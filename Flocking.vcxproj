@@ -141,6 +141,16 @@
     <ClInclude Include="include\custom\Texture2D.h" />
     <ClInclude Include="include\stb\stb_image.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\core\main.cpp" />
+    <ClCompile Include="src\core\Simulation.cpp" />
+    <ClCompile Include="src\graphics\Shader.cpp" />
+    <ClCompile Include="src\graphics\SpriteRenderer.cpp" />
+    <ClCompile Include="src\graphics\stb_image.cpp" />
+    <ClCompile Include="src\graphics\Texture2D.cpp" />
+    <ClCompile Include="src\utility\glad.c" />
+    <ClCompile Include="src\utility\ResourceManager.cpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 12.9.targets" />
