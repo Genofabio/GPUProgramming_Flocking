@@ -8,6 +8,7 @@ Simulation::Simulation(unsigned int width, unsigned int height)
     , width(width)
     , height(height)
     , boidRender(nullptr)
+    , wallRender(nullptr)
     , cohesionDistance(100.0f)
     , separationDistance(25.0f)
     , alignmentDistance(50.0f)
@@ -29,15 +30,18 @@ void Simulation::init()
 {
     // caricamento shaders
     ResourceManager::LoadShader("shaders/boid_shader.vert", "shaders/boid_shader.frag", nullptr, "boid");
+    ResourceManager::LoadShader("shaders/wall_shader.vert", "shaders/wall_shader.frag", nullptr, "wall");
 
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(this->width),
         static_cast<float>(this->height), 0.0f, -1.0f, 1.0f);
 
     // impostazione shaders
     ResourceManager::GetShader("boid").Use().SetMatrix4("projection", projection);
+    ResourceManager::GetShader("wall").Use().SetMatrix4("projection", projection);
 
     // inizializzazione renderers
     boidRender = new BoidRenderer(ResourceManager::GetShader("boid"));
+    wallRender = new WallRenderer(ResourceManager::GetShader("wall"));
 
     // inizializzazione dei boids con posizioni e velocità random
     const int NUM_BOIDS = 200;
@@ -49,6 +53,38 @@ void Simulation::init()
         b.drift = glm::vec2(0);
         boids.push_back(b);
     }
+
+    // === inizializzazione muri di test ===
+    walls.clear();
+    // 1) Muro verticale al centro (segmento da Y=100 a Y=height-100)
+    walls.emplace_back(
+        std::vector<glm::vec2>{
+        glm::vec2(width * 0.5f, 100.0f),
+            glm::vec2(width * 0.5f, 400.0f)
+    });
+    // 2) Muro orizzontale in basso (segmento da X=100 a X=width-100)
+    walls.emplace_back(
+        std::vector<glm::vec2>{
+        glm::vec2(100.0f, height - 150.0f),
+            glm::vec2(width - 400.0f, height - 150.0f)
+    });
+    // 3) Muro a L in alto a sinistra (polilinea di 3 punti)
+    walls.emplace_back(
+        std::vector<glm::vec2>{
+        glm::vec2(50.0f, 50.0f),    // inizio
+            glm::vec2(250.0f, 50.0f),   // orizzontale a destra
+            glm::vec2(250.0f, 250.0f)   // poi giù
+    });
+    // 4) Poligono irregolare a 5 lati sul lato destro
+    walls.emplace_back(
+        std::vector<glm::vec2>{
+        glm::vec2(width - 150.0f, height * 0.5f - 50.0f),   // vertice in alto a sinistra
+            glm::vec2(width - 100.0f, height * 0.5f - 30.0f),   // verso destra
+            glm::vec2(width - 80.0f, height * 0.5f + 20.0f),   // basso-destra
+            glm::vec2(width - 130.0f, height * 0.5f + 40.0f),   // basso-sinistra
+            glm::vec2(width - 160.0f, height * 0.5f + 0.0f)     // chiusura verso vertice iniziale
+    });
+
 }
 
 void Simulation::update(float dt) {
@@ -79,9 +115,27 @@ void Simulation::update(float dt) {
         // scala finale per evitare scatti troppo forti
         v4 *= 0.2f;
 
-        velocityChanges[i] = v1 + v2 + v3 + v4;
+        // gestione collisione con ostacoli
+        glm::vec2 v5(0.0f);
 
-        // Update
+        for (Wall& w : walls) {
+            for (size_t j = 0; j < w.points.size() - 1; ++j) {
+                glm::vec2 segStart = w.points[j];
+                glm::vec2 segEnd = w.points[j + 1];
+
+                glm::vec2 closest;
+                float dist = pointSegmentDistance(b.position, segStart, segEnd, closest);
+
+                if (dist < w.repulsionDistance) {
+                    glm::vec2 away = glm::normalize(b.position - closest);
+                    v5 += away * (w.repulsionDistance - dist) * w.repulsionStrength;
+                }
+            }
+        }
+
+        velocityChanges[i] = v1 + v2 + v3 + v4 + v5;
+
+        // Update movimento randomico
         float driftChange = 10.0f;   // quanto cambia il drift a ogni frame
         float driftMax = 100.0f;     // massimo contributo random
 
@@ -121,6 +175,11 @@ void Simulation::render() {
         float angle = glm::degrees(atan2(b.velocity.y, b.velocity.x)) + 270;
         boidRender->DrawBoid(b.position, angle, glm::vec3(0.4f, 0.5f, 0.9f), 10.0f);
     }
+
+    for (const Wall& w : walls) {
+        wallRender->DrawWall(w, glm::vec3(0.25f, 0.88f, 0.82f));
+    }
+
 }
 
 // Cohesion rule
@@ -182,3 +241,12 @@ glm::vec2 Simulation::matchVelocity(size_t i) {
 
     return perceived_velocity;
 }
+
+// distanza tra punto p e segmento ab, ritorna anche il punto più vicino
+inline float Simulation::pointSegmentDistance(const glm::vec2& p, const glm::vec2& a, const glm::vec2& b, glm::vec2& closest) {
+    glm::vec2 ab = b - a;
+    float t = glm::dot(p - a, ab) / glm::dot(ab, ab);
+    t = glm::clamp(t, 0.0f, 1.0f); // proiezione limitata al segmento
+    closest = a + t * ab;
+    return glm::length(p - closest);
+} //!!!!!!!!! occhio a divisioni per 0

@@ -8,6 +8,8 @@
 #include <vector>
 #include "Boid.h"
 #include "BoidRenderer.h"
+#include "Wall.h"
+#include "WallRenderer.h"
 
 enum SimulationState {
     SIMULATION_RUNNING,
@@ -25,6 +27,9 @@ public:
 
     // Lista dei boids
     std::vector<Boid> boids;
+
+    // Lista degli ostacoli
+    std::vector<Wall> walls;
 
     // Parametri delle regole 
     float cohesionDistance;
@@ -50,11 +55,12 @@ public:
 private:
     // Renderers
     BoidRenderer* boidRender;
+    WallRenderer* wallRender;
 
     // Funzioni interne per calcolare i contributi delle regole
     glm::vec2 moveTowardCenter(size_t i);
     glm::vec2 avoidNeighbors(size_t i);
     glm::vec2 matchVelocity(size_t i);
-    glm::vec2 avoidBordersSmooth(const Boid& b, float width, float height, float borderAlertDistance, float borderScale);
+    float pointSegmentDistance(const glm::vec2& p, const glm::vec2& a, const glm::vec2& b, glm::vec2& closest);
 };
 #endif
