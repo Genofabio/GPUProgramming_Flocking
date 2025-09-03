@@ -3,6 +3,7 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <random>
 
 #include <vector>
 #include "Boid.h"
@@ -33,6 +34,8 @@ public:
     float separationScale;
     float alignmentScale;
     float borderAlertDistance;
+    std::mt19937 rng;
+    std::uniform_real_distribution<float> dist;
 
     // Costruttori / distruttori
     Simulation(unsigned int width, unsigned int height);
@@ -52,5 +55,6 @@ private:
     glm::vec2 moveTowardCenter(size_t i);
     glm::vec2 avoidNeighbors(size_t i);
     glm::vec2 matchVelocity(size_t i);
+    glm::vec2 avoidBordersSmooth(const Boid& b, float width, float height, float borderAlertDistance, float borderScale);
 };
 #endif

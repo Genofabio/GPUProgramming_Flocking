@@ -10,11 +10,13 @@ Simulation::Simulation(unsigned int width, unsigned int height)
     , boidRender(nullptr)
     , cohesionDistance(100.0f)
     , separationDistance(25.0f)
-    , alignmentDistance(100.0f)
-    , cohesionScale(0.01f)
-    , separationScale(1.0f)
+    , alignmentDistance(50.0f)
+    , cohesionScale(0.1f)
+    , separationScale(8.0f)
     , alignmentScale(0.125f)
     , borderAlertDistance(150.0f)
+    , rng(std::random_device{}()) // Mersenne Twister con seed casuale
+    , dist(-1.0f, 1.0f)
 {
 }
 
@@ -44,6 +46,7 @@ void Simulation::init()
         b.position = glm::vec2(rand() % width, rand() % height);
         b.velocity = glm::vec2((((rand() % 200) - 100) / 100.0f) * 100,
             (((rand() % 200) - 100) / 100.0f) * 100);
+        b.drift = glm::vec2(0);
         boids.push_back(b);
     }
 }
@@ -59,32 +62,37 @@ void Simulation::update(float dt) {
         glm::vec2 v3 = matchVelocity(i);
 
         glm::vec2 v4(0.0f);
-
         Boid& b = boids[i];
+
+        // distanza dai bordi
         float distLeft = b.position.x;
         float distRight = width - b.position.x;
         float distTop = b.position.y;
         float distBottom = height - b.position.y;
 
-        float minDist = distLeft;
-        int edge = 0;
-        if (distRight < minDist) { minDist = distRight; edge = 1; }
-        if (distTop < minDist) { minDist = distTop;   edge = 2; }
-        if (distBottom < minDist) { minDist = distBottom; edge = 3; }
+        // somma dei contributi dei bordi che superano la soglia
+        if (distLeft < borderAlertDistance)   v4 += glm::vec2(1, 0) * (borderAlertDistance - distLeft);
+        if (distRight < borderAlertDistance)  v4 += glm::vec2(-1, 0) * (borderAlertDistance - distRight);
+        if (distTop < borderAlertDistance)    v4 += glm::vec2(0, 1) * (borderAlertDistance - distTop);
+        if (distBottom < borderAlertDistance) v4 += glm::vec2(0, -1) * (borderAlertDistance - distBottom);
 
-        if (minDist < borderAlertDistance) {
-            glm::vec2 normal;
-            switch (edge) {
-            case 0: normal = glm::vec2(1, 0);  break;
-            case 1: normal = glm::vec2(-1, 0); break;
-            case 2: normal = glm::vec2(0, 1);  break;
-            case 3: normal = glm::vec2(0, -1); break;
-            }
-            // qui scegli se vuoi riflettere o spingere semplicemente verso l’interno
-            v4 = normal * (borderAlertDistance - minDist) * 0.2f; // più sei vicino, più spinge
-        }
+        // scala finale per evitare scatti troppo forti
+        v4 *= 0.2f;
 
         velocityChanges[i] = v1 + v2 + v3 + v4;
+
+        // Update
+        float driftChange = 10.0f;   // quanto cambia il drift a ogni frame
+        float driftMax = 100.0f;     // massimo contributo random
+
+        b.drift += glm::vec2(dist(rng), dist(rng)) * driftChange * dt;;
+
+        // clamp per non farlo crescere troppo
+        if (glm::length(b.drift) > driftMax) {
+            b.drift = glm::normalize(b.drift) * driftMax;
+        }
+
+        velocityChanges[i] += b.drift;
     }
 
     // 2. Applica i cambiamenti e stabilizza la velocità
@@ -101,12 +109,6 @@ void Simulation::update(float dt) {
 
         // 3. aggiorna la posizione
         boids[i].position += boids[i].velocity * dt;
-
-        // 4. wrap ai bordi
-        if (boids[i].position.x < 0) boids[i].position.x += width;
-        if (boids[i].position.x > width) boids[i].position.x -= width;
-        if (boids[i].position.y < 0) boids[i].position.y += height;
-        if (boids[i].position.y > height) boids[i].position.y -= height;
     }
 }
 
