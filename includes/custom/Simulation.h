@@ -32,6 +32,7 @@ public:
     float cohesionScale;
     float separationScale;
     float alignmentScale;
+    float borderAlertDistance;
 
     // Costruttori / distruttori
     Simulation(unsigned int width, unsigned int height);

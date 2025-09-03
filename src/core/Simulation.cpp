@@ -12,8 +12,9 @@ Simulation::Simulation(unsigned int width, unsigned int height)
     , separationDistance(25.0f)
     , alignmentDistance(100.0f)
     , cohesionScale(0.01f)
-    , separationScale(0.1f)
+    , separationScale(1.0f)
     , alignmentScale(0.125f)
+    , borderAlertDistance(150.0f)
 {
 }
 
@@ -49,6 +50,7 @@ void Simulation::init()
 
 void Simulation::update(float dt) {
     std::vector<glm::vec2> velocityChanges(boids.size(), glm::vec2(0.0f));
+    float slowDown = 0.3f; 
 
     // 1. Calcola i cambiamenti di velocità da cohesion, separation, alignment
     for (size_t i = 0; i < boids.size(); i++) {
@@ -56,13 +58,39 @@ void Simulation::update(float dt) {
         glm::vec2 v2 = avoidNeighbors(i);
         glm::vec2 v3 = matchVelocity(i);
 
-        velocityChanges[i] = v1 + v2 + v3;
+        glm::vec2 v4(0.0f);
+
+        Boid& b = boids[i];
+        float distLeft = b.position.x;
+        float distRight = width - b.position.x;
+        float distTop = b.position.y;
+        float distBottom = height - b.position.y;
+
+        float minDist = distLeft;
+        int edge = 0;
+        if (distRight < minDist) { minDist = distRight; edge = 1; }
+        if (distTop < minDist) { minDist = distTop;   edge = 2; }
+        if (distBottom < minDist) { minDist = distBottom; edge = 3; }
+
+        if (minDist < borderAlertDistance) {
+            glm::vec2 normal;
+            switch (edge) {
+            case 0: normal = glm::vec2(1, 0);  break;
+            case 1: normal = glm::vec2(-1, 0); break;
+            case 2: normal = glm::vec2(0, 1);  break;
+            case 3: normal = glm::vec2(0, -1); break;
+            }
+            // qui scegli se vuoi riflettere o spingere semplicemente verso l’interno
+            v4 = normal * (borderAlertDistance - minDist) * 0.2f; // più sei vicino, più spinge
+        }
+
+        velocityChanges[i] = v1 + v2 + v3 + v4;
     }
 
     // 2. Applica i cambiamenti e stabilizza la velocità
     for (size_t i = 0; i < boids.size(); i++) {
         // applica le regole
-        boids[i].velocity += velocityChanges[i];
+        boids[i].velocity += velocityChanges[i] * slowDown;
 
         // clamp della velocità
         float maxSpeed = 150.0f;
@@ -89,7 +117,7 @@ void Simulation::processInput(float dt)
 void Simulation::render() {
     for (Boid& b : boids) {
         float angle = glm::degrees(atan2(b.velocity.y, b.velocity.x)) + 270;
-        boidRender->DrawBoid(b.position, angle, glm::vec3(0.4f, 0.5f, 0.9f), 20.0f);
+        boidRender->DrawBoid(b.position, angle, glm::vec3(0.4f, 0.5f, 0.9f), 10.0f);
     }
 }
 
