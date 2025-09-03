@@ -11,8 +11,8 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 
 // The Width of the screen
-const unsigned int SCREEN_WIDTH = 800;
-const unsigned int SCREEN_HEIGHT = 600;
+const unsigned int SCREEN_WIDTH = 1200;
+const unsigned int SCREEN_HEIGHT = 800;
 
 // Oggetto globale della simulazione
 Simulation simulation(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // initialize simulation
-    simulation.Init();
+    simulation.init();
 
     float deltaTime = 0.0f;
     float lastFrame = 0.0f;
@@ -55,21 +55,21 @@ int main(int argc, char* argv[])
     while (!glfwWindowShouldClose(window))
     {
         // calculate delta time
-        float currentFrame = glfwGetTime();
+        float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
         glfwPollEvents();
 
         // manage user input
-        simulation.ProcessInput(deltaTime);
+        simulation.processInput(deltaTime);
 
         // update simulation state
-        simulation.Update(deltaTime);
+        simulation.update(deltaTime);
 
         // render
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClearColor(0.08f, 0.08f, 0.08f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        simulation.Render();
+        simulation.render();
 
         glfwSwapBuffers(window);
     }
@@ -87,9 +87,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     if (key >= 0 && key < 1024)
     {
         if (action == GLFW_PRESS)
-            simulation.Keys[key] = true;
+            simulation.keys[key] = true;
         else if (action == GLFW_RELEASE)
-            simulation.Keys[key] = false;
+            simulation.keys[key] = false;
     }
 }
 

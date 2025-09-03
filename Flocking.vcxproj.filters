@@ -33,6 +33,27 @@
     <ClInclude Include="include\custom\SpriteRenderer.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="includes\custom\Boid.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\custom\BoidRenderer.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\custom\Texture2D.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\custom\ResourceManager.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\custom\Shader.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\custom\Simulation.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\custom\SpriteRenderer.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\main.cpp">
@@ -59,5 +80,14 @@
     <ClCompile Include="src\utility\ResourceManager.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
+    <ClCompile Include="src\graphics\BoidRenderer.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\sprite_shader.vert" />
+    <None Include="shaders\sprite_shader.frag" />
+    <None Include="shaders\boid_shader.vert" />
+    <None Include="shaders\boid_shader.frag" />
   </ItemGroup>
 </Project>

@@ -4,6 +4,10 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <vector>
+#include "Boid.h"
+#include "BoidRenderer.h"
+
 enum SimulationState {
     SIMULATION_RUNNING,
     SIMULATION_PAUSED,
@@ -13,16 +17,39 @@ enum SimulationState {
 class Simulation
 {
 public:
-    SimulationState State;
-    bool Keys[1024];
-    unsigned int Width, Height;
+    // Stato generale e configurazione base
+    SimulationState state;
+    bool keys[1024];
+    unsigned int width, height;
 
+    // Lista dei boids
+    std::vector<Boid> boids;
+
+    // Parametri delle regole 
+    float cohesionDistance;
+    float separationDistance;
+    float alignmentDistance;
+    float cohesionScale;
+    float separationScale;
+    float alignmentScale;
+
+    // Costruttori / distruttori
     Simulation(unsigned int width, unsigned int height);
     ~Simulation();
 
-    void Init();
-    void ProcessInput(float dt);
-    void Update(float dt);
-    void Render();
+    // Funzioni principali
+    void init();                  // inizializza boids, shaders, textures
+    void processInput(float dt);  // gestisce input tastiera
+    void update(float dt);        // aggiorna la simulazione (flocking)
+    void render();                // disegna i boids
+
+private:
+    // Renderers
+    BoidRenderer* boidRender;
+
+    // Funzioni interne per calcolare i contributi delle regole
+    glm::vec2 moveTowardCenter(size_t i);
+    glm::vec2 avoidNeighbors(size_t i);
+    glm::vec2 matchVelocity(size_t i);
 };
 #endif

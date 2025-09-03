@@ -134,6 +134,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="includes\custom\Boid.h" />
+    <ClInclude Include="includes\custom\BoidRenderer.h" />
+    <ClInclude Include="includes\custom\ResourceManager.h" />
+    <ClInclude Include="includes\custom\Shader.h" />
+    <ClInclude Include="includes\custom\Simulation.h" />
+    <ClInclude Include="includes\custom\SpriteRenderer.h" />
+    <ClInclude Include="includes\custom\Texture2D.h" />
     <ClInclude Include="include\custom\ResourceManager.h" />
     <ClInclude Include="include\custom\Shader.h" />
     <ClInclude Include="include\custom\Simulation.h" />
@@ -144,12 +151,19 @@
   <ItemGroup>
     <ClCompile Include="src\core\main.cpp" />
     <ClCompile Include="src\core\Simulation.cpp" />
+    <ClCompile Include="src\graphics\BoidRenderer.cpp" />
     <ClCompile Include="src\graphics\Shader.cpp" />
     <ClCompile Include="src\graphics\SpriteRenderer.cpp" />
     <ClCompile Include="src\graphics\stb_image.cpp" />
     <ClCompile Include="src\graphics\Texture2D.cpp" />
     <ClCompile Include="src\utility\glad.c" />
     <ClCompile Include="src\utility\ResourceManager.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\boid_shader.frag" />
+    <None Include="shaders\boid_shader.vert" />
+    <None Include="shaders\sprite_shader.frag" />
+    <None Include="shaders\sprite_shader.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
