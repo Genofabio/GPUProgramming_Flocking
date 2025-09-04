@@ -26,14 +26,23 @@ public:
     // Agenti
     std::vector<Boid> boids;
 
-    // Parametri regole
+    // Distanze per regole
     float cohesionDistance;
     float separationDistance;
     float alignmentDistance;
+    float borderDistance;
+    float predatorFearDistance;
+    float predatorChaseDistance;
+    float predatorSeparationDistance;
+
+    // Pesi per regole
     float cohesionScale;
     float separationScale;
     float alignmentScale;
-    float borderDistance;
+    float borderScale;
+    float predatorFearScale;
+    float predatorChaseScale;
+    float predatorSeparationScale;
 
     // Costruttori / distruttore
     Simulation(unsigned int width, unsigned int height);
@@ -58,6 +67,10 @@ private:
     glm::vec2 evadePredators(size_t i);
     glm::vec2 chasePrey(size_t i);
     glm::vec2 avoidOtherPredators(size_t i);
+
+	// Leader
+    glm::vec2 followLeaders(size_t i);
+    glm::vec2 leaderSeparation(size_t i);
 
     // Bordi
     glm::vec2 avoidBorders(const Boid& b);

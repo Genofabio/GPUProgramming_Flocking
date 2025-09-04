@@ -8,14 +8,22 @@ Simulation::Simulation(unsigned int width, unsigned int height)
     , width(width)
     , height(height)
     , boidRender(nullptr)
-    , cohesionDistance(500.0f)
-    , separationDistance(50.0f)
+    // distances defaults
+    , cohesionDistance(200.0f)
+    , separationDistance(30.0f)
     , alignmentDistance(50.0f)
     , borderDistance(300.0f)
-    , cohesionScale(0.08f)
-    , separationScale(1.5f)
+    , predatorFearDistance(150.0f)
+    , predatorChaseDistance(800.0f)
+    , predatorSeparationDistance(60.0f)
+    // scales / weights defaults
+    , cohesionScale(0.05f)
+    , separationScale(2.0f)
     , alignmentScale(0.15f)
-    
+    , borderScale(0.3f)
+    , predatorFearScale(0.8f)
+    , predatorChaseScale(0.12f)
+    , predatorSeparationScale(2.0f)
 {
 }
 
@@ -40,7 +48,17 @@ void Simulation::init()
 
     // inizializzazione dei boids con posizioni e velocità random
     const int NUM_PREY = 180;
-    const int NUM_PREDATORS = 3;
+    const int NUM_PREDATORS = 2;
+    const int NUM_LEADERS = 2;
+
+    for (int i = 0; i < NUM_LEADERS; i++) {
+        Boid leader;
+        leader.position = glm::vec2(rand() % width, rand() % height);
+        leader.velocity = glm::vec2((((rand() % 200) - 100) / 100.0f) * 50,
+            (((rand() % 200) - 100) / 100.0f) * 50);
+        leader.type = LEADER;
+        boids.push_back(leader);
+    }
 
     for (int i = 0; i < NUM_PREY; i++) {
         Boid b;
@@ -75,11 +93,10 @@ void Simulation::update(float dt) {
             glm::vec2 v1 = moveTowardCenter(i);
             glm::vec2 v2 = avoidNeighbors(i);
             glm::vec2 v3 = matchVelocity(i);
+            glm::vec2 evade = evadePredators(i);
+            glm::vec2 follow = followLeaders(i);   // <-- nuova regola
 
-            // Scappa dai predatori
-            glm::vec2 evade = evadePredators(i); // <-- da implementare
-
-            v = v1 + v2 + v3 + evade;
+            v = v1 + v2 + v3 + evade + follow;
         }
         else if (b.type == PREDATOR) {
             // Inseguire le prede
@@ -89,6 +106,11 @@ void Simulation::update(float dt) {
             glm::vec2 separation = avoidOtherPredators(i) * 2.0f;
 
             v = hunt + separation;
+        } else if(b.type == LEADER) {
+            glm::vec2 vSep = leaderSeparation(i);
+            glm::vec2 evade = evadePredators(i);
+
+            v = vSep + evade;  // possono anche avere velocità “autonome” se vuoi
         }
 
         // Evita i bordi (vale per tutti)
@@ -126,8 +148,11 @@ void Simulation::render() {
         if (b.type == PREDATOR) {
             color = glm::vec3(0.9f, 0.2f, 0.2f);   // rosso (predatori)
         }
+        else if (b.type == LEADER) {
+            color = glm::vec3(0.9f, 0.9f, 0.2f);   // giallo (leader)
+        }
         else {
-            color = glm::vec3(0.4f, 0.5f, 0.9f);   // blu (prede)
+            color = glm::vec3(0.4f, 0.5f, 0.9f);   // blu (prede normali)
         }
 
         boidRender->DrawBoid(b.position, angle, color, 10.0f);
@@ -159,7 +184,6 @@ glm::vec2 Simulation::moveTowardCenter(size_t i) {
     return perceived_center;
 }
 
-
 // Separation rule
 glm::vec2 Simulation::avoidNeighbors(size_t i) {
     glm::vec2 c(0.0f);
@@ -169,7 +193,7 @@ glm::vec2 Simulation::avoidNeighbors(size_t i) {
         glm::vec2 diff = boids[i].position - boids[j].position;
         float dist = glm::length(diff);
         if (dist < separationDistance && dist > 0.0f) {
-            c += diff / dist; // respinta proporzionale
+            c += diff / dist; // respinta proporzionale (unit vector)
         }
     }
 
@@ -184,12 +208,12 @@ glm::vec2 Simulation::avoidOtherPredators(size_t i) {
         if (boids[j].type != PREDATOR) continue;
         glm::vec2 diff = boids[i].position - boids[j].position;
         float dist = glm::length(diff);
-        if (dist < separationDistance && dist > 0.0f) {
+        if (dist < predatorSeparationDistance && dist > 0.0f) {
             c += diff / dist; // respinta proporzionale
         }
     }
 
-    return c * separationScale;
+    return c; // moltiplicato dal chiamante con predatorSeparationScale
 }
 
 // Alignment rule
@@ -217,7 +241,6 @@ glm::vec2 Simulation::matchVelocity(size_t i) {
     return perceived_velocity;
 }
 
-
 //glm::vec2 Simulation::avoidBorders(const Boid& b) {
 //    glm::vec2 force(0.0f);
 //
@@ -241,6 +264,7 @@ glm::vec2 Simulation::matchVelocity(size_t i) {
 //    return force;
 //}
 
+// Borders rule (usa borderDistance e borderScale)
 glm::vec2 Simulation::avoidBorders(const Boid& b) {
     glm::vec2 force(0.0f);
 
@@ -249,24 +273,25 @@ glm::vec2 Simulation::avoidBorders(const Boid& b) {
     float distTop = b.position.y;
     float distBottom = height - b.position.y;
 
-    // lambda che calcola la forza non lineare
+    // lambda che calcola la forza non lineare (stessa forma, ma usa borderDistance)
     auto computeForce = [this](float dist) -> float {
         if (dist < borderDistance)
             return pow(borderDistance - dist, 2) / borderDistance;
         return 0.0f;
-    };
+        };
 
     force += glm::vec2(1, 0) * computeForce(distLeft);
     force += glm::vec2(-1, 0) * computeForce(distRight);
     force += glm::vec2(0, 1) * computeForce(distTop);
     force += glm::vec2(0, -1) * computeForce(distBottom);
 
-    // Scala finale
-    force *= 0.3f;
+    // Scala finale: usa borderScale
+    force *= borderScale;
 
     return force;
 }
 
+// Evade predators (usa predatorFearDistance e predatorFearScale)
 glm::vec2 Simulation::evadePredators(size_t i) {
     glm::vec2 c(0.0f);
     for (size_t j = 0; j < boids.size(); j++) {
@@ -275,28 +300,37 @@ glm::vec2 Simulation::evadePredators(size_t i) {
 
         glm::vec2 diff = boids[i].position - boids[j].position;
         float dist = glm::length(diff);
-        float fearDistance = 150.0f; // distanza di “paura”
-        if (dist < fearDistance && dist > 0.0f) {
-            c += diff / dist * (fearDistance - dist);
+        if (dist < predatorFearDistance && dist > 0.0f) {
+            // respinta che aumenta quando il predatore è più vicino
+            c += (diff / dist) * (predatorFearDistance - dist);
         }
     }
-    return c * 0.8f; // forza di fuga
+    return c * predatorFearScale;
 }
 
+// Chase prey (usa predatorChaseDistance e predatorChaseScale)
 glm::vec2 Simulation::chasePrey(size_t i) {
     glm::vec2 target(0.0f);
-    float closest = 999999.0f;
+    float closest = std::numeric_limits<float>::infinity();
     for (size_t j = 0; j < boids.size(); j++) {
         if (boids[j].type != PREY) continue;
 
         float dist = glm::length(boids[j].position - boids[i].position);
-        if (dist < closest) {
+        // considera solo prede entro predatorChaseDistance
+        if (dist < closest && dist < predatorChaseDistance) {
             closest = dist;
             target = boids[j].position;
         }
     }
-    if (closest < 999999.0f)
-        return (target - boids[i].position) * 0.1f; // forza verso la preda
+    if (closest < std::numeric_limits<float>::infinity()) {
+        // forza diretta verso la preda
+        glm::vec2 dir = target - boids[i].position;
+        // normalizza e scala per evitare scatti troppo forti se molto vicino
+        float len = glm::length(dir);
+        if (len > 0.0f) {
+            return (dir / len) * ((predatorChaseDistance - closest) / predatorChaseDistance) * predatorChaseScale * 100.0f;
+        }
+    }
     return glm::vec2(0.0f);
 }
 
@@ -361,3 +395,52 @@ glm::vec2 Simulation::chasePrey(size_t i) {
 //
 //    return glm::vec2(0.0f);
 //}
+
+glm::vec2 Simulation::followLeaders(size_t i) {
+    Boid& self = boids[i];
+
+    glm::vec2 towardLeader(0.0f);
+    float closestDist = std::numeric_limits<float>::infinity();
+    glm::vec2 closestLeaderPos(0.0f);
+
+    float leaderInfluenceDistance = 200.0f; // regolabile
+
+    for (size_t j = 0; j < boids.size(); j++) {
+        if (i == j) continue;
+        if (boids[j].type != LEADER) continue;  // <-- fix confronto
+
+        float dist = glm::length(boids[j].position - self.position);
+        if (dist < leaderInfluenceDistance && dist < closestDist) {
+            closestDist = dist;
+            closestLeaderPos = boids[j].position;
+        }
+    }
+
+    if (closestDist < std::numeric_limits<float>::infinity()) {
+        float norm = (leaderInfluenceDistance - closestDist) / leaderInfluenceDistance;
+        // curva dolce: vicino = peso quasi nullo, lontano = attrazione maggiore
+        float weight = norm * norm; // quadratica, abbassa la forza a corto raggio
+        towardLeader = (closestLeaderPos - self.position) * weight * 0.4f;
+    }
+
+    return towardLeader; // 0 se nessun leader vicino
+}
+
+glm::vec2 Simulation::leaderSeparation(size_t i) {
+    glm::vec2 force(0.0f);
+    Boid& self = boids[i];
+
+    for (size_t j = 0; j < boids.size(); j++) {
+        if (i == j) continue;
+        if (boids[j].type != LEADER) continue;
+
+        glm::vec2 diff = self.position - boids[j].position;
+        float dist = glm::length(diff);
+        float desiredLeaderDistance = 200.0f; // regolabile
+        if (dist < desiredLeaderDistance && dist > 0.0f) {
+            force += diff / dist * (desiredLeaderDistance - dist);
+        }
+    }
+
+    return force * 0.8f; // scala la forza
+}
