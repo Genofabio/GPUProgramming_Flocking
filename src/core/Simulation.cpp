@@ -11,7 +11,7 @@ Simulation::Simulation(unsigned int width, unsigned int height)
     , cohesionDistance(500.0f)
     , separationDistance(50.0f)
     , alignmentDistance(50.0f)
-    , borderDistance(250.0f)
+    , borderDistance(300.0f)
     , cohesionScale(0.08f)
     , separationScale(1.5f)
     , alignmentScale(0.15f)
@@ -218,6 +218,29 @@ glm::vec2 Simulation::matchVelocity(size_t i) {
 }
 
 
+//glm::vec2 Simulation::avoidBorders(const Boid& b) {
+//    glm::vec2 force(0.0f);
+//
+//    float distLeft = b.position.x;
+//    float distRight = width - b.position.x;
+//    float distTop = b.position.y;
+//    float distBottom = height - b.position.y;
+//
+//    if (distLeft < borderDistance)
+//        force += glm::vec2(1, 0) * (borderDistance - distLeft);
+//    if (distRight < borderDistance)
+//        force += glm::vec2(-1, 0) * (borderDistance - distRight);
+//    if (distTop < borderDistance)
+//        force += glm::vec2(0, 1) * (borderDistance - distTop);
+//    if (distBottom < borderDistance)
+//        force += glm::vec2(0, -1) * (borderDistance - distBottom);
+//
+//    // Scala finale per evitare scatti troppo forti
+//    force *= 0.2f;
+//
+//    return force;
+//}
+
 glm::vec2 Simulation::avoidBorders(const Boid& b) {
     glm::vec2 force(0.0f);
 
@@ -226,17 +249,20 @@ glm::vec2 Simulation::avoidBorders(const Boid& b) {
     float distTop = b.position.y;
     float distBottom = height - b.position.y;
 
-    if (distLeft < borderDistance)
-        force += glm::vec2(1, 0) * (borderDistance - distLeft);
-    if (distRight < borderDistance)
-        force += glm::vec2(-1, 0) * (borderDistance - distRight);
-    if (distTop < borderDistance)
-        force += glm::vec2(0, 1) * (borderDistance - distTop);
-    if (distBottom < borderDistance)
-        force += glm::vec2(0, -1) * (borderDistance - distBottom);
+    // lambda che calcola la forza non lineare
+    auto computeForce = [this](float dist) -> float {
+        if (dist < borderDistance)
+            return pow(borderDistance - dist, 2) / borderDistance;
+        return 0.0f;
+    };
 
-    // Scala finale per evitare scatti troppo forti
-    force *= 0.2f;
+    force += glm::vec2(1, 0) * computeForce(distLeft);
+    force += glm::vec2(-1, 0) * computeForce(distRight);
+    force += glm::vec2(0, 1) * computeForce(distTop);
+    force += glm::vec2(0, -1) * computeForce(distBottom);
+
+    // Scala finale
+    force *= 0.3f;
 
     return force;
 }
