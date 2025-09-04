@@ -4,8 +4,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <random>
-
 #include <vector>
+#include <glm/glm.hpp>
 #include "Boid.h"
 #include "BoidRenderer.h"
 
@@ -18,43 +18,49 @@ enum SimulationState {
 class Simulation
 {
 public:
-    // Stato generale e configurazione base
+    // Stato e config
     SimulationState state;
-    bool keys[1024];
+    bool keys[1024]{};
     unsigned int width, height;
 
-    // Lista dei boids
+    // Agenti
     std::vector<Boid> boids;
 
-    // Parametri delle regole 
+    // Parametri regole
     float cohesionDistance;
     float separationDistance;
     float alignmentDistance;
     float cohesionScale;
     float separationScale;
     float alignmentScale;
-    float borderAlertDistance;
-    std::mt19937 rng;
-    std::uniform_real_distribution<float> dist;
+    float borderDistance;
 
-    // Costruttori / distruttori
+    // Costruttori / distruttore
     Simulation(unsigned int width, unsigned int height);
     ~Simulation();
 
-    // Funzioni principali
-    void init();                  // inizializza boids, shaders, textures
-    void processInput(float dt);  // gestisce input tastiera
-    void update(float dt);        // aggiorna la simulazione (flocking)
-    void render();                // disegna i boids
+    // API principali
+    void init();
+    void processInput(float dt);
+    void update(float dt);
+    void render();
 
 private:
-    // Renderers
+    // Renderer
     BoidRenderer* boidRender;
 
-    // Funzioni interne per calcolare i contributi delle regole
+    // Boids (regole base)
     glm::vec2 moveTowardCenter(size_t i);
     glm::vec2 avoidNeighbors(size_t i);
     glm::vec2 matchVelocity(size_t i);
-    glm::vec2 avoidBordersSmooth(const Boid& b, float width, float height, float borderAlertDistance, float borderScale);
+
+    // Preda/Predatore
+    glm::vec2 evadePredators(size_t i);
+    glm::vec2 chasePrey(size_t i);
+    glm::vec2 avoidOtherPredators(size_t i);
+
+    // Bordi
+    glm::vec2 avoidBorders(const Boid& b);
 };
+
 #endif
