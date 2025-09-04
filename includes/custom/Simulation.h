@@ -10,6 +10,8 @@
 #include "BoidRenderer.h"
 #include "Wall.h"
 #include "WallRenderer.h"
+#include "Grid.h"
+#include "GridRenderer.h"
 
 enum SimulationState {
     SIMULATION_RUNNING,
@@ -27,6 +29,9 @@ public:
 
     // Lista dei boids
     std::vector<Boid> boids;
+
+    // Griglia
+    Grid grid;
 
     // Lista degli ostacoli
     std::vector<Wall> walls;
@@ -56,12 +61,13 @@ private:
     // Renderers
     BoidRenderer* boidRender;
     WallRenderer* wallRender;
+    GridRenderer* gridRender;
 
     // Funzioni interne per calcolare i contributi delle regole
     glm::vec2 moveTowardCenter(size_t i);
     glm::vec2 avoidNeighbors(size_t i);
     glm::vec2 matchVelocity(size_t i);
     float pointSegmentDistance(const glm::vec2& p, const glm::vec2& a, const glm::vec2& b, glm::vec2& closest);
-    std::vector<Wall> generateRandomWalls(int n, float width, float height, float minLength = 50.0f, float maxLength = 400.0f);
+    std::vector<Wall> generateRandomWalls(int n);
 };
 #endif

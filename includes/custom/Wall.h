@@ -8,7 +8,7 @@ public:
     float repulsionDistance;        // raggio entro il quale i boid reagiscono
     float repulsionStrength;        // forza di repulsione
 
-    Wall(const std::vector<glm::vec2>& pts, float dist = 80.0f, float strength = 0.7f)
+    Wall(const std::vector<glm::vec2>& pts, float dist = 90.0f, float strength = 5.0f)
         : points(pts), repulsionDistance(dist), repulsionStrength(strength) {
     }
 };

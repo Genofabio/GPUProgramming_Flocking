@@ -7,8 +7,10 @@ Simulation::Simulation(unsigned int width, unsigned int height)
     , keys()
     , width(width)
     , height(height)
+    , grid(10, 15, width, height)
     , boidRender(nullptr)
     , wallRender(nullptr)
+    , gridRender(nullptr)
     , cohesionDistance(100.0f)
     , separationDistance(25.0f)
     , alignmentDistance(50.0f)
@@ -31,6 +33,7 @@ void Simulation::init()
     // caricamento shaders
     ResourceManager::LoadShader("shaders/boid_shader.vert", "shaders/boid_shader.frag", nullptr, "boid");
     ResourceManager::LoadShader("shaders/wall_shader.vert", "shaders/wall_shader.frag", nullptr, "wall");
+    ResourceManager::LoadShader("shaders/grid_shader.vert", "shaders/grid_shader.frag", nullptr, "grid");    
 
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(this->width),
         static_cast<float>(this->height), 0.0f, -1.0f, 1.0f);
@@ -38,10 +41,12 @@ void Simulation::init()
     // impostazione shaders
     ResourceManager::GetShader("boid").Use().SetMatrix4("projection", projection);
     ResourceManager::GetShader("wall").Use().SetMatrix4("projection", projection);
+    ResourceManager::GetShader("grid").Use().SetMatrix4("projection", projection);
 
     // inizializzazione renderers
     boidRender = new BoidRenderer(ResourceManager::GetShader("boid"));
     wallRender = new WallRenderer(ResourceManager::GetShader("wall"));
+    gridRender = new GridRenderer(ResourceManager::GetShader("grid"));
 
     // inizializzazione dei boids con posizioni e velocità random
     const int NUM_BOIDS = 200;
@@ -55,28 +60,7 @@ void Simulation::init()
     }
 
     // === inizializzazione muri di test ===
-    walls.clear();
-    // 1) Muro verticale al centro (segmento da Y=100 a Y=height-100)
-    walls.emplace_back(
-        std::vector<glm::vec2>{
-        glm::vec2(width * 0.5f, 100.0f),
-            glm::vec2(width * 0.5f, 400.0f)
-    });
-    // 2) Muro orizzontale in basso (segmento da X=100 a X=width-100)
-    walls.emplace_back(
-        std::vector<glm::vec2>{
-        glm::vec2(100.0f, height - 150.0f),
-            glm::vec2(width - 400.0f, height - 150.0f)
-    });
-    // 3) Muro a L in alto a sinistra (polilinea di 3 punti)
-    walls.emplace_back(
-        std::vector<glm::vec2>{
-        glm::vec2(50.0f, 50.0f),    // inizio
-            glm::vec2(250.0f, 50.0f),   // orizzontale a destra
-            glm::vec2(250.0f, 250.0f)   // poi giù
-    });
-
-    std::vector<Wall> newWalls = generateRandomWalls(10, width, height);
+    std::vector<Wall> newWalls = generateRandomWalls(30);
     for (const Wall& w : newWalls) {
         walls.emplace_back(w);
     }
@@ -124,7 +108,8 @@ void Simulation::update(float dt) {
 
                 if (dist < w.repulsionDistance) {
                     glm::vec2 away = glm::normalize(b.position - closest);
-                    v5 += away * (w.repulsionDistance - dist) * w.repulsionStrength;
+                    float factor = w.repulsionDistance / (dist + 0.0001f); // factor va da 1 a +inf all'avvicinarsi al muro
+                    v5 += away * factor * factor * w.repulsionStrength; // repulsione quadratica
                 }
             }
         }
@@ -167,6 +152,9 @@ void Simulation::processInput(float dt)
 }
 
 void Simulation::render() {
+    glLineWidth(1.0f);
+    gridRender->DrawGrid(grid, glm::vec3(0.2f, 0.2f, 0.2f));
+
     for (Boid& b : boids) {
         float angle = glm::degrees(atan2(b.velocity.y, b.velocity.x)) + 270;
         boidRender->DrawBoid(b.position, angle, glm::vec3(0.4f, 0.5f, 0.9f), 10.0f);
@@ -176,7 +164,6 @@ void Simulation::render() {
     for (const Wall& w : walls) {
         wallRender->DrawWall(w, glm::vec3(0.25f, 0.88f, 0.82f));
     }
-
 }
 
 // Cohesion rule
@@ -248,41 +235,18 @@ inline float Simulation::pointSegmentDistance(const glm::vec2& p, const glm::vec
     return glm::length(p - closest);
 } //!!!!!!!!! occhio a divisioni per 0
 
-std::vector<Wall> Simulation::generateRandomWalls(int n, float width, float height, float minLength, float maxLength) {
-    std::vector<Wall> walls;
-    walls.reserve(n);
+std::vector<Wall> Simulation::generateRandomWalls(int n) {
+    std::vector<Wall> result;
 
-    std::mt19937 rng(std::random_device{}());
-    std::uniform_real_distribution<float> distX(0.0f, width);
-    std::uniform_real_distribution<float> distY(0.0f, height);
-    std::uniform_real_distribution<float> distLength(minLength, maxLength);
+    auto candidates = this->grid.cellEdges;
+    std::shuffle(candidates.begin(), candidates.end(), rng);
 
-    // Angoli multipli di 30° o 45°
-    std::vector<float> angles = { 0, 45, 90, 135, 180, 225, 270, 315 };
-
-    std::uniform_int_distribution<int> distAngle(0, static_cast<int>(angles.size() - 1));
-
-    for (int i = 0; i < n; ++i) {
-        float x0 = distX(rng);
-        float y0 = distY(rng);
-        float length = distLength(rng);
-
-        float angleDeg = angles[distAngle(rng)];
-        float angleRad = glm::radians(angleDeg);
-
-        // calcolo punto finale
-        float x1 = x0 + length * cos(angleRad);
-        float y1 = y0 + length * sin(angleRad);
-
-        // clamp per rimanere dentro lo schermo
-        x1 = glm::clamp(x1, 0.0f, width);
-        y1 = glm::clamp(y1, 0.0f, height);
-
-        walls.emplace_back(std::vector<glm::vec2>{
-            glm::vec2(x0, y0),
-                glm::vec2(x1, y1)
-        });
+    int count = std::min(n, static_cast<int>(candidates.size()));
+    for (int i = 0; i < count; i++) {
+        const auto& edge = candidates[i];
+        std::vector<glm::vec2> pts = { edge.first, edge.second };
+        result.emplace_back(pts, 60.0f, 0.3f);
     }
 
-    return walls;
+    return result;
 }

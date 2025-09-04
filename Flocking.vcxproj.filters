@@ -54,6 +54,18 @@
     <ClInclude Include="includes\custom\SpriteRenderer.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="includes\custom\Wall.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\custom\WallRenderer.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\custom\GridRenderer.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\custom\Grid.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\main.cpp">
@@ -83,11 +95,21 @@
     <ClCompile Include="src\graphics\BoidRenderer.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
+    <ClCompile Include="src\graphics\WallRenderer.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\GridRenderer.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\sprite_shader.vert" />
     <None Include="shaders\sprite_shader.frag" />
     <None Include="shaders\boid_shader.vert" />
     <None Include="shaders\boid_shader.frag" />
+    <None Include="shaders\wall_shader.frag" />
+    <None Include="shaders\wall_shader.vert" />
+    <None Include="shaders\grid_shader.frag" />
+    <None Include="shaders\grid_shader.vert" />
   </ItemGroup>
 </Project>

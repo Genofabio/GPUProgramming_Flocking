@@ -136,6 +136,8 @@
   <ItemGroup>
     <ClInclude Include="includes\custom\Boid.h" />
     <ClInclude Include="includes\custom\BoidRenderer.h" />
+    <ClInclude Include="includes\custom\Grid.h" />
+    <ClInclude Include="includes\custom\GridRenderer.h" />
     <ClInclude Include="includes\custom\ResourceManager.h" />
     <ClInclude Include="includes\custom\Shader.h" />
     <ClInclude Include="includes\custom\Simulation.h" />
@@ -154,6 +156,7 @@
     <ClCompile Include="src\core\main.cpp" />
     <ClCompile Include="src\core\Simulation.cpp" />
     <ClCompile Include="src\graphics\BoidRenderer.cpp" />
+    <ClCompile Include="src\graphics\GridRenderer.cpp" />
     <ClCompile Include="src\graphics\Shader.cpp" />
     <ClCompile Include="src\graphics\SpriteRenderer.cpp" />
     <ClCompile Include="src\graphics\stb_image.cpp" />
@@ -165,6 +168,8 @@
   <ItemGroup>
     <None Include="shaders\boid_shader.frag" />
     <None Include="shaders\boid_shader.vert" />
+    <None Include="shaders\grid_shader.frag" />
+    <None Include="shaders\grid_shader.vert" />
     <None Include="shaders\sprite_shader.frag" />
     <None Include="shaders\sprite_shader.vert" />
     <None Include="shaders\wall_shader.frag" />
