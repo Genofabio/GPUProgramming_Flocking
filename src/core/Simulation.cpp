@@ -12,7 +12,7 @@ Simulation::Simulation(unsigned int width, unsigned int height)
     , cohesionDistance(100.0f)
     , separationDistance(25.0f)
     , alignmentDistance(50.0f)
-    , cohesionScale(0.1f)
+    , cohesionScale(0.2f)
     , separationScale(8.0f)
     , alignmentScale(0.125f)
     , borderAlertDistance(150.0f)
@@ -75,15 +75,11 @@ void Simulation::init()
             glm::vec2(250.0f, 50.0f),   // orizzontale a destra
             glm::vec2(250.0f, 250.0f)   // poi giù
     });
-    // 4) Poligono irregolare a 5 lati sul lato destro
-    walls.emplace_back(
-        std::vector<glm::vec2>{
-        glm::vec2(width - 150.0f, height * 0.5f - 50.0f),   // vertice in alto a sinistra
-            glm::vec2(width - 100.0f, height * 0.5f - 30.0f),   // verso destra
-            glm::vec2(width - 80.0f, height * 0.5f + 20.0f),   // basso-destra
-            glm::vec2(width - 130.0f, height * 0.5f + 40.0f),   // basso-sinistra
-            glm::vec2(width - 160.0f, height * 0.5f + 0.0f)     // chiusura verso vertice iniziale
-    });
+
+    std::vector<Wall> newWalls = generateRandomWalls(10, width, height);
+    for (const Wall& w : newWalls) {
+        walls.emplace_back(w);
+    }
 
 }
 
@@ -176,6 +172,7 @@ void Simulation::render() {
         boidRender->DrawBoid(b.position, angle, glm::vec3(0.4f, 0.5f, 0.9f), 10.0f);
     }
 
+    glLineWidth(3.0f);
     for (const Wall& w : walls) {
         wallRender->DrawWall(w, glm::vec3(0.25f, 0.88f, 0.82f));
     }
@@ -250,3 +247,42 @@ inline float Simulation::pointSegmentDistance(const glm::vec2& p, const glm::vec
     closest = a + t * ab;
     return glm::length(p - closest);
 } //!!!!!!!!! occhio a divisioni per 0
+
+std::vector<Wall> Simulation::generateRandomWalls(int n, float width, float height, float minLength, float maxLength) {
+    std::vector<Wall> walls;
+    walls.reserve(n);
+
+    std::mt19937 rng(std::random_device{}());
+    std::uniform_real_distribution<float> distX(0.0f, width);
+    std::uniform_real_distribution<float> distY(0.0f, height);
+    std::uniform_real_distribution<float> distLength(minLength, maxLength);
+
+    // Angoli multipli di 30° o 45°
+    std::vector<float> angles = { 0, 45, 90, 135, 180, 225, 270, 315 };
+
+    std::uniform_int_distribution<int> distAngle(0, static_cast<int>(angles.size() - 1));
+
+    for (int i = 0; i < n; ++i) {
+        float x0 = distX(rng);
+        float y0 = distY(rng);
+        float length = distLength(rng);
+
+        float angleDeg = angles[distAngle(rng)];
+        float angleRad = glm::radians(angleDeg);
+
+        // calcolo punto finale
+        float x1 = x0 + length * cos(angleRad);
+        float y1 = y0 + length * sin(angleRad);
+
+        // clamp per rimanere dentro lo schermo
+        x1 = glm::clamp(x1, 0.0f, width);
+        y1 = glm::clamp(y1, 0.0f, height);
+
+        walls.emplace_back(std::vector<glm::vec2>{
+            glm::vec2(x0, y0),
+                glm::vec2(x1, y1)
+        });
+    }
+
+    return walls;
+}
