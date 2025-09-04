@@ -108,7 +108,7 @@ void Simulation::update(float dt) {
 
                 if (dist < w.repulsionDistance) {
                     glm::vec2 away = glm::normalize(b.position - closest);
-                    float factor = w.repulsionDistance / (dist + 0.0001f); // factor va da 1 a +inf all'avvicinarsi al muro
+                    float factor = (w.repulsionDistance - dist) / dist; // normalizza da 0 a 1
                     v5 += away * factor * factor * w.repulsionStrength; // repulsione quadratica
                 }
             }
