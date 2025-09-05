@@ -67,6 +67,9 @@ private:
     glm::vec2 moveTowardCenter(size_t i);
     glm::vec2 avoidNeighbors(size_t i);
     glm::vec2 matchVelocity(size_t i);
+    glm::vec2 avoidBorders(size_t i);
+    glm::vec2 avoidWalls(size_t i);
+
     float pointSegmentDistance(const glm::vec2& p, const glm::vec2& a, const glm::vec2& b, glm::vec2& closest);
     std::vector<Wall> generateRandomWalls(int n);
 };

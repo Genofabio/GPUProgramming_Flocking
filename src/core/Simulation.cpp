@@ -71,82 +71,17 @@ void Simulation::update(float dt) {
     std::vector<glm::vec2> velocityChanges(boids.size(), glm::vec2(0.0f));
     float slowDown = 0.3f; 
 
-    // 1. Calcola i cambiamenti di velocità da cohesion, separation, alignment
+    // 1. Calcola i cambiamenti di velocità da cohesion, separation, alignment e la repulsione di bordi e muri
     for (size_t i = 0; i < boids.size(); i++) {
         glm::vec2 v1 = moveTowardCenter(i);
         glm::vec2 v2 = avoidNeighbors(i);
         glm::vec2 v3 = matchVelocity(i);
-
-        glm::vec2 v4(0.0f);
-        Boid& b = boids[i];
-
-        // distanza dai bordi
-        float distLeft = b.position.x;
-        float distRight = width - b.position.x;
-        float distTop = b.position.y;
-        float distBottom = height - b.position.y;
-
-        // somma dei contributi dei bordi che superano la soglia
-        if (distLeft < borderAlertDistance)   v4 += glm::vec2(1, 0) * (borderAlertDistance - distLeft);
-        if (distRight < borderAlertDistance)  v4 += glm::vec2(-1, 0) * (borderAlertDistance - distRight);
-        if (distTop < borderAlertDistance)    v4 += glm::vec2(0, 1) * (borderAlertDistance - distTop);
-        if (distBottom < borderAlertDistance) v4 += glm::vec2(0, -1) * (borderAlertDistance - distBottom);
-
-        // scala finale per evitare scatti troppo forti
-        v4 *= 0.2f;
-
-        // gestione collisione con ostacoli
-        
-		// VECCHIA VERSIONE: repulsione in base alla distanza attuale del boid dal muro
-        //glm::vec2 v5(0.0f);
-        //for (Wall& w : walls) {
-        //    for (size_t j = 0; j < w.points.size() - 1; ++j) {
-        //        glm::vec2 segStart = w.points[j];
-        //        glm::vec2 segEnd = w.points[j + 1];
-
-        //        glm::vec2 closest;
-        //        float dist = pointSegmentDistance(b.position, segStart, segEnd, closest);
-
-        //        if (dist < w.repulsionDistance) {
-        //            glm::vec2 away = glm::normalize(b.position - closest);
-        //            float factor = (w.repulsionDistance - dist) / dist; // normalizza da 0 a 1
-        //            v5 += away * factor * factor * w.repulsionStrength; // repulsione quadratica
-        //        }
-        //    }
-        //}
-
-		// NUOVA VERSIONE: repulsione in base alla distanza futura del boid dal muro
-        glm::vec2 v5(0.0f);
-        float lookAhead = 60.0f;
-        glm::vec2 dir = glm::normalize(b.velocity);
-
-        for (Wall& w : walls) {
-            for (size_t j = 0; j < w.points.size() - 1; ++j) {
-                glm::vec2 segStart = w.points[j];
-                glm::vec2 segEnd = w.points[j + 1];
-
-                glm::vec2 closest;
-                float dist = pointSegmentDistance(b.position, segStart, segEnd, closest);
-
-                if (dist < w.repulsionDistance) {
-
-                    float safeLookAhead = glm::min(lookAhead, dist - 0.2f);
-                    safeLookAhead = glm::max(safeLookAhead, 0.001f);
-
-                    glm::vec2 probePos;
-                    if (dist > 2.0f)
-                        probePos = b.position + dir * safeLookAhead; // boid lontano -> look-ahead
-                    else
-                        probePos = b.position; // boid vicino -> posizione attuale
-                
-                    glm::vec2 away = glm::normalize(probePos - closest);
-                    float factor = (w.repulsionDistance - dist) / dist;
-                    v5 += away * factor * factor * w.repulsionStrength;
-                }
-            }
-        }
+        glm::vec2 v4 = avoidBorders(i);
+        glm::vec2 v5 = avoidWalls(i);
 
         velocityChanges[i] = v1 + v2 + v3 + v4 + v5;
+
+        Boid& b = boids[i];
 
         // Update movimento randomico
         float driftChange = 10.0f;   // quanto cambia il drift a ogni frame
@@ -256,6 +191,33 @@ glm::vec2 Simulation::matchVelocity(size_t i) {
         perceived_velocity = glm::vec2(0.0f);
 
     return perceived_velocity;
+}
+
+// Border avoidance 
+glm::vec2 Simulation::avoidBorders(size_t i) {
+    glm::vec2 borderRepulsion(0.0f);
+
+    // distanza dai bordi
+    float distLeft = boids[i].position.x;
+    float distRight = width - boids[i].position.x;
+    float distTop = boids[i].position.y;
+    float distBottom = height - boids[i].position.y;
+
+    // somma dei contributi dei bordi che superano la soglia
+    if (distLeft < borderAlertDistance)   borderRepulsion += glm::vec2(1, 0) * (borderAlertDistance - distLeft);
+    if (distRight < borderAlertDistance)  borderRepulsion += glm::vec2(-1, 0) * (borderAlertDistance - distRight);
+    if (distTop < borderAlertDistance)    borderRepulsion += glm::vec2(0, 1) * (borderAlertDistance - distTop);
+    if (distBottom < borderAlertDistance) borderRepulsion += glm::vec2(0, -1) * (borderAlertDistance - distBottom);
+
+    // scala finale per evitare scatti troppo forti
+    borderRepulsion *= 0.2f;
+
+    return borderRepulsion;
+}
+
+// Walls avoidance
+glm::vec2 Simulation::avoidWalls(size_t i) {
+
 }
 
 // distanza tra punto p e segmento ab, ritorna anche il punto più vicino
