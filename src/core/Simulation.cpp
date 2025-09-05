@@ -24,6 +24,8 @@ Simulation::Simulation(unsigned int width, unsigned int height)
     , predatorFearScale(0.8f)
     , predatorChaseScale(0.12f)
     , predatorSeparationScale(2.0f)
+    , rng(std::random_device{}()) // Mersenne Twister con seed casuale
+    , dist(-1.0f, 1.0f)
 {
 }
 
@@ -57,6 +59,7 @@ void Simulation::init()
         leader.velocity = glm::vec2((((rand() % 200) - 100) / 100.0f) * 50,
             (((rand() % 200) - 100) / 100.0f) * 50);
         leader.type = LEADER;
+        leader.drift = glm::vec2(0);
         boids.push_back(leader);
     }
 
@@ -66,6 +69,7 @@ void Simulation::init()
         b.velocity = glm::vec2((((rand() % 200) - 100) / 100.0f) * 100,
             (((rand() % 200) - 100) / 100.0f) * 100);
         b.type = PREY;
+        b.drift = glm::vec2(0);
         boids.push_back(b);
     }
 
@@ -75,6 +79,7 @@ void Simulation::init()
         b.velocity = glm::vec2((((rand() % 200) - 100) / 100.0f) * 100,
             (((rand() % 200) - 100) / 100.0f) * 100);
         b.type = PREDATOR;
+        b.drift = glm::vec2(0);
         boids.push_back(b);
     }
 }
@@ -117,6 +122,18 @@ void Simulation::update(float dt) {
         glm::vec2 borderForce = avoidBorders(b);
 
         velocityChanges[i] = v + borderForce;
+
+        float driftChange = 10.0f;   // quanto cambia il drift a ogni frame
+        float driftMax = 100.0f;     // massimo contributo random
+
+        b.drift += glm::vec2(dist(rng), dist(rng)) * driftChange * dt;;
+
+        // clamp per non farlo crescere troppo
+        if (glm::length(b.drift) > driftMax) {
+            b.drift = glm::normalize(b.drift) * driftMax;
+        }
+
+        velocityChanges[i] += b.drift;
     }
 
     // 2. Applica i cambiamenti e stabilizza la velocità
