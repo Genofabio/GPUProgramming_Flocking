@@ -35,6 +35,7 @@ public:
 
     // Lista degli ostacoli
     std::vector<Wall> walls;
+    std::vector<glm::vec2> corners;
 
     // Parametri delle regole 
     float cohesionDistance;
@@ -69,8 +70,10 @@ private:
     glm::vec2 matchVelocity(size_t i);
     glm::vec2 avoidBorders(size_t i);
     glm::vec2 avoidWalls(size_t i);
+    glm::vec2 avoidCorners(size_t i);
 
     float pointSegmentDistance(const glm::vec2& p, const glm::vec2& a, const glm::vec2& b, glm::vec2& closest);
     std::vector<Wall> generateRandomWalls(int n);
+    std::vector<glm::vec2> computeWallCorners();
 };
 #endif

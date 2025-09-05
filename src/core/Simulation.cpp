@@ -65,6 +65,7 @@ void Simulation::init()
         walls.emplace_back(w);
     }
 
+    corners = computeWallCorners();
 }
 
 void Simulation::update(float dt) {
@@ -78,8 +79,9 @@ void Simulation::update(float dt) {
         glm::vec2 v3 = matchVelocity(i);
         glm::vec2 v4 = avoidBorders(i);
         glm::vec2 v5 = avoidWalls(i);
+        glm::vec2 v6 = avoidCorners(i);
 
-        velocityChanges[i] = v1 + v2 + v3 + v4 + v5;
+        velocityChanges[i] = v1 + v2 + v3 + v4 + v5 + v6;
 
         Boid& b = boids[i];
 
@@ -217,7 +219,54 @@ glm::vec2 Simulation::avoidBorders(size_t i) {
 
 // Walls avoidance
 glm::vec2 Simulation::avoidWalls(size_t i) {
+    glm::vec2 v5(0.0f);
+    const float lookAhead = 60.0f; // distanza massima di previsione
+    glm::vec2 dir = glm::normalize(boids[i].velocity);
 
+    for (Wall& w : walls) {
+        for (size_t j = 0; j < w.points.size() - 1; ++j) {
+            glm::vec2 segStart = w.points[j];
+            glm::vec2 segEnd = w.points[j + 1];
+
+            glm::vec2 closest;
+            float dist = pointSegmentDistance(boids[i].position, segStart, segEnd, closest);
+
+            if (dist < w.repulsionDistance && dist > 0.001f) {
+                float safeLookAhead = glm::clamp(dist - 0.2f, 0.001f, lookAhead);
+
+                // sempre proiettiamo il probe avanti nella direzione di movimento
+                glm::vec2 probePos = boids[i].position + dir * safeLookAhead;
+
+                glm::vec2 away = glm::normalize(probePos - closest);
+                float factor = (w.repulsionDistance - dist) / dist;
+                v5 += away * factor * factor * w.repulsionStrength;
+            }
+        }
+    }
+
+    return v5;
+}
+
+// Corner avoidance
+glm::vec2 Simulation::avoidCorners(size_t i) {
+    glm::vec2 repulsion(0.0f);
+    const float cornerRepulsionDistance = 30.0f;   // raggio di influenza
+    const float cornerRepulsionStrength = 300.0f;    // forza di repulsione
+
+    const Boid& b = boids[i];
+
+    for (const glm::vec2& c : corners) {
+        glm::vec2 diff = b.position - c;
+        float dist = glm::length(diff);
+
+        if (dist < cornerRepulsionDistance && dist > 0.001f) {
+            glm::vec2 away = diff / dist; // direzione di fuga normalizzata
+            float factor = (cornerRepulsionDistance - dist) / cornerRepulsionDistance; // più vicino -> più forte
+            repulsion += away * factor * cornerRepulsionStrength;
+        }
+    }
+
+    return repulsion;
 }
 
 // distanza tra punto p e segmento ab, ritorna anche il punto più vicino
@@ -243,4 +292,66 @@ std::vector<Wall> Simulation::generateRandomWalls(int n) {
     }
 
     return result;
+}
+
+#include <set>
+
+struct Vec2Compare {
+    bool operator()(const glm::vec2& a, const glm::vec2& b) const {
+        const float EPS = 0.001f; // tolleranza
+        if (fabs(a.x - b.x) > EPS) return a.x < b.x;
+        return a.y < b.y - EPS;
+    }
+};
+
+std::vector<glm::vec2> Simulation::computeWallCorners() {
+    std::set<glm::vec2, Vec2Compare> uniquePoints;
+
+    for (size_t i = 0; i < walls.size(); ++i) {
+        for (size_t j = 0; j < walls[i].points.size() - 1; ++j) {
+            glm::vec2 a1 = walls[i].points[j];
+            glm::vec2 a2 = walls[i].points[j + 1];
+
+            bool aVertical = fabs(a1.x - a2.x) < 0.001f;
+            bool aHorizontal = fabs(a1.y - a2.y) < 0.001f;
+
+            for (size_t k = i + 1; k < walls.size(); ++k) {
+                for (size_t m = 0; m < walls[k].points.size() - 1; ++m) {
+                    glm::vec2 b1 = walls[k].points[m];
+                    glm::vec2 b2 = walls[k].points[m + 1];
+
+                    bool bVertical = fabs(b1.x - b2.x) < 0.001f;
+                    bool bHorizontal = fabs(b1.y - b2.y) < 0.001f;
+
+                    // incrocio solo se uno è verticale e l’altro orizzontale
+                    if ((aVertical && bHorizontal) || (aHorizontal && bVertical)) {
+                        glm::vec2 verticalStart, verticalEnd;
+                        glm::vec2 horizontalStart, horizontalEnd;
+
+                        if (aVertical) {
+                            verticalStart = a1; verticalEnd = a2;
+                            horizontalStart = b1; horizontalEnd = b2;
+                        }
+                        else {
+                            verticalStart = b1; verticalEnd = b2;
+                            horizontalStart = a1; horizontalEnd = a2;
+                        }
+
+                        float vx = verticalStart.x;
+                        float hy = horizontalStart.y;
+
+                        // check se incrocio sta dentro entrambi i segmenti
+                        if (vx >= glm::min(horizontalStart.x, horizontalEnd.x) &&
+                            vx <= glm::max(horizontalStart.x, horizontalEnd.x) &&
+                            hy >= glm::min(verticalStart.y, verticalEnd.y) &&
+                            hy <= glm::max(verticalStart.y, verticalEnd.y)) {
+                            uniquePoints.insert(glm::vec2(vx, hy));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return std::vector<glm::vec2>(uniquePoints.begin(), uniquePoints.end());
 }
