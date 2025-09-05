@@ -17,7 +17,7 @@ Simulation::Simulation(unsigned int width, unsigned int height)
     , cohesionScale(0.2f)
     , separationScale(8.0f)
     , alignmentScale(0.125f)
-    , borderAlertDistance(150.0f)
+    , borderAlertDistance(width/11.0f)
     , rng(std::random_device{}()) // Mersenne Twister con seed casuale
     , dist(-1.0f, 1.0f)
 {
@@ -60,7 +60,7 @@ void Simulation::init()
     }
 
     // === inizializzazione muri di test ===
-    std::vector<Wall> newWalls = generateRandomWalls(30);
+    std::vector<Wall> newWalls = generateRandomWalls(70);
     for (const Wall& w : newWalls) {
         walls.emplace_back(w);
     }
@@ -96,7 +96,29 @@ void Simulation::update(float dt) {
         v4 *= 0.2f;
 
         // gestione collisione con ostacoli
+        
+		// VECCHIA VERSIONE: repulsione in base alla distanza attuale del boid dal muro
+        //glm::vec2 v5(0.0f);
+        //for (Wall& w : walls) {
+        //    for (size_t j = 0; j < w.points.size() - 1; ++j) {
+        //        glm::vec2 segStart = w.points[j];
+        //        glm::vec2 segEnd = w.points[j + 1];
+
+        //        glm::vec2 closest;
+        //        float dist = pointSegmentDistance(b.position, segStart, segEnd, closest);
+
+        //        if (dist < w.repulsionDistance) {
+        //            glm::vec2 away = glm::normalize(b.position - closest);
+        //            float factor = (w.repulsionDistance - dist) / dist; // normalizza da 0 a 1
+        //            v5 += away * factor * factor * w.repulsionStrength; // repulsione quadratica
+        //        }
+        //    }
+        //}
+
+		// NUOVA VERSIONE: repulsione in base alla distanza futura del boid dal muro
         glm::vec2 v5(0.0f);
+        float lookAhead = 60.0f;
+        glm::vec2 dir = glm::normalize(b.velocity);
 
         for (Wall& w : walls) {
             for (size_t j = 0; j < w.points.size() - 1; ++j) {
@@ -107,9 +129,19 @@ void Simulation::update(float dt) {
                 float dist = pointSegmentDistance(b.position, segStart, segEnd, closest);
 
                 if (dist < w.repulsionDistance) {
-                    glm::vec2 away = glm::normalize(b.position - closest);
-                    float factor = (w.repulsionDistance - dist) / dist; // normalizza da 0 a 1
-                    v5 += away * factor * factor * w.repulsionStrength; // repulsione quadratica
+
+                    float safeLookAhead = glm::min(lookAhead, dist - 0.2f);
+                    safeLookAhead = glm::max(safeLookAhead, 0.001f);
+
+                    glm::vec2 probePos;
+                    if (dist > 2.0f)
+                        probePos = b.position + dir * safeLookAhead; // boid lontano -> look-ahead
+                    else
+                        probePos = b.position; // boid vicino -> posizione attuale
+                
+                    glm::vec2 away = glm::normalize(probePos - closest);
+                    float factor = (w.repulsionDistance - dist) / dist;
+                    v5 += away * factor * factor * w.repulsionStrength;
                 }
             }
         }
@@ -136,7 +168,7 @@ void Simulation::update(float dt) {
         boids[i].velocity += velocityChanges[i] * slowDown;
 
         // clamp della velocità
-        float maxSpeed = 150.0f;
+        float maxSpeed = 100.0f;
         float speed = glm::length(boids[i].velocity);
         if (speed > maxSpeed) {
             boids[i].velocity = (boids[i].velocity / speed) * maxSpeed;
@@ -245,7 +277,7 @@ std::vector<Wall> Simulation::generateRandomWalls(int n) {
     for (int i = 0; i < count; i++) {
         const auto& edge = candidates[i];
         std::vector<glm::vec2> pts = { edge.first, edge.second };
-        result.emplace_back(pts, 60.0f, 0.3f);
+        result.emplace_back(pts, height / 11.0f, 3.0f);
     }
 
     return result;
