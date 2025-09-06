@@ -26,6 +26,7 @@ public:
 
     // Agenti
     std::vector<Boid> boids;
+    std::vector<size_t> eatenPrey;
 
     // Distanze per regole
     float cohesionDistance;
@@ -35,6 +36,7 @@ public:
     float predatorFearDistance;
     float predatorChaseDistance;
     float predatorSeparationDistance;
+    float predatorEatDistance;
 
     // Pesi per regole
     float cohesionScale;
@@ -67,6 +69,7 @@ private:
     // Preda/Predatore
     glm::vec2 evadePredators(size_t i);
     glm::vec2 chasePrey(size_t i);
+    void eatPrey(size_t predatorIndex, size_t preyIndex);
     glm::vec2 avoidOtherPredators(size_t i);
 
 	// Leader

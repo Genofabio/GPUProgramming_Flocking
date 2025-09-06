@@ -2,6 +2,7 @@
 #include "custom/ResourceManager.h"
 #include "custom/SpriteRenderer.h"
 #include <iostream>
+#include <cmath>
 
 Simulation::Simulation(unsigned int width, unsigned int height)
     : state(SIMULATION_RUNNING)
@@ -17,6 +18,7 @@ Simulation::Simulation(unsigned int width, unsigned int height)
     , predatorFearDistance(150.0f)
     , predatorChaseDistance(800.0f)
     , predatorSeparationDistance(60.0f)
+    , predatorEatDistance(5.0f)
     // scales / weights defaults
     , cohesionScale(0.05f)
     , separationScale(2.0f)
@@ -184,6 +186,18 @@ void Simulation::update(float dt) {
         // 3. aggiorna la posizione
         boids[i].position += boids[i].velocity * dt;
     }
+
+    // Alla fine dell'update elimina i boids mangiati messi in pending
+    if (!eatenPrey.empty()) {
+        // ordiniamo al contrario per non invalidare gli indici
+        std::sort(eatenPrey.rbegin(), eatenPrey.rend());
+        for (size_t idx : eatenPrey) {
+            if (idx < boids.size()) {
+                boids.erase(boids.begin() + idx);
+            }
+        }
+        eatenPrey.clear();
+    }
 }
 
 void Simulation::processInput(float dt)
@@ -281,29 +295,6 @@ glm::vec2 Simulation::matchVelocity(size_t i) {
     return perceived_velocity;
 }
 
-//glm::vec2 Simulation::avoidBorders(const Boid& b) {
-//    glm::vec2 force(0.0f);
-//
-//    float distLeft = b.position.x;
-//    float distRight = width - b.position.x;
-//    float distTop = b.position.y;
-//    float distBottom = height - b.position.y;
-//
-//    if (distLeft < borderDistance)
-//        force += glm::vec2(1, 0) * (borderDistance - distLeft);
-//    if (distRight < borderDistance)
-//        force += glm::vec2(-1, 0) * (borderDistance - distRight);
-//    if (distTop < borderDistance)
-//        force += glm::vec2(0, 1) * (borderDistance - distTop);
-//    if (distBottom < borderDistance)
-//        force += glm::vec2(0, -1) * (borderDistance - distBottom);
-//
-//    // Scala finale per evitare scatti troppo forti
-//    force *= 0.2f;
-//
-//    return force;
-//}
-
 // Borders rule (usa borderDistance e borderScale)
 glm::vec2 Simulation::avoidBorders(const Boid& b) {
     glm::vec2 force(0.0f);
@@ -334,6 +325,9 @@ glm::vec2 Simulation::avoidBorders(const Boid& b) {
 // Evade predators (usa predatorFearDistance e predatorFearScale)
 glm::vec2 Simulation::evadePredators(size_t i) {
     glm::vec2 c(0.0f);
+    int nearbyAllies = 0;
+    float allyRadius = 60.0f; // raggio per contare prede vicine
+
     for (size_t j = 0; j < boids.size(); j++) {
         if (i == j) continue;
         if (boids[j].type != PREDATOR) continue;
@@ -345,96 +339,87 @@ glm::vec2 Simulation::evadePredators(size_t i) {
             c += (diff / dist) * (predatorFearDistance - dist);
         }
     }
-    return c * predatorFearScale;
+
+    // conta quante prede sono vicine (per ridurre l'effetto della fuga)
+    for (size_t j = 0; j < boids.size(); j++) {
+        if (i == j) continue;
+        if (boids[j].type != PREY) continue;
+        float dist = glm::length(boids[j].position - boids[i].position);
+        if (dist < allyRadius) nearbyAllies++;
+    }
+
+    // 3) groupFactor continuo (nessun if)
+    // parametri della logistic function (regolabili):
+    const float k = 10.03f;   // steepness (maggiore -> transizione più ripida)
+    const float n0 = 2.08f;  // centro della transizione (vicino a 4) zona sicura
+    float na = static_cast<float>(nearbyAllies);
+    float groupFactor = 1.0f / (1.0f + std::exp(-k * (na - n0)));
+
+    return c * predatorFearScale * groupFactor;
 }
 
-// Chase prey (usa predatorChaseDistance e predatorChaseScale)
-glm::vec2 Simulation::chasePrey(size_t i) {
+
+// Chase prey (con possibilità di mangiare direttamente)
+glm::vec2 Simulation::chasePrey(size_t predatorIndex) {
     glm::vec2 target(0.0f);
     float closest = std::numeric_limits<float>::infinity();
+    size_t preyIndex = boids.size(); // indice preda candidata
+
+    int nearbyPrey = 0;
+    float predatorBoostRadius = 80.0f;
+
     for (size_t j = 0; j < boids.size(); j++) {
         if (boids[j].type != PREY) continue;
 
-        float dist = glm::length(boids[j].position - boids[i].position);
-        // considera solo prede entro predatorChaseDistance
+        glm::vec2 diff = boids[j].position - boids[predatorIndex].position;
+        float dist = glm::length(diff);
+
         if (dist < closest && dist < predatorChaseDistance) {
             closest = dist;
             target = boids[j].position;
+            preyIndex = j;
+        }
+
+        if (dist < predatorBoostRadius) {
+            nearbyPrey++;
         }
     }
-    if (closest < std::numeric_limits<float>::infinity()) {
-        // forza diretta verso la preda
-        glm::vec2 dir = target - boids[i].position;
-        // normalizza e scala per evitare scatti troppo forti se molto vicino
+
+    if (preyIndex < boids.size()) {
+        // Se è abbastanza vicina, mangiala direttamente
+        if (closest < predatorEatDistance) {
+            eatPrey(predatorIndex, preyIndex);
+            return glm::vec2(0.0f); // non serve più la forza di inseguimento
+        }
+
+        // Altrimenti calcola la forza di inseguimento
+        glm::vec2 dir = target - boids[predatorIndex].position;
         float len = glm::length(dir);
         if (len > 0.0f) {
-            return (dir / len) * ((predatorChaseDistance - closest) / predatorChaseDistance) * predatorChaseScale * 100.0f;
+            float baseForce = ((predatorChaseDistance - closest) / predatorChaseDistance)
+                * predatorChaseScale * 100.0f;
+
+            float boost = (nearbyPrey <= 2) ? 1.5f : 1.0f;
+
+            return (dir / len) * baseForce * boost;
         }
     }
     return glm::vec2(0.0f);
 }
 
-//glm::vec2 Simulation::chasePrey(size_t i) {
-//    float flockRadius = 100.0f; // distanza per considerare il gruppo
-//    glm::vec2 target(0.0f);
-//    int maxCount = 0;
-//    Boid& predator = boids[i];
-//
-//    for (size_t j = 0; j < boids.size(); j++) {
-//        if (boids[j].type != PREY) continue;
-//
-//        glm::vec2 center(0.0f);
-//        int count = 0;
-//
-//        for (size_t k = 0; k < boids.size(); k++) {
-//            if (boids[k].type != PREY) continue;
-//
-//            float dist = glm::length(boids[j].position - boids[k].position);
-//            if (dist < flockRadius) {
-//                center += boids[k].position;
-//                count++;
-//            }
-//        }
-//
-//        if (count > maxCount) {
-//            maxCount = count;
-//            target = center / (float)count;
-//        }
-//    }
-//
-//    if (maxCount > 0)
-//        return (target - predator.position) * 0.2f;
-//    return glm::vec2(0.0f);
-//}
 
-//glm::vec2 Simulation::chasePrey(size_t i) {
-//    Boid& predator = boids[i];
-//    glm::vec2 weightedPos(0.0f);
-//    glm::vec2 weightedVel(0.0f);
-//    float totalWeight = 0.0f;
-//    float influenceRadius = 150.0f;
-//
-//    for (size_t j = 0; j < boids.size(); j++) {
-//        if (boids[j].type != PREY) continue;
-//
-//        glm::vec2 diff = boids[j].position - predator.position;
-//        float dist = glm::length(diff);
-//        if (dist > 0 && dist < influenceRadius) {
-//            float weight = 1.0f / dist; // prede più vicine pesano di più
-//            weightedPos += boids[j].position * weight;
-//            weightedVel += boids[j].velocity * weight;
-//            totalWeight += weight;
-//        }
-//    }
-//
-//    if (totalWeight > 0) {
-//        glm::vec2 avgPos = weightedPos / totalWeight;
-//        glm::vec2 avgVel = weightedVel / totalWeight;
-//        return ((avgPos + avgVel) - predator.position) * 0.1f;
-//    }
-//
-//    return glm::vec2(0.0f);
-//}
+// Eliminazione dei boid mangiati
+void Simulation::eatPrey(size_t predatorIndex, size_t preyIndex) {
+    if (predatorIndex >= boids.size() || preyIndex >= boids.size()) return;
+    if (boids[predatorIndex].type != PREDATOR || boids[preyIndex].type != PREY) return;
+
+    float dist = glm::length(boids[predatorIndex].position - boids[preyIndex].position);
+    if (dist < predatorEatDistance) {
+        eatenPrey.push_back(preyIndex);
+        std::cout << "Predatore " << predatorIndex
+            << " ha mangiato preda " << preyIndex << std::endl;
+    }
+}
 
 glm::vec2 Simulation::followLeaders(size_t i) {
     Boid& self = boids[i];
