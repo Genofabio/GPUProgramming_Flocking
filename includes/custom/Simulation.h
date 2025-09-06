@@ -22,6 +22,7 @@ public:
     SimulationState state;
     bool keys[1024]{};
     unsigned int width, height;
+    float currentTime = 0.0f;
 
     // Agenti
     std::vector<Boid> boids;
@@ -74,6 +75,9 @@ private:
 
     std::mt19937 rng;
     std::uniform_real_distribution<float> dist;
+
+    // Crescita dei boids
+    void upgradeBoid(Boid& b, float currentTime);
 
     // Bordi
     glm::vec2 avoidBorders(const Boid& b);

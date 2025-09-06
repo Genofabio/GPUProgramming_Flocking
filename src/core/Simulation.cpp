@@ -1,6 +1,7 @@
 #include "custom/Simulation.h"  
 #include "custom/ResourceManager.h"
 #include "custom/SpriteRenderer.h"
+#include <iostream>
 
 Simulation::Simulation(unsigned int width, unsigned int height)
     : state(SIMULATION_RUNNING)
@@ -53,15 +54,23 @@ void Simulation::init()
     const int NUM_PREDATORS = 2;
     const int NUM_LEADERS = 2;
 
+    // Leader
     for (int i = 0; i < NUM_LEADERS; i++) {
         Boid leader;
         leader.position = glm::vec2(rand() % width, rand() % height);
         leader.velocity = glm::vec2((((rand() % 200) - 100) / 100.0f) * 50,
             (((rand() % 200) - 100) / 100.0f) * 50);
         leader.type = LEADER;
+        leader.age = 10;
+        leader.scale = 1.7f;
+        leader.color = glm::vec3(0.9f, 0.9f, 0.2f);
         leader.drift = glm::vec2(0);
         boids.push_back(leader);
     }
+
+    // Non-Leader
+    std::uniform_int_distribution<int> ageDist(0, 6);
+    std::uniform_real_distribution<float> offsetDist(0.0f, 30.0f);
 
     for (int i = 0; i < NUM_PREY; i++) {
         Boid b;
@@ -69,22 +78,43 @@ void Simulation::init()
         b.velocity = glm::vec2((((rand() % 200) - 100) / 100.0f) * 100,
             (((rand() % 200) - 100) / 100.0f) * 100);
         b.type = PREY;
-        b.drift = glm::vec2(0);
+        b.birthTime = currentTime + offsetDist(rng); // Birth time random continuo [0, 30]
+        b.age = ageDist(rng); // età ranodm [0, 6]
+        
+        float t = b.age / 10.0f; // Normalizzazione t da 0.0 a 0.6
+        
+        b.scale = 1.0f; // Aggiorna scale (1.0 -> 1.24) 
+
+        glm::vec3 blue(0.2f, 0.2f, 0.9f);
+        glm::vec3 blue_marine(0.05f, 0.8f, 0.7f);
+        b.color = glm::mix(blue, blue_marine, t); // Aggiorna colore (da blu a blu_marine) 
+
+        b.influence = 0.8f + t * 0.24f; // Setta influence tra 0.8 (b.age = 0) e 1.04 (b.age = 6) 
+
+        // std::cout << "CurrentTime " << i << currentTime << std::endl;
+        // std::cout << "Boid " << i << "birthTime " << b.birthTime << "Age " << b.age << std::endl;
+
         boids.push_back(b);
     }
 
+    // Predatori
     for (int i = 0; i < NUM_PREDATORS; i++) {
         Boid b;
         b.position = glm::vec2(rand() % width, rand() % height);
         b.velocity = glm::vec2((((rand() % 200) - 100) / 100.0f) * 100,
             (((rand() % 200) - 100) / 100.0f) * 100);
         b.type = PREDATOR;
+        b.age = 10;
+        b.scale = 1.9f;
+        b.color = glm::vec3(0.9f, 0.2f, 0.2f);
         b.drift = glm::vec2(0);
         boids.push_back(b);
     }
 }
 
 void Simulation::update(float dt) {
+    currentTime += dt;
+
     std::vector<glm::vec2> velocityChanges(boids.size(), glm::vec2(0.0f));
     float slowDown = 0.3f; 
 
@@ -94,6 +124,9 @@ void Simulation::update(float dt) {
         glm::vec2 v(0.0f);
 
         if (b.type == PREY) {
+
+            upgradeBoid(b, currentTime);
+
             // Flocking base
             glm::vec2 v1 = moveTowardCenter(i);
             glm::vec2 v2 = avoidNeighbors(i);
@@ -161,18 +194,7 @@ void Simulation::render() {
     for (Boid& b : boids) {
         float angle = glm::degrees(atan2(b.velocity.y, b.velocity.x)) + 270.0f;
 
-        glm::vec3 color;
-        if (b.type == PREDATOR) {
-            color = glm::vec3(0.9f, 0.2f, 0.2f);   // rosso (predatori)
-        }
-        else if (b.type == LEADER) {
-            color = glm::vec3(0.9f, 0.9f, 0.2f);   // giallo (leader)
-        }
-        else {
-            color = glm::vec3(0.4f, 0.5f, 0.9f);   // blu (prede normali)
-        }
-
-        boidRender->DrawBoid(b.position, angle, color, 10.0f);
+        boidRender->DrawBoid(b.position, angle, b.color, 10.0f*b.scale);
     }
 }
 
@@ -236,7 +258,7 @@ glm::vec2 Simulation::avoidOtherPredators(size_t i) {
 // Alignment rule
 glm::vec2 Simulation::matchVelocity(size_t i) {
     glm::vec2 perceived_velocity(0.0f);
-    int count = 0;
+    float totalWeight = 0.0f;
     Boid& self = boids[i];
 
     for (size_t j = 0; j < boids.size(); j++) {
@@ -245,13 +267,14 @@ glm::vec2 Simulation::matchVelocity(size_t i) {
 
         float dist = glm::length(boids[j].position - self.position);
         if (dist < alignmentDistance) {
-            perceived_velocity += boids[j].velocity;
-            count++;
+            float w = boids[j].influence; // peso
+            perceived_velocity += boids[j].velocity * w;
+            totalWeight += w;
         }
     }
 
-    if (count > 0)
-        perceived_velocity = (perceived_velocity / (float)count) * alignmentScale;
+    if (totalWeight > 0.0f)
+        perceived_velocity = (perceived_velocity / totalWeight) * alignmentScale;
     else
         perceived_velocity = glm::vec2(0.0f);
 
@@ -460,4 +483,29 @@ glm::vec2 Simulation::leaderSeparation(size_t i) {
     }
 
     return force * 0.8f; // scala la forza
+}
+
+// Aggiorna i parametri di crescita della preda
+void Simulation::upgradeBoid(Boid& b, float currentTime) {
+    if (b.type != PREY || b.age >= 10) return;  // solo PREY e max età 10
+
+    if (currentTime - b.birthTime >= 15.0f) { // iniziano a crescere dopo 15s
+        //std::cout << "upgrade al tempo " << currentTime << ". Age: " << b.age << " -> " << b.age +1 << std::endl;
+        b.age++;  // incremento età
+
+        b.scale += 0.04f; // Aggiorna scale (1.0 -> 1.4)
+
+        // Aggiorna colore (da blu a blu_marine)
+        float t = (b.age - 1) / 9.0f; // Normalizzazione t da 0.0 a 1.0
+
+        glm::vec3 blue(0.2f, 0.2f, 0.9f);
+        glm::vec3 blue_marine(0.05f, 0.8f, 0.7f);
+        b.color = glm::mix(blue, blue_marine, t);
+
+        // Aggiorna influence (0.8 -> 1.2)
+        b.influence += 0.04f;
+
+        // Reset birthTime per prossimo step
+        b.birthTime = currentTime;
+    }
 }
