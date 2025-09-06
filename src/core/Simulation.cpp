@@ -17,7 +17,7 @@ Simulation::Simulation(unsigned int width, unsigned int height)
     , cohesionScale(0.2f)
     , separationScale(8.0f)
     , alignmentScale(0.125f)
-    , borderAlertDistance(width/11.0f)
+    , borderAlertDistance(height/5.0f)
     , rng(std::random_device{}()) // Mersenne Twister con seed casuale
     , dist(-1.0f, 1.0f)
 {
@@ -220,27 +220,25 @@ glm::vec2 Simulation::avoidBorders(size_t i) {
 // Walls avoidance
 glm::vec2 Simulation::avoidWalls(size_t i) {
     glm::vec2 v5(0.0f);
-    const float lookAhead = 60.0f; // distanza massima di previsione
+    const float lookAhead = 30.0f; // distanza massima di previsione
     glm::vec2 dir = glm::normalize(boids[i].velocity);
 
-    for (Wall& w : walls) {
-        for (size_t j = 0; j < w.points.size() - 1; ++j) {
-            glm::vec2 segStart = w.points[j];
-            glm::vec2 segEnd = w.points[j + 1];
+    for (const Wall& w : walls) {
+        // I muri hanno solo due punti
+        glm::vec2 segStart = w.points[0];
+        glm::vec2 segEnd = w.points[1];
 
-            glm::vec2 closest;
-            float dist = pointSegmentDistance(boids[i].position, segStart, segEnd, closest);
+        glm::vec2 closest;
+        float dist = pointSegmentDistance(boids[i].position, segStart, segEnd, closest);
 
-            if (dist < w.repulsionDistance && dist > 0.001f) {
-                float safeLookAhead = glm::clamp(dist - 0.2f, 0.001f, lookAhead);
+        if (dist < w.repulsionDistance && dist > 0.001f) {
+            float safeLookAhead = glm::clamp(dist - 0.2f, 0.001f, lookAhead);
 
-                // sempre proiettiamo il probe avanti nella direzione di movimento
-                glm::vec2 probePos = boids[i].position + dir * safeLookAhead;
+            glm::vec2 probePos = boids[i].position + dir * safeLookAhead;
 
-                glm::vec2 away = glm::normalize(probePos - closest);
-                float factor = (w.repulsionDistance - dist) / dist;
-                v5 += away * factor * factor * w.repulsionStrength;
-            }
+            glm::vec2 away = glm::normalize(probePos - closest);
+            float factor = (w.repulsionDistance - dist) / dist;
+            v5 += away * factor * factor * w.repulsionStrength;
         }
     }
 
