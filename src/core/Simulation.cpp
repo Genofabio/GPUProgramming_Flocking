@@ -83,13 +83,13 @@ void Simulation::init()
         
         float t = b.age / 10.0f; // Normalizzazione t da 0.0 a 0.6
         
-        b.scale = 1.0f; // Aggiorna scale (1.0 -> 1.24) 
+        b.scale = 1.0f + 0.04f * b.age; // Aggiorna scale (1.0 -> 1.24) 
 
         glm::vec3 blue(0.2f, 0.2f, 0.9f);
         glm::vec3 blue_marine(0.05f, 0.8f, 0.7f);
         b.color = glm::mix(blue, blue_marine, t); // Aggiorna colore (da blu a blu_marine) 
 
-        b.influence = 0.8f + t * 0.24f; // Setta influence tra 0.8 (b.age = 0) e 1.04 (b.age = 6) 
+        b.influence = 0.8f + 0.04f * b.age; // Setta influence tra 0.8 (b.age = 0) e 1.04 (b.age = 6) 
 
         // std::cout << "CurrentTime " << i << currentTime << std::endl;
         // std::cout << "Boid " << i << "birthTime " << b.birthTime << "Age " << b.age << std::endl;
@@ -496,7 +496,7 @@ void Simulation::upgradeBoid(Boid& b, float currentTime) {
         b.scale += 0.04f; // Aggiorna scale (1.0 -> 1.4)
 
         // Aggiorna colore (da blu a blu_marine)
-        float t = (b.age - 1) / 9.0f; // Normalizzazione t da 0.0 a 1.0
+        float t = b.age / 10.0f; // Normalizzazione t da 0.0 a 1.0
 
         glm::vec3 blue(0.2f, 0.2f, 0.9f);
         glm::vec3 blue_marine(0.05f, 0.8f, 0.7f);
