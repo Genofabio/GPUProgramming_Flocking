@@ -136,6 +136,7 @@
   <ItemGroup>
     <ClInclude Include="includes\custom\Boid.h" />
     <ClInclude Include="includes\custom\BoidRenderer.h" />
+    <ClInclude Include="includes\custom\Profiler.h" />
     <ClInclude Include="includes\custom\ResourceManager.h" />
     <ClInclude Include="includes\custom\Shader.h" />
     <ClInclude Include="includes\custom\Simulation.h" />

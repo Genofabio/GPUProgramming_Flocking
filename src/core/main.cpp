@@ -3,6 +3,7 @@
 
 #include "custom/Simulation.h" 
 #include "custom/ResourceManager.h"
+#include "custom/Profiler.h"
 
 #include <iostream>
 
@@ -49,8 +50,12 @@ int main(int argc, char* argv[])
     // initialize simulation
     simulation.init();
 
+    Profiler profiler;
+
     float deltaTime = 0.0f;
     float lastFrame = 0.0f;
+    float consoleTimer = 0.0f;
+    int frameCounter = 0;
 
     while (!glfwWindowShouldClose(window))
     {
@@ -64,15 +69,47 @@ int main(int argc, char* argv[])
         simulation.processInput(deltaTime);
 
         // update simulation state
+        profiler.start();
         simulation.update(deltaTime);
+        double updateTime = profiler.stop();
+        profiler.log("update", updateTime);
 
         // render
+        profiler.start();
         glClearColor(0.08f, 0.08f, 0.08f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         simulation.render();
+        double renderTime = profiler.stop();
+        profiler.log("render", renderTime);
 
         glfwSwapBuffers(window);
+
+        // Aggiornamento console ogni secondo
+        consoleTimer += deltaTime;
+        frameCounter++;
+
+        if (consoleTimer >= 1.0f)
+        {
+            double avgUpdate = updateTime; // media aggiornata al momento
+            double avgRender = renderTime;
+
+            // Oppure usa le medie calcolate dal Profiler:
+            std::cout << "\n";
+            profiler.printAverage("update");
+            profiler.printAverage("render");
+
+            // Calcolo FPS
+            double fps = frameCounter / consoleTimer;
+            std::cout << "FPS: " << fps << std::endl;
+
+            // reset contatori
+            frameCounter = 0;
+            consoleTimer = 0.0f;
+        }
     }
+
+    profiler.printAllAverages();
+    profiler.saveCSV("./output/benchmark_cpu.csv");
 
     ResourceManager::Clear();
 
