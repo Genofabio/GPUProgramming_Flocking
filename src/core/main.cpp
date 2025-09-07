@@ -1,9 +1,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "custom/Simulation.h" 
+#include "custom/Simulation.h"
 #include "custom/ResourceManager.h"
-#include "custom/Profiler.h"
 
 #include <iostream>
 
@@ -20,6 +19,7 @@ Simulation simulation(SCREEN_WIDTH, SCREEN_HEIGHT);
 
 int main(int argc, char* argv[])
 {
+    // Init GLFW
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -39,6 +39,7 @@ int main(int argc, char* argv[])
         return -1;
     }
 
+    // Callbacks
     glfwSetKeyCallback(window, key_callback);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
@@ -47,72 +48,42 @@ int main(int argc, char* argv[])
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // initialize simulation
+    // Initialize simulation
     simulation.init();
-
-    Profiler profiler;
 
     float deltaTime = 0.0f;
     float lastFrame = 0.0f;
-    float consoleTimer = 0.0f;
-    int frameCounter = 0;
 
+    // Main loop
     while (!glfwWindowShouldClose(window))
     {
-        // calculate delta time
+        // Calculate delta time
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+
         glfwPollEvents();
 
-        // manage user input
+        // Process input
         simulation.processInput(deltaTime);
 
-        // update simulation state
-        profiler.start();
-        simulation.update(deltaTime);
-        double updateTime = profiler.stop();
-        profiler.log("update", updateTime);
+        // Update simulation (with profiling)
+        simulation.updateWithProfiling(deltaTime);
 
-        // render
-        profiler.start();
+        // Render simulation (with profiling)
         glClearColor(0.08f, 0.08f, 0.08f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        simulation.render();
-        double renderTime = profiler.stop();
-        profiler.log("render", renderTime);
+        simulation.renderWithProfiling();
+
+		simulation.updateStats(deltaTime);
 
         glfwSwapBuffers(window);
-
-        // Aggiornamento console ogni secondo
-        consoleTimer += deltaTime;
-        frameCounter++;
-
-        if (consoleTimer >= 1.0f)
-        {
-            double avgUpdate = updateTime; // media aggiornata al momento
-            double avgRender = renderTime;
-
-            // Oppure usa le medie calcolate dal Profiler:
-            std::cout << "\n";
-            profiler.printAverage("update");
-            profiler.printAverage("render");
-
-            // Calcolo FPS
-            double fps = frameCounter / consoleTimer;
-            std::cout << "FPS: " << fps << std::endl;
-
-            // reset contatori
-            frameCounter = 0;
-            consoleTimer = 0.0f;
-        }
     }
 
-    profiler.printAllAverages();
-    profiler.saveCSV("./output/benchmark_cpu.csv");
+    // Salva CSV con risultati profiling
+    simulation.saveProfilerCSV("./output/benchmark_cpu.csv");
 
     ResourceManager::Clear();
-
     glfwTerminate();
     return 0;
 }
@@ -121,6 +92,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+
     if (key >= 0 && key < 1024)
     {
         if (action == GLFW_PRESS)

@@ -1,4 +1,4 @@
-#include "Custom/text_renderer.h"
+#include "custom/TextRenderer.h"
 #include <iostream>
 
 TextRenderer::TextRenderer(const Shader& shader) : shader(shader) {

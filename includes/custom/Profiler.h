@@ -64,10 +64,33 @@ public:
         }
     }
 
+    // --- Nuova funzione: gestisce FPS e stampa periodica ---
+    void updateFrameStats(double dt) {
+        frameCounter++;
+        consoleTimer += dt;
+        if (consoleTimer >= 1.0) {
+            currentFPS = static_cast<double>(frameCounter) / consoleTimer;  // <-- salvo l'FPS
+            std::cout << "\n";
+            printAverage("update");
+            printAverage("render");
+            std::cout << "FPS: " << static_cast<int>(currentFPS) << "\n";
+            // reset
+            frameCounter = 0;
+            consoleTimer = 0.0;
+        }
+    }
+
+    double getCurrentFPS() const { return currentFPS; }   // <-- nuovo getter
+
 private:
     using clock_type = std::chrono::high_resolution_clock;
     using ms = std::chrono::duration<double, std::milli>;
 
     clock_type::time_point start_time;
     std::map<std::string, std::vector<double>> measurements;
+
+    // --- Nuovi membri per FPS ---
+    double consoleTimer = 0.0;  // accumula secondi
+    int frameCounter = 0;       // conta frame nell'intervallo
+    double currentFPS = 0.0;
 };
