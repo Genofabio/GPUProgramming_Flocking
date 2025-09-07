@@ -209,16 +209,20 @@ void Simulation::renderWithProfiling()
     double renderTime = profiler.stop();
     profiler.log("render", renderTime);
 
-    // --- Disegna FPS in alto a destra ---
+    float margin = 10.0f;    // margine dai bordi
+    float scale = 0.7f;     // dimensione del testo
+    glm::vec3 color(0.9f, 0.9f, 0.3f); // colore giallo chiaro
+
+    // FPS
     double fps = profiler.getCurrentFPS();
-    if (fps > 0.0) { // solo se calcolato almeno una volta
+    if (fps > 0.0) {
         std::string fpsText = "FPS: " + std::to_string(static_cast<int>(fps));
-        float x = static_cast<float>(width) - 100.0f;  // margine destro
-        float y = static_cast<float>(height) - 30.0f;                               // margine alto
-        float scale = 1.0f;
-        glm::vec3 color(0.9f, 0.9f, 0.3f);             // giallo chiaro
-        textRender->RenderText(fpsText, x, y, scale, color);
+        textRender->RenderText(fpsText, margin, static_cast<float>(height) - margin - 1 * 20.0f, scale, color);
     }
+
+    // Numero di boids
+    std::string boidText = "Boids: " + std::to_string(boids.size());
+    textRender->RenderText(boidText, margin, static_cast<float>(height) - margin - 2 * 20.0f, scale, color);
 }
 
 void Simulation::updateStats(float dt)
