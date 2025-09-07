@@ -27,6 +27,7 @@ public:
     // Agenti
     std::vector<Boid> boids;
     std::vector<size_t> eatenPrey;
+    std::vector<int> boidCouples;
 
     // Distanze per regole
     float cohesionDistance;
@@ -81,6 +82,10 @@ private:
 
     // Crescita dei boids
     void upgradeBoid(Boid& b, float currentTime);
+
+    // Spawn dei boids
+    void updateMating();
+    void spawnBoid(size_t parentA, size_t parentB);
 
     // Bordi
     glm::vec2 avoidBorders(const Boid& b);

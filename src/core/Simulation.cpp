@@ -93,9 +93,6 @@ void Simulation::init()
 
         b.influence = 0.8f + 0.04f * b.age; // Setta influence tra 0.8 (b.age = 0) e 1.04 (b.age = 6) 
 
-        // std::cout << "CurrentTime " << i << currentTime << std::endl;
-        // std::cout << "Boid " << i << "birthTime " << b.birthTime << "Age " << b.age << std::endl;
-
         boids.push_back(b);
     }
 
@@ -186,6 +183,9 @@ void Simulation::update(float dt) {
         // 3. aggiorna la posizione
         boids[i].position += boids[i].velocity * dt;
     }
+
+    // Gestisce lo spawn di nuovi pesci 
+    updateMating();
 
     // Alla fine dell'update elimina i boids mangiati messi in pending
     if (!eatenPrey.empty()) {
@@ -358,6 +358,60 @@ glm::vec2 Simulation::evadePredators(size_t i) {
     return c * predatorFearScale * groupFactor;
 }
 
+// gestisce l'accoppiamento
+void Simulation::updateMating() {
+    size_t N = boids.size();
+    if (N == 0) return;
+
+    // inizializza se necessario
+    if (boidCouples.size() != N * N) {
+        boidCouples.assign(N * N, 0);
+    }
+
+    const float mateDistance = 10.0f;   // distanza per considerare i boids "in coppia"
+    const int mateThreshold = 200;      // numero di update vicini prima di spawnare
+    const int matingAge = 6;
+
+    for (size_t i = 0; i < N; i++) {
+        if (boids[i].type != PREY) continue;  // solo prede si accoppiano?
+        for (size_t j = i + 1; j < N; j++) {
+            if (boids[j].type != PREY) continue;
+
+            float dist = glm::length(boids[i].position - boids[j].position);
+            size_t idx = i * N + j;
+
+            if (dist < mateDistance && (boids[i].age >= matingAge && boids[j].age >= matingAge)) {
+                boidCouples[idx]++;
+
+                if (boidCouples[idx] >= mateThreshold) {
+                    spawnBoid(i, j);               // <-- tua funzione già definita
+                    boidCouples[idx] = 0;      // reset contatore
+                }
+            }
+            else {
+                boidCouples[idx] = 0; // si sono separati, resetta
+            }
+        }
+    }
+}
+
+// Spawna un cucciolo di boid :)
+void Simulation::spawnBoid(size_t parentA, size_t parentB) {
+    Boid b;
+
+    b.position = (boids[parentA].position + boids[parentB].position) / glm::vec2(2.0f);
+    b.velocity = (boids[parentA].velocity + boids[parentB].velocity) / glm::vec2(2.0f);
+
+    b.type = PREY;
+    b.birthTime = currentTime;
+    b.age = 0; 
+    b.scale = 1.0f;
+    glm::vec3 blue(0.2f, 0.2f, 0.9f);
+    b.color = blue;
+    b.influence = 0.8f;
+
+    boids.push_back(b);
+}
 
 // Chase prey (con possibilità di mangiare direttamente)
 glm::vec2 Simulation::chasePrey(size_t predatorIndex) {
@@ -407,7 +461,6 @@ glm::vec2 Simulation::chasePrey(size_t predatorIndex) {
     return glm::vec2(0.0f);
 }
 
-
 // Eliminazione dei boid mangiati
 void Simulation::eatPrey(size_t predatorIndex, size_t preyIndex) {
     if (predatorIndex >= boids.size() || preyIndex >= boids.size()) return;
@@ -416,8 +469,6 @@ void Simulation::eatPrey(size_t predatorIndex, size_t preyIndex) {
     float dist = glm::length(boids[predatorIndex].position - boids[preyIndex].position);
     if (dist < predatorEatDistance) {
         eatenPrey.push_back(preyIndex);
-        std::cout << "Predatore " << predatorIndex
-            << " ha mangiato preda " << preyIndex << std::endl;
     }
 }
 
