@@ -134,6 +134,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="includes\custom\Boid.h" />
+    <ClInclude Include="includes\custom\BoidRenderer.h" />
+    <ClInclude Include="includes\custom\Grid.h" />
+    <ClInclude Include="includes\custom\GridRenderer.h" />
+    <ClInclude Include="includes\custom\Profiler.h" />
+    <ClInclude Include="includes\custom\ResourceManager.h" />
+    <ClInclude Include="includes\custom\Shader.h" />
+    <ClInclude Include="includes\custom\Simulation.h" />
+    <ClInclude Include="includes\custom\SpriteRenderer.h" />
+    <ClInclude Include="includes\custom\TextRenderer.h" />
+    <ClInclude Include="includes\custom\Texture2D.h" />
+    <ClInclude Include="includes\custom\Wall.h" />
+    <ClInclude Include="includes\custom\WallRenderer.h" />
     <ClInclude Include="includes\freetype\config\ftconfig.h" />
     <ClInclude Include="includes\freetype\config\ftheader.h" />
     <ClInclude Include="includes\freetype\config\ftmodule.h" />
@@ -247,11 +260,13 @@
     <ClCompile Include="src\core\main.cpp" />
     <ClCompile Include="src\core\Simulation.cpp" />
     <ClCompile Include="src\graphics\BoidRenderer.cpp" />
+    <ClCompile Include="src\graphics\GridRenderer.cpp" />
     <ClCompile Include="src\graphics\Shader.cpp" />
     <ClCompile Include="src\graphics\SpriteRenderer.cpp" />
     <ClCompile Include="src\graphics\stb_image.cpp" />
     <ClCompile Include="src\graphics\TextRenderer.cpp" />
     <ClCompile Include="src\graphics\Texture2D.cpp" />
+    <ClCompile Include="src\graphics\WallRenderer.cpp" />
     <ClCompile Include="src\utility\glad.c" />
     <ClCompile Include="src\utility\ResourceManager.cpp" />
   </ItemGroup>

@@ -134,7 +134,7 @@ void Simulation::init()
     }
 
     // inizializzazione dei muri
-    std::vector<Wall> newWalls = generateRandomWalls(50);
+    std::vector<Wall> newWalls = generateRandomWalls(0);
     for (const Wall& w : newWalls) {
         walls.emplace_back(w);
     }

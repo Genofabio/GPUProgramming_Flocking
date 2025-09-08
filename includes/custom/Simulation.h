@@ -105,9 +105,6 @@ private:
     glm::vec2 followLeaders(size_t i);
     glm::vec2 leaderSeparation(size_t i);
 
-    std::mt19937 rng;
-    std::uniform_real_distribution<float> dist;
-
     // Crescita dei boids
     void upgradeBoid(Boid& b, float currentTime);
 
