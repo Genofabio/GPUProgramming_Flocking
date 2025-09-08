@@ -113,7 +113,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);$(CudaToolkitLibDir);%(AdditionalLibraryDirectories);$(CudaToolkitLibDir); C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.9\lib\x64</AdditionalLibraryDirectories>
-      <AdditionalDependencies>%(AdditionalDependencies);C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.9\lib\x64\cudart.lib;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.9\lib\x64\cudadevrt.lib;glfw3.lib;opengl32.lib;</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies);C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.9\lib\x64\cudart.lib;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.9\lib\x64\cudadevrt.lib;glfw3.lib;opengl32.lib;freetype.lib;</AdditionalDependencies>
     </Link>
     <CudaCompile>
       <CodeGeneration>compute_61,sm_61</CodeGeneration>
@@ -136,10 +136,12 @@
   <ItemGroup>
     <ClInclude Include="includes\custom\Boid.h" />
     <ClInclude Include="includes\custom\BoidRenderer.h" />
+    <ClInclude Include="includes\custom\Profiler.h" />
     <ClInclude Include="includes\custom\ResourceManager.h" />
     <ClInclude Include="includes\custom\Shader.h" />
     <ClInclude Include="includes\custom\Simulation.h" />
     <ClInclude Include="includes\custom\SpriteRenderer.h" />
+    <ClInclude Include="includes\custom\TextRenderer.h" />
     <ClInclude Include="includes\custom\Texture2D.h" />
     <ClInclude Include="include\custom\ResourceManager.h" />
     <ClInclude Include="include\custom\Shader.h" />
@@ -155,6 +157,7 @@
     <ClCompile Include="src\graphics\Shader.cpp" />
     <ClCompile Include="src\graphics\SpriteRenderer.cpp" />
     <ClCompile Include="src\graphics\stb_image.cpp" />
+    <ClCompile Include="src\graphics\TextRenderer.cpp" />
     <ClCompile Include="src\graphics\Texture2D.cpp" />
     <ClCompile Include="src\utility\glad.c" />
     <ClCompile Include="src\utility\ResourceManager.cpp" />
@@ -164,6 +167,11 @@
     <None Include="shaders\boid_shader.vert" />
     <None Include="shaders\sprite_shader.frag" />
     <None Include="shaders\sprite_shader.vert" />
+    <None Include="shaders\text_shader.frag" />
+    <None Include="shaders\text_shader.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="libs\freetype.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

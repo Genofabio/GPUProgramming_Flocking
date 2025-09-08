@@ -8,6 +8,8 @@
 #include <glm/glm.hpp>
 #include "Boid.h"
 #include "BoidRenderer.h"
+#include "TextRenderer.h"
+#include "Profiler.h"
 
 enum SimulationState {
     SIMULATION_RUNNING,
@@ -58,9 +60,17 @@ public:
     void update(float dt);
     void render();
 
+    // Funzioni principali con profiling
+    void updateWithProfiling(float dt);
+    void renderWithProfiling();
+    void updateStats(float dt);
+    void saveProfilerCSV(const std::string& path);
+
 private:
     // Renderer
     BoidRenderer* boidRender;
+    TextRenderer* textRender;
+    Profiler profiler;
 
     // Boids (regole base)
     glm::vec2 moveTowardCenter(size_t i);

@@ -10,9 +10,9 @@ Simulation::Simulation(unsigned int width, unsigned int height)
     , width(width)
     , height(height)
     , boidRender(nullptr)
-    // distances defaults
-    , cohesionDistance(200.0f)
-    , separationDistance(30.0f)
+    , textRender(nullptr)
+    , cohesionDistance(100.0f)
+    , separationDistance(25.0f)
     , alignmentDistance(50.0f)
     , borderDistance(300.0f)
     , predatorFearDistance(150.0f)
@@ -35,21 +35,31 @@ Simulation::Simulation(unsigned int width, unsigned int height)
 Simulation::~Simulation()
 {
     delete boidRender;
+    delete textRender;
 }
 
 void Simulation::init()
 {
     // caricamento shaders
     ResourceManager::LoadShader("shaders/boid_shader.vert", "shaders/boid_shader.frag", nullptr, "boid");
+    ResourceManager::LoadShader("shaders/text_shader.vert", "shaders/text_shader.frag", nullptr, "text");
 
-    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(this->width),
-        static_cast<float>(this->height), 0.0f, -1.0f, 1.0f);
+    glm::mat4 projection = glm::ortho(
+        0.0f, static_cast<float>(width),   // left, right
+        0.0f, static_cast<float>(height),  // bottom, top
+        -1.0f, 1.0f                         // near, far
+    );
 
     // impostazione shaders
     ResourceManager::GetShader("boid").Use().SetMatrix4("projection", projection);
+    ResourceManager::GetShader("text").Use().SetInteger("text", 0);
+    ResourceManager::GetShader("text").SetMatrix4("projection", projection);
 
     // inizializzazione renderers
     boidRender = new BoidRenderer(ResourceManager::GetShader("boid"));
+    textRender = new TextRenderer(ResourceManager::GetShader("text"));
+
+    textRender->Use("resources/fonts/Roboto/Roboto-Regular.ttf", 24);  // carica font e dimensione
 
     // inizializzazione dei boids con posizioni e velocità random
     const int NUM_PREY = 180;
@@ -293,6 +303,48 @@ glm::vec2 Simulation::matchVelocity(size_t i) {
         perceived_velocity = glm::vec2(0.0f);
 
     return perceived_velocity;
+}
+
+void Simulation::updateWithProfiling(float dt)
+{
+    profiler.start();
+    this->update(dt);
+    double updateTime = profiler.stop();
+    profiler.log("update", updateTime);
+}
+
+void Simulation::renderWithProfiling()
+{
+    profiler.start();
+    this->render();  // render boids
+    double renderTime = profiler.stop();
+    profiler.log("render", renderTime);
+
+    float margin = 10.0f;    // margine dai bordi
+    float scale = 0.7f;     // dimensione del testo
+    glm::vec3 color(0.9f, 0.9f, 0.3f); // colore giallo chiaro
+
+    // FPS
+    double fps = profiler.getCurrentFPS();
+    if (fps > 0.0) {
+        std::string fpsText = "FPS: " + std::to_string(static_cast<int>(fps));
+        textRender->RenderText(fpsText, margin, static_cast<float>(height) - margin - 1 * 20.0f, scale, color);
+    }
+
+    // Numero di boids
+    std::string boidText = "Boids: " + std::to_string(boids.size());
+    textRender->RenderText(boidText, margin, static_cast<float>(height) - margin - 2 * 20.0f, scale, color);
+}
+
+void Simulation::updateStats(float dt)
+{
+    profiler.updateFrameStats(dt);
+}
+
+void Simulation::saveProfilerCSV(const std::string& path)
+{
+    profiler.saveCSV(path);
+}
 }
 
 // Borders rule (usa borderDistance e borderScale)
