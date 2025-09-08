@@ -271,6 +271,7 @@
     <ClCompile Include="src\utility\ResourceManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="libs\freetype.dll" />
     <None Include="shaders\boid_shader.frag" />
     <None Include="shaders\boid_shader.vert" />
     <None Include="shaders\sprite_shader.frag" />
