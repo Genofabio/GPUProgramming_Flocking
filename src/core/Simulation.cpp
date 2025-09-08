@@ -1,15 +1,20 @@
 #include "custom/Simulation.h"  
 #include "custom/ResourceManager.h"
 #include "custom/SpriteRenderer.h"
+#include <set>
 #include <iostream>
 #include <cmath>
+
 
 Simulation::Simulation(unsigned int width, unsigned int height)
     : state(SIMULATION_RUNNING)
     , keys()
     , width(width)
     , height(height)
+    , grid(10, 15, width, height)
     , boidRender(nullptr)
+    , wallRender(nullptr)
+    , gridRender(nullptr)
     , textRender(nullptr)
     , cohesionDistance(100.0f)
     , separationDistance(25.0f)
@@ -27,6 +32,8 @@ Simulation::Simulation(unsigned int width, unsigned int height)
     , predatorFearScale(0.8f)
     , predatorChaseScale(0.12f)
     , predatorSeparationScale(2.0f)
+
+    , borderAlertDistance(height/5.0f)
     , rng(std::random_device{}()) // Mersenne Twister con seed casuale
     , dist(-1.0f, 1.0f)
 {
@@ -42,6 +49,8 @@ void Simulation::init()
 {
     // caricamento shaders
     ResourceManager::LoadShader("shaders/boid_shader.vert", "shaders/boid_shader.frag", nullptr, "boid");
+    ResourceManager::LoadShader("shaders/wall_shader.vert", "shaders/wall_shader.frag", nullptr, "wall");
+    ResourceManager::LoadShader("shaders/grid_shader.vert", "shaders/grid_shader.frag", nullptr, "grid");    
     ResourceManager::LoadShader("shaders/text_shader.vert", "shaders/text_shader.frag", nullptr, "text");
 
     glm::mat4 projection = glm::ortho(
@@ -54,9 +63,13 @@ void Simulation::init()
     ResourceManager::GetShader("boid").Use().SetMatrix4("projection", projection);
     ResourceManager::GetShader("text").Use().SetInteger("text", 0);
     ResourceManager::GetShader("text").SetMatrix4("projection", projection);
+    ResourceManager::GetShader("wall").Use().SetMatrix4("projection", projection);
+    ResourceManager::GetShader("grid").Use().SetMatrix4("projection", projection);
 
     // inizializzazione renderers
     boidRender = new BoidRenderer(ResourceManager::GetShader("boid"));
+    wallRender = new WallRenderer(ResourceManager::GetShader("wall"));
+    gridRender = new GridRenderer(ResourceManager::GetShader("grid"));
     textRender = new TextRenderer(ResourceManager::GetShader("text"));
 
     textRender->Use("resources/fonts/Roboto/Roboto-Regular.ttf", 24);  // carica font e dimensione
@@ -80,7 +93,7 @@ void Simulation::init()
         boids.push_back(leader);
     }
 
-    // Non-Leader
+    // Prede
     std::uniform_int_distribution<int> ageDist(0, 6);
     std::uniform_real_distribution<float> offsetDist(0.0f, 30.0f);
 
@@ -119,79 +132,71 @@ void Simulation::init()
         b.drift = glm::vec2(0);
         boids.push_back(b);
     }
+
+    // inizializzazione dei muri
+    std::vector<Wall> newWalls = generateRandomWalls(50);
+    for (const Wall& w : newWalls) {
+        walls.emplace_back(w);
+    }
 }
 
 void Simulation::update(float dt) {
+    const float slowDownFactor = 0.3f;
+    const float maxSpeed = 100.0f;
+
     currentTime += dt;
 
     std::vector<glm::vec2> velocityChanges(boids.size(), glm::vec2(0.0f));
-    float slowDown = 0.3f; 
 
     // 1. Calcola i cambiamenti di velocità da cohesion, separation, alignment
     for (size_t i = 0; i < boids.size(); i++) {
         Boid& b = boids[i];
         glm::vec2 v(0.0f);
+        glm::vec2 totalChange(0.0f);
+
+        upgradeBoid(b, currentTime);
 
         if (b.type == PREY) {
-
-            upgradeBoid(b, currentTime);
-
-            // Flocking base
-            glm::vec2 v1 = moveTowardCenter(i);
-            glm::vec2 v2 = avoidNeighbors(i);
-            glm::vec2 v3 = matchVelocity(i);
-            glm::vec2 evade = evadePredators(i);
-            glm::vec2 follow = followLeaders(i);   // <-- nuova regola
-
-            v = v1 + v2 + v3 + evade + follow;
+            totalChange =
+                moveTowardCenter(i) +
+                avoidNeighbors(i) +
+                matchVelocity(i) +
+                avoidBorders(i) +
+                avoidWalls(i) +
+                evadePredators(i) +
+                followLeaders(i) +
+                computeDrift(i, dt);
         }
         else if (b.type == PREDATOR) {
-            // Inseguire le prede
-            glm::vec2 hunt = chasePrey(i);
-
-            // Separazione dai altri predatori
-            glm::vec2 separation = avoidOtherPredators(i) * 2.0f;
-
-            v = hunt + separation;
-        } else if(b.type == LEADER) {
-            glm::vec2 vSep = leaderSeparation(i);
-            glm::vec2 evade = evadePredators(i);
-
-            v = vSep + evade;  // possono anche avere velocità “autonome” se vuoi
+            totalChange =
+                chasePrey(i) +
+                (avoidOtherPredators(i) * 2.0f) +
+                avoidWalls(i) +
+                avoidBorders(i) +
+                computeDrift(i, dt);
         }
-
-        // Evita i bordi (vale per tutti)
-        glm::vec2 borderForce = avoidBorders(b);
-
-        velocityChanges[i] = v + borderForce;
-
-        float driftChange = 10.0f;   // quanto cambia il drift a ogni frame
-        float driftMax = 100.0f;     // massimo contributo random
-
-        b.drift += glm::vec2(dist(rng), dist(rng)) * driftChange * dt;;
-
-        // clamp per non farlo crescere troppo
-        if (glm::length(b.drift) > driftMax) {
-            b.drift = glm::normalize(b.drift) * driftMax;
+        else if (b.type == LEADER) {
+            totalChange =
+                leaderSeparation(i) +
+                evadePredators(i) +
+                avoidWalls(i) +
+                avoidBorders(i) +
+                computeDrift(i, dt);
         }
-
-        velocityChanges[i] += b.drift;
     }
 
-    // 2. Applica i cambiamenti e stabilizza la velocità
-    for (size_t i = 0; i < boids.size(); i++) {
-        // applica le regole
-        boids[i].velocity += velocityChanges[i] * slowDown;
+    // 2. Applica le variazioni
+    for (size_t i = 0; i < boids.size(); ++i) {
+        Boid& b = boids[i];
 
-        // clamp della velocità
-        float maxSpeed = 150.0f;
-        float speed = glm::length(boids[i].velocity);
+        b.velocity += velocityChanges[i] * slowDownFactor;
+
+        float speed = glm::length(b.velocity);
         if (speed > maxSpeed) {
-            boids[i].velocity = (boids[i].velocity / speed) * maxSpeed;
+            b.velocity = (b.velocity / speed) * maxSpeed;
         }
 
-        // 3. aggiorna la posizione
-        boids[i].position += boids[i].velocity * dt;
+        b.position += b.velocity * dt;
     }
 
     // Gestisce lo spawn di nuovi pesci 
@@ -215,12 +220,65 @@ void Simulation::processInput(float dt)
 }
 
 void Simulation::render() {
+    glLineWidth(1.0f);
+    gridRender->DrawGrid(grid, glm::vec3(0.2f, 0.2f, 0.2f));
+
     for (Boid& b : boids) {
         float angle = glm::degrees(atan2(b.velocity.y, b.velocity.x)) + 270.0f;
 
         boidRender->DrawBoid(b.position, angle, b.color, 10.0f*b.scale);
     }
+
+    glLineWidth(3.0f);
+    for (const Wall& w : walls) {
+        wallRender->DrawWall(w, glm::vec3(0.25f, 0.88f, 0.82f));
+    }
 }
+
+// === PROFILING ===
+
+void Simulation::updateWithProfiling(float dt)
+{
+    profiler.start();
+    this->update(dt);
+    double updateTime = profiler.stop();
+    profiler.log("update", updateTime);
+}
+
+void Simulation::renderWithProfiling()
+{
+    profiler.start();
+    this->render();  // render boids
+    double renderTime = profiler.stop();
+    profiler.log("render", renderTime);
+
+    float margin = 10.0f;    // margine dai bordi
+    float scale = 0.7f;     // dimensione del testo
+    glm::vec3 color(0.9f, 0.9f, 0.3f); // colore giallo chiaro
+
+    // FPS
+    double fps = profiler.getCurrentFPS();
+    if (fps > 0.0) {
+        std::string fpsText = "FPS: " + std::to_string(static_cast<int>(fps));
+        textRender->RenderText(fpsText, margin, static_cast<float>(height) - margin - 1 * 20.0f, scale, color);
+    }
+
+    // Numero di boids
+    std::string boidText = "Boids: " + std::to_string(boids.size());
+    textRender->RenderText(boidText, margin, static_cast<float>(height) - margin - 2 * 20.0f, scale, color);
+}
+
+void Simulation::updateStats(float dt)
+{
+    profiler.updateFrameStats(dt);
+}
+
+void Simulation::saveProfilerCSV(const std::string& path)
+{
+    profiler.saveCSV(path);
+}
+
+// === REGOLE ===
 
 // Cohesion rule
 glm::vec2 Simulation::moveTowardCenter(size_t i) {
@@ -256,7 +314,7 @@ glm::vec2 Simulation::avoidNeighbors(size_t i) {
         glm::vec2 diff = boids[i].position - boids[j].position;
         float dist = glm::length(diff);
         if (dist < separationDistance && dist > 0.0f) {
-            c += diff / dist; // respinta proporzionale (unit vector)
+            c += diff / dist;
         }
     }
 
@@ -305,73 +363,32 @@ glm::vec2 Simulation::matchVelocity(size_t i) {
     return perceived_velocity;
 }
 
-void Simulation::updateWithProfiling(float dt)
-{
-    profiler.start();
-    this->update(dt);
-    double updateTime = profiler.stop();
-    profiler.log("update", updateTime);
-}
-
-void Simulation::renderWithProfiling()
-{
-    profiler.start();
-    this->render();  // render boids
-    double renderTime = profiler.stop();
-    profiler.log("render", renderTime);
-
-    float margin = 10.0f;    // margine dai bordi
-    float scale = 0.7f;     // dimensione del testo
-    glm::vec3 color(0.9f, 0.9f, 0.3f); // colore giallo chiaro
-
-    // FPS
-    double fps = profiler.getCurrentFPS();
-    if (fps > 0.0) {
-        std::string fpsText = "FPS: " + std::to_string(static_cast<int>(fps));
-        textRender->RenderText(fpsText, margin, static_cast<float>(height) - margin - 1 * 20.0f, scale, color);
-    }
-
-    // Numero di boids
-    std::string boidText = "Boids: " + std::to_string(boids.size());
-    textRender->RenderText(boidText, margin, static_cast<float>(height) - margin - 2 * 20.0f, scale, color);
-}
-
-void Simulation::updateStats(float dt)
-{
-    profiler.updateFrameStats(dt);
-}
-
-void Simulation::saveProfilerCSV(const std::string& path)
-{
-    profiler.saveCSV(path);
-}
-
 // Borders rule (usa borderDistance e borderScale)
-glm::vec2 Simulation::avoidBorders(const Boid& b) {
-    glm::vec2 force(0.0f);
-
-    float distLeft = b.position.x;
-    float distRight = width - b.position.x;
-    float distTop = b.position.y;
-    float distBottom = height - b.position.y;
-
-    // lambda che calcola la forza non lineare (stessa forma, ma usa borderDistance)
-    auto computeForce = [this](float dist) -> float {
-        if (dist < borderDistance)
-            return pow(borderDistance - dist, 2) / borderDistance;
-        return 0.0f;
-        };
-
-    force += glm::vec2(1, 0) * computeForce(distLeft);
-    force += glm::vec2(-1, 0) * computeForce(distRight);
-    force += glm::vec2(0, 1) * computeForce(distTop);
-    force += glm::vec2(0, -1) * computeForce(distBottom);
-
-    // Scala finale: usa borderScale
-    force *= borderScale;
-
-    return force;
-}
+//glm::vec2 Simulation::avoidBorders(const Boid& b) {
+//    glm::vec2 force(0.0f);
+//
+//    float distLeft = b.position.x;
+//    float distRight = width - b.position.x;
+//    float distTop = b.position.y;
+//    float distBottom = height - b.position.y;
+//
+//    // lambda che calcola la forza non lineare (stessa forma, ma usa borderDistance)
+//    auto computeForce = [this](float dist) -> float {
+//        if (dist < borderDistance)
+//            return pow(borderDistance - dist, 2) / borderDistance;
+//        return 0.0f;
+//        };
+//
+//    force += glm::vec2(1, 0) * computeForce(distLeft);
+//    force += glm::vec2(-1, 0) * computeForce(distRight);
+//    force += glm::vec2(0, 1) * computeForce(distTop);
+//    force += glm::vec2(0, -1) * computeForce(distBottom);
+//
+//    // Scala finale: usa borderScale
+//    force *= borderScale;
+//
+//    return force;
+//}
 
 // Evade predators (usa predatorFearDistance e predatorFearScale)
 glm::vec2 Simulation::evadePredators(size_t i) {
@@ -595,4 +612,127 @@ void Simulation::upgradeBoid(Boid& b, float currentTime) {
         // Reset birthTime per prossimo step
         b.birthTime = currentTime;
     }
+}
+
+// Border avoidance 
+glm::vec2 Simulation::avoidBorders(size_t i) {
+    glm::vec2 borderRepulsion(0.0f);
+
+    // distanza dai bordi
+    float distLeft = boids[i].position.x;
+    float distRight = width - boids[i].position.x;
+    float distTop = boids[i].position.y;
+    float distBottom = height - boids[i].position.y;
+
+    // somma dei contributi dei bordi che superano la soglia
+    if (distLeft < borderAlertDistance)   borderRepulsion += glm::vec2(1, 0) * (borderAlertDistance - distLeft);
+    if (distRight < borderAlertDistance)  borderRepulsion += glm::vec2(-1, 0) * (borderAlertDistance - distRight);
+    if (distTop < borderAlertDistance)    borderRepulsion += glm::vec2(0, 1) * (borderAlertDistance - distTop);
+    if (distBottom < borderAlertDistance) borderRepulsion += glm::vec2(0, -1) * (borderAlertDistance - distBottom);
+
+    // scala finale per evitare scatti troppo forti
+    borderRepulsion *= 0.2f;
+
+    return borderRepulsion;
+}
+
+// Walls avoidance
+glm::vec2 Simulation::avoidWalls(size_t i) {
+    glm::vec2 v5(0.0f);
+    const float lookAhead = 30.0f;
+    glm::vec2 dir = glm::normalize(boids[i].velocity);
+
+    for (const Wall& w : walls) {
+        glm::vec2 closest;
+        float dist = w.distanceToPoint(boids[i].position, closest);
+
+        if (dist < w.repulsionDistance && dist > 0.001f) {
+            float safeLookAhead = glm::clamp(dist - 0.2f, 0.001f, lookAhead);
+
+            glm::vec2 probePos = boids[i].position + dir * safeLookAhead;
+
+            glm::vec2 away = glm::normalize(probePos - closest);
+            float factor = (w.repulsionDistance - dist) / dist;
+            v5 += away * factor * factor * w.repulsionStrength;
+        }
+    }
+
+    return v5;
+}
+
+glm::vec2 Simulation::computeDrift(size_t i, float dt) {
+    const float driftStep = 10.0f;   // Intensità del drift random
+    const float driftLimit = 100.0f;  // Massima ampiezza del drift
+
+    // Aggiorna il drift esistente con nuovo contributo casuale
+    boids[i].drift += glm::vec2(dist(rng), dist(rng)) * driftStep * dt;
+
+    // Clamp della lunghezza del drift per evitare crescite incontrollate
+    if (glm::length(boids[i].drift) > driftLimit) {
+        boids[i].drift = glm::normalize(boids[i].drift) * driftLimit;
+    }
+
+    return boids[i].drift;
+}
+
+// === UTILITY ===
+
+// Genera n muri casuali rispettando i vincoli
+std::vector<Wall> Simulation::generateRandomWalls(int n) {
+    std::vector<Wall> result;
+
+    auto candidates = this->grid.cellEdges;
+    std::shuffle(candidates.begin(), candidates.end(), rng);
+
+    // memorizza i lati occupati: ogni lato è definito da due vertici ordinati
+    std::set<std::pair<std::pair<int, int>, std::pair<int, int>>> usedEdges;
+
+    // memorizza per ogni vertice se è raggiunto da un muro orizzontale o verticale
+    std::map<std::pair<int, int>, std::pair<bool, bool>> vertexOccupancy;
+    // .first = orizzontale, .second = verticale
+
+    int added = 0;
+    for (const auto& edge : candidates) {
+        if (added >= n) break;
+
+        auto p1 = std::make_pair(int(edge.first.x), int(edge.first.y));
+        auto p2 = std::make_pair(int(edge.second.x), int(edge.second.y));
+
+        // ordina i vertici per uniformità
+        if (p2 < p1) std::swap(p1, p2);
+
+        bool horizontal = (p1.second == p2.second);
+
+        // controlla se il lato è già occupato
+        if (usedEdges.count({ p1, p2 })) continue;
+
+        // controlla se ci sono muri di orientamento opposto ai vertici
+        if (horizontal) {
+            if (vertexOccupancy[p1].second || vertexOccupancy[p2].second) continue;
+        }
+        else {
+            if (vertexOccupancy[p1].first || vertexOccupancy[p2].first) continue;
+        }
+
+        // aggiungi il muro
+        std::vector<glm::vec2> pts = { edge.first, edge.second };
+        result.emplace_back(pts, height / 11.0f, 3.0f);
+
+        // segna il lato come occupato
+        usedEdges.insert({ p1, p2 });
+
+        // aggiorna i vertici
+        if (horizontal) {
+            vertexOccupancy[p1].first = true;
+            vertexOccupancy[p2].first = true;
+        }
+        else {
+            vertexOccupancy[p1].second = true;
+            vertexOccupancy[p2].second = true;
+        }
+
+        added++;
+    }
+
+    return result;
 }

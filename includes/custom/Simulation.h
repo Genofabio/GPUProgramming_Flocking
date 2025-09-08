@@ -10,6 +10,10 @@
 #include "BoidRenderer.h"
 #include "TextRenderer.h"
 #include "Profiler.h"
+#include "Wall.h"
+#include "WallRenderer.h"
+#include "Grid.h"
+#include "GridRenderer.h"
 
 enum SimulationState {
     SIMULATION_RUNNING,
@@ -31,6 +35,11 @@ public:
     std::vector<size_t> eatenPrey;
     std::vector<int> boidCouples;
 
+    // Ostacoli
+    Grid grid;
+    std::vector<Wall> walls;
+
+    // Parametri delle regole 
     // Distanze per regole
     float cohesionDistance;
     float separationDistance;
@@ -49,6 +58,11 @@ public:
     float predatorFearScale;
     float predatorChaseScale;
     float predatorSeparationScale;
+    float borderAlertDistance;
+
+	// Generatore di numeri casuali
+    std::mt19937 rng;
+    std::uniform_real_distribution<float> dist;
 
     // Costruttori / distruttore
     Simulation(unsigned int width, unsigned int height);
@@ -70,6 +84,10 @@ private:
     // Renderer
     BoidRenderer* boidRender;
     TextRenderer* textRender;
+    WallRenderer* wallRender;
+    GridRenderer* gridRender;
+
+	// Profiler
     Profiler profiler;
 
     // Boids (regole base)
@@ -98,7 +116,12 @@ private:
     void spawnBoid(size_t parentA, size_t parentB);
 
     // Bordi
-    glm::vec2 avoidBorders(const Boid& b);
+    glm::vec2 avoidBorders(size_t i);
+    glm::vec2 avoidWalls(size_t i);
+    glm::vec2 computeDrift(size_t i, float dt);
+
+	// Utility
+    std::vector<Wall> generateRandomWalls(int n);
 };
 
 #endif
