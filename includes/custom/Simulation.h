@@ -30,12 +30,9 @@ public:
     // Lista dei boids
     std::vector<Boid> boids;
 
-    // Griglia
+    // Ostacoli
     Grid grid;
-
-    // Lista degli ostacoli
     std::vector<Wall> walls;
-    std::vector<glm::vec2> corners;
 
     // Parametri delle regole 
     float cohesionDistance;
@@ -45,6 +42,8 @@ public:
     float separationScale;
     float alignmentScale;
     float borderAlertDistance;
+
+	// Generatore di numeri casuali
     std::mt19937 rng;
     std::uniform_real_distribution<float> dist;
 
@@ -70,10 +69,9 @@ private:
     glm::vec2 matchVelocity(size_t i);
     glm::vec2 avoidBorders(size_t i);
     glm::vec2 avoidWalls(size_t i);
-    glm::vec2 avoidCorners(size_t i);
+    glm::vec2 computeDrift(size_t i, float dt);
 
-    float pointSegmentDistance(const glm::vec2& p, const glm::vec2& a, const glm::vec2& b, glm::vec2& closest);
+	// Utility
     std::vector<Wall> generateRandomWalls(int n);
-    std::vector<glm::vec2> computeWallCorners();
 };
 #endif
