@@ -183,6 +183,7 @@ void Simulation::update(float dt) {
                 avoidBorders(i) +
                 computeDrift(i, dt);
         }
+        velocityChanges[i] = totalChange;
     }
 
     // 2. Applica le variazioni
