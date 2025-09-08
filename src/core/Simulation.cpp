@@ -345,7 +345,6 @@ void Simulation::saveProfilerCSV(const std::string& path)
 {
     profiler.saveCSV(path);
 }
-}
 
 // Borders rule (usa borderDistance e borderScale)
 glm::vec2 Simulation::avoidBorders(const Boid& b) {
