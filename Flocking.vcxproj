@@ -74,6 +74,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);.\libs\</LibraryPath>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);.\includes\</IncludePath>
+    <CopyLocalDeploymentContent>true</CopyLocalDeploymentContent>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -271,7 +272,9 @@
     <ClCompile Include="src\utility\ResourceManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="libs\freetype.dll" />
+    <None Include="libs\freetype.dll">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="shaders\boid_shader.frag" />
     <None Include="shaders\boid_shader.vert" />
     <None Include="shaders\sprite_shader.frag" />
