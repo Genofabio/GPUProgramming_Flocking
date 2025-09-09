@@ -14,6 +14,7 @@
 #include "WallRenderer.h"
 #include "Grid.h"
 #include "GridRenderer.h"
+#include "VectorRenderer.h"
 
 enum SimulationState {
     SIMULATION_RUNNING,
@@ -86,6 +87,7 @@ private:
     TextRenderer* textRender;
     WallRenderer* wallRender;
     GridRenderer* gridRender;
+    VectorRenderer* vectorRender;
 
 	// Profiler
     Profiler profiler;

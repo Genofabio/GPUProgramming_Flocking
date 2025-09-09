@@ -146,6 +146,7 @@
     <ClInclude Include="includes\custom\SpriteRenderer.h" />
     <ClInclude Include="includes\custom\TextRenderer.h" />
     <ClInclude Include="includes\custom\Texture2D.h" />
+    <ClInclude Include="includes\custom\VectorRenderer.h" />
     <ClInclude Include="includes\custom\Wall.h" />
     <ClInclude Include="includes\custom\WallRenderer.h" />
     <ClInclude Include="includes\freetype\config\ftconfig.h" />
@@ -267,6 +268,7 @@
     <ClCompile Include="src\graphics\stb_image.cpp" />
     <ClCompile Include="src\graphics\TextRenderer.cpp" />
     <ClCompile Include="src\graphics\Texture2D.cpp" />
+    <ClCompile Include="src\graphics\VectorRenderer.cpp" />
     <ClCompile Include="src\graphics\WallRenderer.cpp" />
     <ClCompile Include="src\utility\glad.c" />
     <ClCompile Include="src\utility\ResourceManager.cpp" />
@@ -278,6 +280,8 @@
     <None Include="shaders\sprite_shader.vert" />
     <None Include="shaders\text_shader.frag" />
     <None Include="shaders\text_shader.vert" />
+    <None Include="shaders\vector_shader.frag" />
+    <None Include="shaders\vector_shader.vert" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="libs\freetype.lib" />

@@ -16,6 +16,7 @@ Simulation::Simulation(unsigned int width, unsigned int height)
     , wallRender(nullptr)
     , gridRender(nullptr)
     , textRender(nullptr)
+    , vectorRender(nullptr)
     , cohesionDistance(100.0f)
     , separationDistance(25.0f)
     , alignmentDistance(50.0f)
@@ -52,6 +53,7 @@ void Simulation::init()
     ResourceManager::LoadShader("shaders/wall_shader.vert", "shaders/wall_shader.frag", nullptr, "wall");
     ResourceManager::LoadShader("shaders/grid_shader.vert", "shaders/grid_shader.frag", nullptr, "grid");    
     ResourceManager::LoadShader("shaders/text_shader.vert", "shaders/text_shader.frag", nullptr, "text");
+	ResourceManager::LoadShader("shaders/vector_shader.vert", "shaders/vector_shader.frag", nullptr, "vector");
 
     glm::mat4 projection = glm::ortho(
         0.0f, static_cast<float>(width),   // left, right
@@ -65,12 +67,14 @@ void Simulation::init()
     ResourceManager::GetShader("text").SetMatrix4("projection", projection);
     ResourceManager::GetShader("wall").Use().SetMatrix4("projection", projection);
     ResourceManager::GetShader("grid").Use().SetMatrix4("projection", projection);
+	ResourceManager::GetShader("vector").Use().SetMatrix4("projection", projection);
 
     // inizializzazione renderers
     boidRender = new BoidRenderer(ResourceManager::GetShader("boid"));
     wallRender = new WallRenderer(ResourceManager::GetShader("wall"));
     gridRender = new GridRenderer(ResourceManager::GetShader("grid"));
     textRender = new TextRenderer(ResourceManager::GetShader("text"));
+	vectorRender = new VectorRenderer(ResourceManager::GetShader("vector"));
 
     textRender->Use("resources/fonts/Roboto/Roboto-Regular.ttf", 24);  // carica font e dimensione
 
@@ -168,20 +172,22 @@ void Simulation::update(float dt) {
                 computeDrift(i, dt);
         }
         else if (b.type == PREDATOR) {
-            totalChange =
-                chasePrey(i) +
-                (avoidOtherPredators(i) * 2.0f) +
-                avoidWalls(i) +
-                avoidBorders(i) +
-                computeDrift(i, dt);
+            b.debugVectors[0] = chasePrey(i);
+			b.debugVectors[1] = (avoidOtherPredators(i) * 2.0f);
+            b.debugVectors[2] = avoidWalls(i);
+            b.debugVectors[3] = avoidBorders(i);
+			b.debugVectors[4] = computeDrift(i, dt);
+                            
+            totalChange = b.debugVectors[0] + b.debugVectors[1] + b.debugVectors[2] + b.debugVectors[3] + b.debugVectors[4];
         }
         else if (b.type == LEADER) {
-            totalChange =
-                leaderSeparation(i) +
-                evadePredators(i) +
-                avoidWalls(i) +
-                avoidBorders(i) +
-                computeDrift(i, dt);
+            b.debugVectors[0] = leaderSeparation(i);
+            b.debugVectors[1] = evadePredators(i);
+            b.debugVectors[2] = avoidWalls(i);
+            b.debugVectors[3] = avoidBorders(i);
+            b.debugVectors[4] = computeDrift(i, dt);
+
+            totalChange = b.debugVectors[0] + b.debugVectors[1] + b.debugVectors[2] + b.debugVectors[3] + b.debugVectors[4];
         }
         velocityChanges[i] = totalChange;
     }
@@ -233,6 +239,18 @@ void Simulation::render() {
     glLineWidth(3.0f);
     for (const Wall& w : walls) {
         wallRender->DrawWall(w, glm::vec3(0.25f, 0.88f, 0.82f));
+    }
+
+    for (Boid& b : boids) {
+        if (b.type == LEADER || b.type == PREDATOR) {
+            glm::vec2 start = b.position;
+
+            vectorRender->DrawVector(start, start + b.debugVectors[0] * 20.0f, glm::vec3(1.0f, 1.0f, 0.0f)); // giallo
+            vectorRender->DrawVector(start, start + b.debugVectors[1] * 20.0f, glm::vec3(1.0f, 0.0f, 0.0f)); // rosso
+            vectorRender->DrawVector(start, start + b.debugVectors[2] * 20.0f, glm::vec3(0.05f, 0.8f, 0.7f)); // ciano
+            vectorRender->DrawVector(start, start + b.debugVectors[3] * 20.0f, glm::vec3(0.0f, 0.0f, 1.0f)); // blu
+            vectorRender->DrawVector(start, start + b.debugVectors[4] * 20.0f, glm::vec3(1.0f, 0.0f, 1.0f)); // magenta
+        }
     }
 }
 
