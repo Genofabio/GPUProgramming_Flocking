@@ -3,9 +3,9 @@
 
 #include <string>
 
-#include <glad/glad.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include <external/glad/glad.h>
+#include <external/glm/glm.hpp>
+#include <external/glm/gtc/type_ptr.hpp>
 
 class Shader
 {

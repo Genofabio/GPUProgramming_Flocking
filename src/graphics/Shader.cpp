@@ -1,5 +1,4 @@
-#include "custom/shader.h"
-
+#include <graphics/shader.h>
 #include <iostream>
 
 Shader& Shader::Use()

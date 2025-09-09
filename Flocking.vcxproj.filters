@@ -39,9 +39,6 @@
     <ClInclude Include="includes\custom\BoidRenderer.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="includes\custom\Texture2D.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
     <ClInclude Include="includes\custom\ResourceManager.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
@@ -49,9 +46,6 @@
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="includes\custom\Simulation.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
-    <ClInclude Include="includes\custom\SpriteRenderer.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="includes\custom\Wall.h">
@@ -66,6 +60,363 @@
     <ClInclude Include="includes\custom\Grid.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="includes\custom\Profiler.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\custom\TextRenderer.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\config\ftconfig.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\config\ftheader.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\config\ftmodule.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\config\ftoption.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\config\ftstdlib.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\config\integer-types.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\config\mac-support.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\config\public-macros.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\freetype.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftadvanc.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftbbox.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftbdf.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftbitmap.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftbzip2.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftcache.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftchapters.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftcid.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftcolor.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftdriver.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\fterrdef.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\fterrors.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftfntfmt.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftgasp.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftglyph.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftgxval.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftgzip.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftimage.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftincrem.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftlcdfil.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftlist.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftlogging.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftlzw.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftmac.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftmm.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftmodapi.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftmoderr.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftotval.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftoutln.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftparams.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftpfr.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftrender.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftsizes.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftsnames.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftstroke.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftsynth.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftsystem.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\fttrigon.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\fttypes.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ftwinfnt.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\autohint.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\cffotypes.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\cfftypes.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\compiler-macros.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\ftcalc.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\ftdebug.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\ftdrv.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\ftgloadr.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\fthash.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\ftmemory.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\ftmmtypes.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\ftobjs.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\ftpsprop.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\ftrfork.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\ftserv.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\ftstream.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\fttrace.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\ftvalid.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\psaux.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\pshints.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\services\svbdf.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\services\svcfftl.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\services\svcid.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\services\svfntfmt.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\services\svgldict.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\services\svgxval.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\services\svkern.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\services\svmetric.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\services\svmm.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\services\svotval.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\services\svpfr.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\services\svpostnm.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\services\svprop.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\services\svpscmap.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\services\svpsinfo.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\services\svsfnt.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\services\svttcmap.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\services\svtteng.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\services\svttglyf.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\services\svwinfnt.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\sfnt.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\svginterface.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\t1types.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\tttypes.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\internal\wofftypes.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\otsvg.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\t1tables.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\ttnameid.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\tttables.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\freetype\tttags.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\ft2build.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\GLFW\glfw3.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\GLFW\glfw3native.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\custom\BoidRules.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\custom\BoidParams.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\core\Boid.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\core\BoidParams.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\core\BoidRules.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\core\Grid.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\core\Profiler.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\core\Simulation.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\core\Wall.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\graphics\BoidRenderer.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\graphics\GridRenderer.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\graphics\Shader.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\graphics\TextRenderer.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\graphics\WallRenderer.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\utility\ResourceManager.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\main.cpp">
@@ -75,15 +426,6 @@
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="src\graphics\Shader.cpp">
-      <Filter>File di origine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\graphics\SpriteRenderer.cpp">
-      <Filter>File di origine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\graphics\stb_image.cpp">
-      <Filter>File di origine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\graphics\Texture2D.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="src\utility\glad.c">
@@ -101,15 +443,23 @@
     <ClCompile Include="src\graphics\GridRenderer.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
+    <ClCompile Include="src\graphics\TextRenderer.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\BoidRules.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\sprite_shader.vert" />
     <None Include="shaders\sprite_shader.frag" />
     <None Include="shaders\boid_shader.vert" />
     <None Include="shaders\boid_shader.frag" />
-    <None Include="shaders\wall_shader.frag" />
-    <None Include="shaders\wall_shader.vert" />
-    <None Include="shaders\grid_shader.frag" />
-    <None Include="shaders\grid_shader.vert" />
+    <None Include="shaders\text_shader.frag" />
+    <None Include="shaders\text_shader.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="libs\freetype.lib" />
+    <Library Include="libs\glfw3.lib" />
   </ItemGroup>
 </Project>

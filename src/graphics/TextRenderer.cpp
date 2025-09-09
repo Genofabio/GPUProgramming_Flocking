@@ -1,33 +1,67 @@
-#include "custom/TextRenderer.h"
+#include <graphics/TextRenderer.h>
 #include <iostream>
 
-TextRenderer::TextRenderer(const Shader& shader) : shader(shader) {
-    this->initRenderData();
+TextRenderer::TextRenderer(const Shader& shaderProgram)
+    : shader(shaderProgram)
+{
+    initBuffers();
 }
 
-void TextRenderer::Use(std::string font, unsigned int fontSize) {
-    // Inizializza FreeType
+TextRenderer::~TextRenderer()
+{
+    freeCharacters();
+
+    if (vbo) glDeleteBuffers(1, &vbo);
+    if (vao) glDeleteVertexArrays(1, &vao);
+}
+
+void TextRenderer::initBuffers()
+{
+    glGenVertexArrays(1, &vao);
+    glGenBuffers(1, &vbo);
+
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, nullptr, GL_DYNAMIC_DRAW); // 6 vertici, 4 float per vertice
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+void TextRenderer::freeCharacters()
+{
+    for (auto& pair : characters) {
+        glDeleteTextures(1, &pair.second.TextureID);
+    }
+    characters.clear();
+}
+
+void TextRenderer::loadFont(const std::string& fontPath, unsigned int fontSize)
+{
     FT_Library ft;
     if (FT_Init_FreeType(&ft)) {
-        std::cerr << "Errore: impossibile inizializzare FreeType" << std::endl;
+        std::cerr << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
         return;
     }
 
-    // Carica il font
     FT_Face face;
-    if (FT_New_Face(ft, font.c_str(), 0, &face)) {
-        std::cerr << "Errore: impossibile caricare il font " << font << std::endl;
+    if (FT_New_Face(ft, fontPath.c_str(), 0, &face)) {
+        std::cerr << "ERROR::FREETYPE: Failed to load font: " << fontPath << std::endl;
         FT_Done_FreeType(ft);
         return;
     }
 
     FT_Set_Pixel_Sizes(face, 0, fontSize);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // Disabilita l'allineamento byte per le texture
 
-    // Carica i primi 128 caratteri ASCII
-    for (unsigned char c = 0; c < 128; c++) {
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // Disable byte-alignment restriction
+
+    for (unsigned char c = 0; c < 128; c++)
+    {
         if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
-            std::cerr << "Errore: impossibile caricare il carattere " << c << std::endl;
+            std::cerr << "ERROR::FREETYPE: Failed to load Glyph: " << c << std::endl;
             continue;
         }
 
@@ -46,7 +80,6 @@ void TextRenderer::Use(std::string font, unsigned int fontSize) {
             face->glyph->bitmap.buffer
         );
 
-        // Parametri della texture
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -56,9 +89,10 @@ void TextRenderer::Use(std::string font, unsigned int fontSize) {
             texture,
             glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
             glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-            (unsigned int)face->glyph->advance.x
+            static_cast<unsigned int>(face->glyph->advance.x)
         };
-        Characters.insert(std::pair<char, Character>(c, character));
+
+        characters.insert(std::pair<char, Character>(c, character));
     }
 
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -66,14 +100,15 @@ void TextRenderer::Use(std::string font, unsigned int fontSize) {
     FT_Done_FreeType(ft);
 }
 
-void TextRenderer::RenderText(std::string text, float x, float y, float scale, glm::vec3 color) {
+void TextRenderer::draw(const std::string& text, float x, float y, float scale, const glm::vec3& color)
+{
     shader.Use();
     shader.SetVector3f("textColor", color);
     glActiveTexture(GL_TEXTURE0);
-    glBindVertexArray(VAO);
+    glBindVertexArray(vao);
 
-    for (const char& c : text) {
-        Character ch = Characters[c];
+    for (const char c : text) {
+        Character ch = characters[c];
 
         float xpos = x + ch.Bearing.x * scale;
         float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
@@ -82,41 +117,26 @@ void TextRenderer::RenderText(std::string text, float x, float y, float scale, g
         float h = ch.Size.y * scale;
 
         float vertices[6][4] = {
-            { xpos,     ypos + h,   0.0f, 0.0f },
-            { xpos,     ypos,       0.0f, 1.0f },
-            { xpos + w, ypos,       1.0f, 1.0f },
+            { xpos,     ypos + h, 0.0f, 0.0f },
+            { xpos,     ypos,     0.0f, 1.0f },
+            { xpos + w, ypos,     1.0f, 1.0f },
 
-            { xpos,     ypos + h,   0.0f, 0.0f },
-            { xpos + w, ypos,       1.0f, 1.0f },
-            { xpos + w, ypos + h,   1.0f, 0.0f }
+            { xpos,     ypos + h, 0.0f, 0.0f },
+            { xpos + w, ypos,     1.0f, 1.0f },
+            { xpos + w, ypos + h, 1.0f, 0.0f }
         };
 
         glBindTexture(GL_TEXTURE_2D, ch.TextureID);
 
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
-        x += (ch.Advance >> 6) * scale;
+        x += (ch.Advance >> 6) * scale; // Bitshift per convertire da 1/64 pixel
     }
 
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-void TextRenderer::initRenderData() {
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, nullptr, GL_DYNAMIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
 }

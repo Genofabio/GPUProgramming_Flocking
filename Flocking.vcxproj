@@ -72,8 +72,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);.\libs\</LibraryPath>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);.\includes\</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(ProjectDir)libs;</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)includes;$(ProjectDir)includes/external </IncludePath>
     <CopyLocalDeploymentContent>true</CopyLocalDeploymentContent>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -108,7 +108,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(CudaToolkitIncludeDir);C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.9\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(CudaToolkitIncludeDir);C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.9\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -135,17 +135,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="includes\core\Boid.h" />
+    <ClInclude Include="includes\core\BoidParams.h" />
+    <ClInclude Include="includes\core\BoidRules.h" />
+    <ClInclude Include="includes\core\Grid.h" />
+    <ClInclude Include="includes\core\Profiler.h" />
+    <ClInclude Include="includes\core\Simulation.h" />
+    <ClInclude Include="includes\core\Wall.h" />
     <ClInclude Include="includes\custom\Boid.h" />
+    <ClInclude Include="includes\custom\BoidParams.h" />
     <ClInclude Include="includes\custom\BoidRenderer.h" />
+    <ClInclude Include="includes\custom\BoidRules.h" />
     <ClInclude Include="includes\custom\Grid.h" />
     <ClInclude Include="includes\custom\GridRenderer.h" />
     <ClInclude Include="includes\custom\Profiler.h" />
     <ClInclude Include="includes\custom\ResourceManager.h" />
     <ClInclude Include="includes\custom\Shader.h" />
     <ClInclude Include="includes\custom\Simulation.h" />
-    <ClInclude Include="includes\custom\SpriteRenderer.h" />
     <ClInclude Include="includes\custom\TextRenderer.h" />
-    <ClInclude Include="includes\custom\Texture2D.h" />
     <ClInclude Include="includes\custom\Wall.h" />
     <ClInclude Include="includes\custom\WallRenderer.h" />
     <ClInclude Include="includes\freetype\config\ftconfig.h" />
@@ -250,6 +257,12 @@
     <ClInclude Include="includes\ft2build.h" />
     <ClInclude Include="includes\GLFW\glfw3.h" />
     <ClInclude Include="includes\GLFW\glfw3native.h" />
+    <ClInclude Include="includes\graphics\BoidRenderer.h" />
+    <ClInclude Include="includes\graphics\GridRenderer.h" />
+    <ClInclude Include="includes\graphics\Shader.h" />
+    <ClInclude Include="includes\graphics\TextRenderer.h" />
+    <ClInclude Include="includes\graphics\WallRenderer.h" />
+    <ClInclude Include="includes\utility\ResourceManager.h" />
     <ClInclude Include="include\custom\ResourceManager.h" />
     <ClInclude Include="include\custom\Shader.h" />
     <ClInclude Include="include\custom\Simulation.h" />
@@ -258,16 +271,16 @@
     <ClInclude Include="include\stb\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\core\BoidRules.cpp" />
     <ClCompile Include="src\core\main.cpp" />
     <ClCompile Include="src\core\Simulation.cpp" />
     <ClCompile Include="src\graphics\BoidRenderer.cpp" />
     <ClCompile Include="src\graphics\GridRenderer.cpp" />
     <ClCompile Include="src\graphics\Shader.cpp" />
-    <ClCompile Include="src\graphics\SpriteRenderer.cpp" />
-    <ClCompile Include="src\graphics\stb_image.cpp" />
     <ClCompile Include="src\graphics\TextRenderer.cpp" />
-    <ClCompile Include="src\graphics\Texture2D.cpp" />
-    <ClCompile Include="src\graphics\WallRenderer.cpp" />
+    <ClCompile Include="src\graphics\WallRenderer.cpp">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalIncludeDirectories);$(CudaToolkitIncludeDir);C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.9\include; </AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\utility\glad.c" />
     <ClCompile Include="src\utility\ResourceManager.cpp" />
   </ItemGroup>

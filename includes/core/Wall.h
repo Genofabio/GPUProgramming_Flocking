@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include <glm/glm.hpp>
+#include <external/glm/glm.hpp>
 
 class Wall {
 public:

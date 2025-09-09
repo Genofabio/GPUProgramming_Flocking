@@ -1,8 +1,8 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include <external/glad/glad.h>
+#include <external/GLFW/glfw3.h>
 
-#include "custom/Simulation.h"
-#include "custom/ResourceManager.h"
+#include <core/Simulation.h>
+#include <utility/ResourceManager.h>
 
 #include <iostream>
 
@@ -68,12 +68,12 @@ int main(int argc, char* argv[])
         simulation.processInput(deltaTime);
 
         // Update simulation (with profiling)
-        simulation.updateWithProfiling(deltaTime);
+        simulation.update(deltaTime);
 
         // Render simulation (with profiling)
         glClearColor(0.08f, 0.08f, 0.08f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        simulation.renderWithProfiling();
+        simulation.render();
 
 		simulation.updateStats(deltaTime);
 
