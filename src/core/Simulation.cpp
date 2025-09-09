@@ -48,6 +48,7 @@ Simulation::Simulation(unsigned int width, unsigned int height)
     params.matingAge = 6;
     params.predatorBoostRadius = 80.0f;
     params.desiredLeaderDistance = 200.0f;
+	params.allyRadius = 60.0f;
 }
 
 Simulation::~Simulation()
@@ -56,6 +57,7 @@ Simulation::~Simulation()
     delete boidRenderer;
     delete textRenderer;
     delete gridRenderer;
+	delete vectorRenderer;
 }
 
 void Simulation::init()
@@ -65,6 +67,7 @@ void Simulation::init()
     ResourceManager::LoadShader("shaders/wall_shader.vert", "shaders/wall_shader.frag", nullptr, "wall");
     ResourceManager::LoadShader("shaders/grid_shader.vert", "shaders/grid_shader.frag", nullptr, "grid");
     ResourceManager::LoadShader("shaders/text_shader.vert", "shaders/text_shader.frag", nullptr, "text");
+    ResourceManager::LoadShader("shaders/vector_shader.vert", "shaders/vector_shader.frag", nullptr, "vector");
 
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height), -1.0f, 1.0f);
 
@@ -73,6 +76,7 @@ void Simulation::init()
     ResourceManager::GetShader("grid").Use().SetMatrix4("projection", projection);
     ResourceManager::GetShader("text").Use().SetInteger("text", 0);
     ResourceManager::GetShader("text").SetMatrix4("projection", projection);
+    ResourceManager::GetShader("vector").Use().SetMatrix4("projection", projection);
 
     // Renderer setup
     boidRenderer = new BoidRenderer(ResourceManager::GetShader("boid"));
@@ -80,9 +84,10 @@ void Simulation::init()
     gridRenderer = new GridRenderer(ResourceManager::GetShader("grid"));
     textRenderer = new TextRenderer(ResourceManager::GetShader("text"));
     textRenderer->loadFont("resources/fonts/Roboto/Roboto-Regular.ttf", 24);
+    vectorRenderer = new VectorRenderer(ResourceManager::GetShader("vector"));
 
     // Initialize boids
-    initLeaders(0);
+    initLeaders(3);
     initPrey(180);
     initPredators(2);
 
@@ -134,7 +139,20 @@ void Simulation::render()
 
     profiler.log("render", profiler.stop());
 
-    // 4. Draw HUD / stats
+    // 4. Draw debug vectors
+    for (Boid& b : boids) {
+        if (b.type == LEADER || b.type == PREDATOR) {
+            glm::vec2 start = b.position;
+
+            vectorRenderer->DrawVector(start, start + b.debugVectors[0] * 20.0f, glm::vec3(1.0f, 1.0f, 0.0f)); // giallo
+            vectorRenderer->DrawVector(start, start + b.debugVectors[1] * 20.0f, glm::vec3(1.0f, 0.0f, 0.0f)); // rosso
+            vectorRenderer->DrawVector(start, start + b.debugVectors[2] * 20.0f, glm::vec3(0.05f, 0.8f, 0.7f)); // ciano
+            vectorRenderer->DrawVector(start, start + b.debugVectors[3] * 20.0f, glm::vec3(0.0f, 0.0f, 1.0f)); // blu
+            //vectorRenderer->DrawVector(start, start + b.debugVectors[4] * 20.0f, glm::vec3(1.0f, 0.0f, 1.0f)); // magenta
+        }
+    }
+
+    // 5. Draw HUD / stats
     float margin = 10.0f;
     float scale = 0.7f;
     glm::vec3 color(0.9f, 0.9f, 0.3f);
@@ -254,7 +272,9 @@ void Simulation::computeForces(std::vector<glm::vec2>& velocityChanges)
     for (size_t i = 0; i < N; ++i) {
         Boid& b = boids[i];
         glm::vec2 totalChange(0.0f);
+
         BoidRules::computeBoidUpgrade(b, currentTime);
+
         switch (b.type) {
         case PREY:
             totalChange += BoidRules::computeCohesion(b, boids, params.cohesionDistance, params.cohesionScale);
@@ -263,19 +283,24 @@ void Simulation::computeForces(std::vector<glm::vec2>& velocityChanges)
             totalChange += BoidRules::computeFollowLeaders(b, boids.data(), N, params.leaderInfluenceDistance);
             totalChange += BoidRules::computeBorderRepulsion(b.position, static_cast<float>(width), static_cast<float>(height), params.borderAlertDistance);
             totalChange += BoidRules::computeWallRepulsion(b.position, b.velocity, walls);
+            totalChange += BoidRules::computeEvadePredators(b, boids, params.predatorFearDistance, params.predatorFearScale, params.allyRadius);
             break;
 
         case PREDATOR:
-            totalChange += BoidRules::computeChasePrey(i, boids, params.predatorChaseDistance, params.predatorChaseScale, params.predatorBoostRadius);
-            totalChange += BoidRules::computePredatorSeparation(b, boids, params.predatorSeparationDistance) * params.predatorSeparationScale;
-            totalChange += BoidRules::computeBorderRepulsion(b.position, static_cast<float>(width), static_cast<float>(height), params.borderAlertDistance);
-            totalChange += BoidRules::computeWallRepulsion(b.position, b.velocity, walls);
+            b.debugVectors[0] = BoidRules::computeChasePrey(i, boids, params.predatorChaseDistance, params.predatorChaseScale, params.predatorBoostRadius);
+            b.debugVectors[1] = BoidRules::computePredatorSeparation(b, boids, params.predatorSeparationDistance) * params.predatorSeparationScale;
+            b.debugVectors[2] = BoidRules::computeBorderRepulsion(b.position, static_cast<float>(width), static_cast<float>(height), params.borderAlertDistance);
+            b.debugVectors[3] = BoidRules::computeWallRepulsion(b.position, b.velocity, walls);
+
+            totalChange = b.debugVectors[0] + b.debugVectors[1] + b.debugVectors[2] + b.debugVectors[3];
             break;
 
         case LEADER:
-            totalChange += BoidRules::computeLeaderSeparation(b, boids.data(), N, params.desiredLeaderDistance);
-            totalChange += BoidRules::computeBorderRepulsion(b.position, static_cast<float>(width), static_cast<float>(height), params.borderAlertDistance);
-            totalChange += BoidRules::computeWallRepulsion(b.position, b.velocity, walls);
+            b.debugVectors[0] = BoidRules::computeLeaderSeparation(b, boids.data(), N, params.desiredLeaderDistance);
+            b.debugVectors[1] = BoidRules::computeBorderRepulsion(b.position, static_cast<float>(width), static_cast<float>(height), params.borderAlertDistance);
+            b.debugVectors[2] = BoidRules::computeWallRepulsion(b.position, b.velocity, walls);
+            b.debugVectors[3] = BoidRules::computeEvadePredators(b, boids, params.predatorFearDistance, params.predatorFearScale, params.allyRadius);
+            totalChange = b.debugVectors[0] + b.debugVectors[1] + b.debugVectors[2] + b.debugVectors[3];
             break;
         }
 

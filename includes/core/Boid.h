@@ -14,4 +14,6 @@ struct Boid {
 
     int age;                // Età del boid (discreta, usata per regole come matingAge)
     float birthTime;        // Tempo di nascita (float per interpolazioni temporali, accoppiamenti, ecc.)
+
+    glm::vec2 debugVectors[5];
 };

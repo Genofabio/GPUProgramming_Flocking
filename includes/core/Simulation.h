@@ -9,6 +9,7 @@
 #include <graphics/TextRenderer.h>
 #include <graphics/WallRenderer.h>
 #include <graphics/GridRenderer.h>
+#include <graphics/VectorRenderer.h>
 
 #include <core/Profiler.h>
 #include <core/BoidRules.h>
@@ -56,6 +57,7 @@ private:
     TextRenderer* textRenderer = nullptr;
     WallRenderer* wallRenderer = nullptr;
     GridRenderer* gridRenderer = nullptr;
+    VectorRenderer* vectorRenderer = nullptr;
 
     // Profiler
     Profiler profiler;

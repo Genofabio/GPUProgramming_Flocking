@@ -32,4 +32,5 @@ struct BoidParams {
     int mateThreshold;
     int matingAge;
     float predatorBoostRadius;
+	float allyRadius;
 };
