@@ -12,7 +12,7 @@ Simulation::Simulation(unsigned int width, unsigned int height)
     : keys()
     , width(width)
     , height(height)
-    , grid(10, 15, static_cast<float>(width), static_cast<float>(height))
+    , wallGrid(10, 15, static_cast<float>(width), static_cast<float>(height), 1)
     , boidRenderer(nullptr)
     , wallRenderer(nullptr)
     , gridRenderer(nullptr)
@@ -21,34 +21,44 @@ Simulation::Simulation(unsigned int width, unsigned int height)
     , dist(-1.0f, 1.0f)
 {
     // Inizializzazione dei parametri di boid
-    params.maxSpeed = 100.0f;
-    params.slowDownFactor = 0.3f;
+    params.maxSpeed = 100.0f;          // come prima, velocità naturale
+    params.slowDownFactor = 0.3f;      // frenata normale
 
-    params.cohesionDistance = 100.0f;
-    params.separationDistance = 25.0f;
-    params.alignmentDistance = 50.0f;
-    params.borderDistance = 300.0f;
-    params.predatorFearDistance = 150.0f;
-    params.predatorChaseDistance = 800.0f;
-    params.predatorSeparationDistance = 60.0f;
-    params.predatorEatDistance = 5.0f;
+    // Distanze (adattate a maxBoidDistance = 150)
+    params.cohesionDistance = 60.0f;   // leggermente più piccolo per stare entro griglia
+    params.separationDistance = 20.0f; // mantenere sicurezza nelle collisioni
+    params.alignmentDistance = 40.0f;  // simile all’originale ma compatto
+    params.borderDistance = 80.0f;     // non serve così grande
+    params.predatorFearDistance = 100.0f;
+    params.predatorChaseDistance = 120.0f;
+    params.predatorSeparationDistance = 50.0f;
+    params.predatorEatDistance = 5.0f; // come prima
 
-    params.cohesionScale = 0.05f;
-    params.separationScale = 2.0f;
-    params.alignmentScale = 0.15f;
-    params.borderScale = 0.3f;
-    params.predatorFearScale = 0.8f;
+    // Scale (forza delle regole)
+    params.cohesionScale = 0.1f;      // originale
+    params.separationScale = 2.2f;     // come prima
+    params.alignmentScale = 0.19f;     // originale
+    params.borderScale = 0.3f;         // coerente
+    params.predatorFearScale = 0.8f;   // originale
     params.predatorChaseScale = 0.12f;
     params.predatorSeparationScale = 2.0f;
-    params.borderAlertDistance = (static_cast<float>(height) / 5.0f);
+    params.borderAlertDistance = height / 5.0f;
 
-    params.leaderInfluenceDistance = 200.0f;
+    // Social/extra
+    params.leaderInfluenceDistance = 120.0f; // ridotto proporzionalmente
+    params.leaderInfluenceScale = 1.0f;
     params.mateDistance = 10.0f;
     params.mateThreshold = 200;
     params.matingAge = 6;
-    params.predatorBoostRadius = 80.0f;
-    params.desiredLeaderDistance = 200.0f;
-    params.allyRadius = 60.0f;
+    params.predatorBoostRadius = 70.0f;
+    params.desiredLeaderDistance = 150.0f;
+    params.allyRadius = 50.0f;
+
+    // Griglia boid basata sulla distanza massima di interazione
+    float maxBoidDistance = 300.0f;//std::max({ params.cohesionDistance, params.separationDistance, params.alignmentDistance, params.borderDistance, params.predatorFearDistance, params.predatorChaseDistance, params.predatorSeparationDistance, params.predatorEatDistance });
+    int nCols = static_cast<int>(std::ceil(width / maxBoidDistance));
+    int nRows = static_cast<int>(std::ceil(height / maxBoidDistance));
+    boidGrid = UniformBoidGrid(nRows, nCols, static_cast<float>(width), static_cast<float>(height));
 }
 
 Simulation::~Simulation()
@@ -87,9 +97,9 @@ void Simulation::init()
     vectorRenderer = new VectorRenderer(ResourceManager::GetShader("vector"));
 
     // Initialize boids
-    initLeaders(3);
-    initPrey(450);
-    initPredators(2);
+    initLeaders(2);
+    initPrey(200);
+    initPredators(0);
 
     // Initialize walls
     initWalls(50);
@@ -104,7 +114,7 @@ void Simulation::update(float dt)
     for (const auto& b : boids)
         positions.push_back(b.position);
 
-    grid.updateCells(positions);
+    boidGrid.updateCells(positions);
 
     size_t N = boids.size();
     std::vector<glm::vec2> velocityChanges(N, glm::vec2(0.0f));
@@ -130,7 +140,8 @@ void Simulation::render()
 
     // 1. Draw grid
     glLineWidth(1.0f);
-    gridRenderer->draw(grid, glm::vec3(0.2f, 0.2f, 0.2f));
+    gridRenderer->draw(wallGrid, glm::vec3(0.2f, 0.2f, 0.2f));
+    //gridRenderer->draw(boidGrid, glm::vec3(0.6f, 0.6f, 0.6f));
 
     // 2. Draw boids
     for (const Boid& b : boids) {
@@ -146,17 +157,17 @@ void Simulation::render()
     profiler.log("render", profiler.stop());
 
     // 4. Draw debug vectors
-    for (Boid& b : boids) {
-        if (b.type == LEADER || b.type == PREDATOR) {
-            glm::vec2 start = b.position;
+    //for (Boid& b : boids) {
+    //    if (b.type == LEADER || b.type == PREDATOR) {
+    //        glm::vec2 start = b.position;
 
-            vectorRenderer->DrawVector(start, start + b.debugVectors[0] * 20.0f, glm::vec3(1.0f, 1.0f, 0.0f)); // giallo
-            vectorRenderer->DrawVector(start, start + b.debugVectors[1] * 20.0f, glm::vec3(1.0f, 0.0f, 0.0f)); // rosso
-            vectorRenderer->DrawVector(start, start + b.debugVectors[2] * 20.0f, glm::vec3(0.05f, 0.8f, 0.7f)); // ciano
-            vectorRenderer->DrawVector(start, start + b.debugVectors[3] * 20.0f, glm::vec3(0.0f, 0.0f, 1.0f)); // blu
-            //vectorRenderer->DrawVector(start, start + b.debugVectors[4] * 20.0f, glm::vec3(1.0f, 0.0f, 1.0f)); // magenta
-        }
-    }
+    //        vectorRenderer->DrawVector(start, start + b.debugVectors[0] * 20.0f, glm::vec3(1.0f, 1.0f, 0.0f)); // giallo
+    //        vectorRenderer->DrawVector(start, start + b.debugVectors[1] * 20.0f, glm::vec3(1.0f, 0.0f, 0.0f)); // rosso
+    //        vectorRenderer->DrawVector(start, start + b.debugVectors[2] * 20.0f, glm::vec3(0.05f, 0.8f, 0.7f)); // ciano
+    //        vectorRenderer->DrawVector(start, start + b.debugVectors[3] * 20.0f, glm::vec3(0.0f, 0.0f, 1.0f)); // blu
+    //        //vectorRenderer->DrawVector(start, start + b.debugVectors[4] * 20.0f, glm::vec3(1.0f, 0.0f, 1.0f)); // magenta
+    //    }
+    //}
 
     // 5. Draw HUD / stats
     float margin = 10.0f;
@@ -234,7 +245,7 @@ void Simulation::initPredators(int count)
 
 void Simulation::initWalls(int count)
 {
-    auto candidates = grid.cellEdges;
+    auto candidates = wallGrid.cellEdges;
     std::shuffle(candidates.begin(), candidates.end(), rng);
 
     std::set<std::pair<std::pair<int, int>, std::pair<int, int>>> usedEdges;
@@ -281,11 +292,11 @@ void Simulation::computeForces(std::vector<glm::vec2>& velocityChanges)
 
         BoidRules::computeBoidUpgrade(b, currentTime);
 
-        int col = static_cast<int>(b.position.x / grid.cellWidth);
-        int row = static_cast<int>(b.position.y / grid.cellHeight);
+        int col = static_cast<int>(b.position.x / wallGrid.cellWidth);
+        int row = static_cast<int>(b.position.y / wallGrid.cellHeight);
 
         // Ottieni boid vicini
-        std::vector<size_t> nearbyIndices = grid.getNearbyBoids(row, col);
+        std::vector<size_t> nearbyIndices = boidGrid.getNearbyBoids(b.position);
 
         // Suddividi i vicini per tipo
         std::vector<size_t> nearbyPrey, nearbyPredators, nearbyLeaders, nearbyAllies;
@@ -305,7 +316,7 @@ void Simulation::computeForces(std::vector<glm::vec2>& velocityChanges)
             totalChange += BoidRules::computeCohesion(b, boids, nearbyPrey, params.cohesionDistance, params.cohesionScale);
             totalChange += BoidRules::computeSeparation(b, boids, nearbyPrey, params.separationDistance, params.separationScale);
             totalChange += BoidRules::computeAlignment(b, boids, nearbyPrey, params.alignmentDistance, params.alignmentScale);
-            totalChange += BoidRules::computeFollowLeaders(b, boids, nearbyLeaders, params.leaderInfluenceDistance);
+            totalChange += BoidRules::computeFollowLeaders(b, boids, nearbyLeaders, params.leaderInfluenceDistance, params.leaderInfluenceScale);
             totalChange += BoidRules::computeBorderRepulsion(b.position, static_cast<float>(width), static_cast<float>(height), params.borderAlertDistance);
             totalChange += BoidRules::computeWallRepulsion(b.position, b.velocity, walls);
             totalChange += BoidRules::computeEvadePredators(b, boids, nearbyPredators, nearbyAllies, params.predatorFearDistance, params.predatorFearScale, params.allyRadius);

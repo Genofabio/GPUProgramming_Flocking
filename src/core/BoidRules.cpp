@@ -159,7 +159,11 @@ namespace BoidRules {
         return (dist < predatorEatDistance);
     }
 
-    glm::vec2 computeFollowLeaders(const Boid& self, const std::vector<Boid>& boids, const std::vector<size_t>& nearbyLeaders, float leaderInfluenceDistance) {
+    glm::vec2 computeFollowLeaders(const Boid& self,
+        const std::vector<Boid>& boids,
+        const std::vector<size_t>& nearbyLeaders,
+        float leaderInfluenceDistance,
+        float leaderInfluenceScale) {
         glm::vec2 towardLeader(0.0f);
         float closestDist = std::numeric_limits<float>::infinity();
         glm::vec2 closestLeaderPos(0.0f);
@@ -176,7 +180,7 @@ namespace BoidRules {
         if (closestDist < std::numeric_limits<float>::infinity()) {
             float norm = (leaderInfluenceDistance - closestDist) / leaderInfluenceDistance;
             float weight = norm * norm;
-            towardLeader = (closestLeaderPos - self.position) * weight * 0.4f;
+            towardLeader = (closestLeaderPos - self.position) * weight * leaderInfluenceScale;
         }
 
         return towardLeader;

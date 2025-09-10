@@ -64,11 +64,11 @@ namespace BoidRules {
     );
 
     // === Funzioni per i leader ===
-    glm::vec2 computeFollowLeaders(
-        const Boid& self,
+    glm::vec2 computeFollowLeaders(const Boid& self,
         const std::vector<Boid>& boids,
         const std::vector<size_t>& nearbyLeaders,
-        float leaderInfluenceDistance
+        float leaderInfluenceDistance,
+        float leaderInfluenceScale
     );
 
     glm::vec2 computeLeaderSeparation(

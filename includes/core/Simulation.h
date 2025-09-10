@@ -14,6 +14,7 @@
 #include <core/Profiler.h>
 #include <core/BoidRules.h>
 #include <core/Grid.h>
+#include <core/UniformBoidGrid.h>
 #include <core/BoidParams.h>
 
 class Simulation
@@ -38,12 +39,14 @@ public:
     void saveProfilerCSV(const std::string& path);
 
 private:
-    // Agenti
+    // Agenti e ostacoli
     std::vector<Boid> boids;
-
-    // Ostacoli
-    Grid grid;
     std::vector<Wall> walls;
+
+    // Griglie
+    Grid wallGrid;
+    UniformBoidGrid boidGrid;
+
 
     // Parametri di simulazione
     BoidParams params;

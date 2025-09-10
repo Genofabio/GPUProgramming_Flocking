@@ -135,6 +135,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="includes\core\Boid.h" />
+    <ClInclude Include="includes\core\BoidParams.h" />
+    <ClInclude Include="includes\core\BoidRules.h" />
+    <ClInclude Include="includes\core\Grid.h" />
+    <ClInclude Include="includes\core\Profiler.h" />
+    <ClInclude Include="includes\core\Simulation.h" />
+    <ClInclude Include="includes\core\UniformBoidGrid.h" />
+    <ClInclude Include="includes\core\Wall.h" />
     <ClInclude Include="includes\custom\BoidRenderer.h" />
     <ClInclude Include="includes\custom\Grid.h" />
     <ClInclude Include="includes\custom\GridRenderer.h" />
