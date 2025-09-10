@@ -6,10 +6,12 @@
 
 namespace BoidRules {
 
-    glm::vec2 computeCohesion(const Boid& self, const std::vector<Boid>& boids, float cohesionDistance, float cohesionScale) {
+    glm::vec2 computeCohesion(const Boid& self, const std::vector<Boid>& boids, const std::vector<size_t>& nearbyIndices, float cohesionDistance, float cohesionScale) {
         glm::vec2 perceived_center(0.0f);
         int count = 0;
-        for (const Boid& b : boids) {
+
+        for (size_t idx : nearbyIndices) {
+            const Boid& b = boids[idx];
             if (b.type != PREY) continue;
             float dist = glm::length(b.position - self.position);
             if (dist < cohesionDistance) {
@@ -17,14 +19,18 @@ namespace BoidRules {
                 count++;
             }
         }
+
         if (count > 0)
             perceived_center = (perceived_center / float(count) - self.position) * cohesionScale;
+
         return perceived_center;
     }
 
-    glm::vec2 computeSeparation(const Boid& self, const std::vector<Boid>& boids, float separationDistance, float separationScale) {
+    glm::vec2 computeSeparation(const Boid& self, const std::vector<Boid>& boids, const std::vector<size_t>& nearbyIndices, float separationDistance, float separationScale) {
         glm::vec2 c(0.0f);
-        for (const Boid& other : boids) {
+
+        for (size_t idx : nearbyIndices) {
+            const Boid& other = boids[idx];
             if (&self == &other) continue;
             glm::vec2 diff = self.position - other.position;
             float dist = glm::length(diff);
@@ -32,28 +38,34 @@ namespace BoidRules {
                 c += diff / dist;
             }
         }
+
         return c * separationScale;
     }
 
-    glm::vec2 computePredatorSeparation(const Boid& self, const std::vector<Boid>& boids, float predatorSeparationDistance) {
+    glm::vec2 computePredatorSeparation(const Boid& self, const std::vector<Boid>& boids, const std::vector<size_t>& nearbyIndices, float predatorSeparationDistance) {
         glm::vec2 c(0.0f);
-        for (const Boid& other : boids) {
+
+        for (size_t idx : nearbyIndices) {
+            const Boid& other = boids[idx];
             if (&self == &other) continue;
             if (other.type != PREDATOR) continue;
+
             glm::vec2 diff = self.position - other.position;
             float dist = glm::length(diff);
             if (dist < predatorSeparationDistance && dist > 0.0f) {
                 c += diff / dist;
             }
         }
+
         return c;
     }
 
-    glm::vec2 computeAlignment(const Boid& self, const std::vector<Boid>& boids, float alignmentDistance, float alignmentScale) {
+    glm::vec2 computeAlignment(const Boid& self, const std::vector<Boid>& boids, const std::vector<size_t>& nearbyIndices, float alignmentDistance, float alignmentScale) {
         glm::vec2 perceived_velocity(0.0f);
         float totalWeight = 0.0f;
 
-        for (const Boid& other : boids) {
+        for (size_t idx : nearbyIndices) {
+            const Boid& other = boids[idx];
             if (&self == &other) continue;
             if (other.type != PREY) continue;
 
@@ -73,14 +85,14 @@ namespace BoidRules {
         return perceived_velocity;
     }
 
-    glm::vec2 computeEvadePredators(const Boid& self, const std::vector<Boid>& boids, float predatorFearDistance, float predatorFearScale, float allyRadius) {
+    glm::vec2 computeEvadePredators(const Boid& self, const std::vector<Boid>& boids,
+        const std::vector<size_t>& nearbyPredators, const std::vector<size_t>& nearbyAllies,
+        float predatorFearDistance, float predatorFearScale, float allyRadius)
+    {
         glm::vec2 c(0.0f);
-        int nearbyAllies = 0;
 
-        for (const Boid& other : boids) {
-            if (&self == &other) continue;
-            if (other.type != PREDATOR) continue;
-
+        for (size_t idx : nearbyPredators) {
+            const Boid& other = boids[idx];
             glm::vec2 diff = self.position - other.position;
             float dist = glm::length(diff);
             if (dist < predatorFearDistance && dist > 0.0f) {
@@ -88,41 +100,42 @@ namespace BoidRules {
             }
         }
 
-        for (const Boid& other : boids) {
-            if (&self == &other) continue;
-            if (other.type != PREY) continue;
-
+        int nearbyCount = 0;
+        for (size_t idx : nearbyAllies) {
+            const Boid& other = boids[idx];
             float dist = glm::length(other.position - self.position);
-            if (dist < allyRadius) nearbyAllies++;
+            if (dist < allyRadius) nearbyCount++;
         }
 
         const float k = 10.03f;
         const float n0 = 2.08f;
-        float na = static_cast<float>(nearbyAllies);
-        float groupFactor = 1.0f / (1.0f + std::exp(-k * (na - n0)));
+        float groupFactor = 1.0f / (1.0f + std::exp(-k * (nearbyCount - n0)));
 
         return c * predatorFearScale * groupFactor;
     }
 
-    glm::vec2 computeChasePrey(size_t predatorIndex, const std::vector<Boid>& boids, float predatorChaseDistance, float predatorChaseScale, float predatorBoostRadius) {
+    glm::vec2 computeChasePrey(size_t predatorIndex, const std::vector<Boid>& boids,
+        const std::vector<size_t>& nearbyPrey,
+        float predatorChaseDistance, float predatorChaseScale, float predatorBoostRadius)
+    {
         glm::vec2 outForce(0.0f);
         glm::vec2 target(0.0f);
         float closest = std::numeric_limits<float>::infinity();
-        int nearbyPrey = 0;
+        int nearbyCount = 0;
 
         const Boid& predator = boids[predatorIndex];
 
-        for (size_t j = 0; j < boids.size(); ++j) {
-            if (boids[j].type != PREY) continue;
-            glm::vec2 diff = boids[j].position - predator.position;
+        for (size_t idx : nearbyPrey) {
+            const Boid& prey = boids[idx];
+            glm::vec2 diff = prey.position - predator.position;
             float dist = glm::length(diff);
 
             if (dist < closest && dist < predatorChaseDistance) {
                 closest = dist;
-                target = boids[j].position;
+                target = prey.position;
             }
 
-            if (dist < predatorBoostRadius) nearbyPrey++;
+            if (dist < predatorBoostRadius) nearbyCount++;
         }
 
         if (closest == std::numeric_limits<float>::infinity()) return glm::vec2(0.0f);
@@ -131,7 +144,7 @@ namespace BoidRules {
         float len = glm::length(dir);
         if (len > 0.0f) {
             float baseForce = ((predatorChaseDistance - closest) / predatorChaseDistance) * predatorChaseScale * 100.0f;
-            float boost = (nearbyPrey <= 2) ? 1.5f : 1.0f;
+            float boost = (nearbyCount <= 2) ? 1.5f : 1.0f;
             outForce = (dir / len) * baseForce * boost;
         }
 
@@ -146,19 +159,17 @@ namespace BoidRules {
         return (dist < predatorEatDistance);
     }
 
-    glm::vec2 computeFollowLeaders(const Boid& self, const Boid* boids, size_t numBoids, float leaderInfluenceDistance) {
+    glm::vec2 computeFollowLeaders(const Boid& self, const std::vector<Boid>& boids, const std::vector<size_t>& nearbyLeaders, float leaderInfluenceDistance) {
         glm::vec2 towardLeader(0.0f);
         float closestDist = std::numeric_limits<float>::infinity();
         glm::vec2 closestLeaderPos(0.0f);
 
-        for (size_t j = 0; j < numBoids; j++) {
-            if (&self == &boids[j]) continue;
-            if (boids[j].type != LEADER) continue;
-
-            float dist = glm::length(boids[j].position - self.position);
+        for (size_t idx : nearbyLeaders) {
+            const Boid& leader = boids[idx];
+            float dist = glm::length(leader.position - self.position);
             if (dist < leaderInfluenceDistance && dist < closestDist) {
                 closestDist = dist;
-                closestLeaderPos = boids[j].position;
+                closestLeaderPos = leader.position;
             }
         }
 
@@ -171,14 +182,12 @@ namespace BoidRules {
         return towardLeader;
     }
 
-    glm::vec2 computeLeaderSeparation(const Boid& self, const Boid* boids, size_t numBoids, float desiredLeaderDistance) {
+    glm::vec2 computeLeaderSeparation(const Boid& self, const std::vector<Boid>& boids, const std::vector<size_t>& nearbyLeaders, float desiredLeaderDistance) {
         glm::vec2 force(0.0f);
 
-        for (size_t j = 0; j < numBoids; j++) {
-            if (&self == &boids[j]) continue;
-            if (boids[j].type != LEADER) continue;
-
-            glm::vec2 diff = self.position - boids[j].position;
+        for (size_t idx : nearbyLeaders) {
+            const Boid& leader = boids[idx];
+            glm::vec2 diff = self.position - leader.position;
             float dist = glm::length(diff);
 
             if (dist < desiredLeaderDistance && dist > 0.0f) {

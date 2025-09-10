@@ -11,6 +11,7 @@ namespace BoidRules {
     glm::vec2 computeCohesion(
         const Boid& self,
         const std::vector<Boid>& boids,
+        const std::vector<size_t>& nearbyIndices,
         float cohesionDistance,
         float cohesionScale
     );
@@ -18,6 +19,7 @@ namespace BoidRules {
     glm::vec2 computeSeparation(
         const Boid& self,
         const std::vector<Boid>& boids,
+        const std::vector<size_t>& nearbyIndices,
         float separationDistance,
         float separationScale
     );
@@ -25,6 +27,7 @@ namespace BoidRules {
     glm::vec2 computeAlignment(
         const Boid& self,
         const std::vector<Boid>& boids,
+        const std::vector<size_t>& nearbyIndices,
         float alignmentDistance,
         float alignmentScale
     );
@@ -32,6 +35,8 @@ namespace BoidRules {
     glm::vec2 computeEvadePredators(
         const Boid& self,
         const std::vector<Boid>& boids,
+        const std::vector<size_t>& nearbyPredators,
+        const std::vector<size_t>& nearbyAllies,
         float predatorFearDistance,
         float predatorFearScale,
         float allyRadius
@@ -61,15 +66,15 @@ namespace BoidRules {
     // === Funzioni per i leader ===
     glm::vec2 computeFollowLeaders(
         const Boid& self,
-        const Boid* boids,
-        size_t numBoids,
+        const std::vector<Boid>& boids,
+        const std::vector<size_t>& nearbyLeaders,
         float leaderInfluenceDistance
     );
 
     glm::vec2 computeLeaderSeparation(
         const Boid& self,
-        const Boid* boids,
-        size_t numBoids,
+        const std::vector<Boid>& boids,
+        const std::vector<size_t>& nearbyLeaders,
         float desiredLeaderDistance
     );
 
@@ -77,6 +82,7 @@ namespace BoidRules {
     glm::vec2 computeChasePrey(
         size_t predatorIndex,
         const std::vector<Boid>& boids,
+        const std::vector<size_t>& nearbyPrey,
         float predatorChaseDistance,
         float predatorChaseScale,
         float predatorBoostRadius
@@ -92,6 +98,7 @@ namespace BoidRules {
     glm::vec2 computePredatorSeparation(
         const Boid& self,
         const std::vector<Boid>& boids,
+        const std::vector<size_t>& nearbyIndices,
         float predatorSeparationDistance
     );
 
@@ -109,4 +116,4 @@ namespace BoidRules {
         const std::vector<Wall>& walls
     );
 
-} 
+} // namespace BoidRules

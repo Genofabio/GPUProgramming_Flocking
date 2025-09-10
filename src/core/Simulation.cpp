@@ -48,7 +48,7 @@ Simulation::Simulation(unsigned int width, unsigned int height)
     params.matingAge = 6;
     params.predatorBoostRadius = 80.0f;
     params.desiredLeaderDistance = 200.0f;
-	params.allyRadius = 60.0f;
+    params.allyRadius = 60.0f;
 }
 
 Simulation::~Simulation()
@@ -57,7 +57,7 @@ Simulation::~Simulation()
     delete boidRenderer;
     delete textRenderer;
     delete gridRenderer;
-	delete vectorRenderer;
+    delete vectorRenderer;
 }
 
 void Simulation::init()
@@ -88,7 +88,7 @@ void Simulation::init()
 
     // Initialize boids
     initLeaders(3);
-    initPrey(180);
+    initPrey(450);
     initPredators(2);
 
     // Initialize walls
@@ -99,6 +99,12 @@ void Simulation::update(float dt)
 {
     profiler.start();
     currentTime += dt;
+
+    std::vector<glm::vec2> positions;
+    for (const auto& b : boids)
+        positions.push_back(b.position);
+
+    grid.updateCells(positions);
 
     size_t N = boids.size();
     std::vector<glm::vec2> velocityChanges(N, glm::vec2(0.0f));
@@ -275,20 +281,39 @@ void Simulation::computeForces(std::vector<glm::vec2>& velocityChanges)
 
         BoidRules::computeBoidUpgrade(b, currentTime);
 
+        int col = static_cast<int>(b.position.x / grid.cellWidth);
+        int row = static_cast<int>(b.position.y / grid.cellHeight);
+
+        // Ottieni boid vicini
+        std::vector<size_t> nearbyIndices = grid.getNearbyBoids(row, col);
+
+        // Suddividi i vicini per tipo
+        std::vector<size_t> nearbyPrey, nearbyPredators, nearbyLeaders, nearbyAllies;
+        for (size_t idx : nearbyIndices) {
+            const Boid& other = boids[idx];
+            if (&b == &other) continue;
+
+            switch (other.type) {
+            case PREY:   nearbyPrey.push_back(idx); nearbyAllies.push_back(idx); break;
+            case PREDATOR: nearbyPredators.push_back(idx); break;
+            case LEADER: nearbyLeaders.push_back(idx); break;
+            }
+        }
+
         switch (b.type) {
         case PREY:
-            totalChange += BoidRules::computeCohesion(b, boids, params.cohesionDistance, params.cohesionScale);
-            totalChange += BoidRules::computeSeparation(b, boids, params.separationDistance, params.separationScale);
-            totalChange += BoidRules::computeAlignment(b, boids, params.alignmentDistance, params.alignmentScale);
-            totalChange += BoidRules::computeFollowLeaders(b, boids.data(), N, params.leaderInfluenceDistance);
+            totalChange += BoidRules::computeCohesion(b, boids, nearbyPrey, params.cohesionDistance, params.cohesionScale);
+            totalChange += BoidRules::computeSeparation(b, boids, nearbyPrey, params.separationDistance, params.separationScale);
+            totalChange += BoidRules::computeAlignment(b, boids, nearbyPrey, params.alignmentDistance, params.alignmentScale);
+            totalChange += BoidRules::computeFollowLeaders(b, boids, nearbyLeaders, params.leaderInfluenceDistance);
             totalChange += BoidRules::computeBorderRepulsion(b.position, static_cast<float>(width), static_cast<float>(height), params.borderAlertDistance);
             totalChange += BoidRules::computeWallRepulsion(b.position, b.velocity, walls);
-            totalChange += BoidRules::computeEvadePredators(b, boids, params.predatorFearDistance, params.predatorFearScale, params.allyRadius);
+            totalChange += BoidRules::computeEvadePredators(b, boids, nearbyPredators, nearbyAllies, params.predatorFearDistance, params.predatorFearScale, params.allyRadius);
             break;
 
         case PREDATOR:
-            b.debugVectors[0] = BoidRules::computeChasePrey(i, boids, params.predatorChaseDistance, params.predatorChaseScale, params.predatorBoostRadius);
-            b.debugVectors[1] = BoidRules::computePredatorSeparation(b, boids, params.predatorSeparationDistance) * params.predatorSeparationScale;
+            b.debugVectors[0] = BoidRules::computeChasePrey(i, boids, nearbyPrey, params.predatorChaseDistance, params.predatorChaseScale, params.predatorBoostRadius);
+            b.debugVectors[1] = BoidRules::computePredatorSeparation(b, boids, nearbyPredators, params.predatorSeparationDistance) * params.predatorSeparationScale;
             b.debugVectors[2] = BoidRules::computeBorderRepulsion(b.position, static_cast<float>(width), static_cast<float>(height), params.borderAlertDistance);
             b.debugVectors[3] = BoidRules::computeWallRepulsion(b.position, b.velocity, walls);
 
@@ -296,10 +321,11 @@ void Simulation::computeForces(std::vector<glm::vec2>& velocityChanges)
             break;
 
         case LEADER:
-            b.debugVectors[0] = BoidRules::computeLeaderSeparation(b, boids.data(), N, params.desiredLeaderDistance);
+            b.debugVectors[0] = BoidRules::computeLeaderSeparation(b, boids, nearbyLeaders, params.desiredLeaderDistance);
             b.debugVectors[1] = BoidRules::computeBorderRepulsion(b.position, static_cast<float>(width), static_cast<float>(height), params.borderAlertDistance);
             b.debugVectors[2] = BoidRules::computeWallRepulsion(b.position, b.velocity, walls);
-            b.debugVectors[3] = BoidRules::computeEvadePredators(b, boids, params.predatorFearDistance, params.predatorFearScale, params.allyRadius);
+            b.debugVectors[3] = BoidRules::computeEvadePredators(b, boids, nearbyPredators, nearbyAllies, params.predatorFearDistance, params.predatorFearScale, params.allyRadius);
+
             totalChange = b.debugVectors[0] + b.debugVectors[1] + b.debugVectors[2] + b.debugVectors[3];
             break;
         }
@@ -307,6 +333,7 @@ void Simulation::computeForces(std::vector<glm::vec2>& velocityChanges)
         velocityChanges[i] = totalChange;
     }
 }
+
 
 void Simulation::applyVelocity(float dt, std::vector<glm::vec2>& velocityChanges)
 {
