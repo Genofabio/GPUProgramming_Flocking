@@ -114,7 +114,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);$(CudaToolkitLibDir);%(AdditionalLibraryDirectories);$(CudaToolkitLibDir); C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.9\lib\x64</AdditionalLibraryDirectories>
-      <AdditionalDependencies>%(AdditionalDependencies);C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.9\lib\x64\cudart.lib;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.9\lib\x64\cudadevrt.lib;glfw3.lib;opengl32.lib;freetype.lib;</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies);C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.9\lib\x64\cudart.lib;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.9\lib\x64\cudadevrt.lib;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.9\lib\x64\cudart.lib;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.9\lib\x64\cudart_static.lib;glfw3.lib;opengl32.lib;freetype.lib;</AdditionalDependencies>
     </Link>
     <CudaCompile>
       <CodeGeneration>compute_61,sm_61</CodeGeneration>
@@ -260,6 +260,7 @@
     <ClInclude Include="includes\GLFW\glfw3native.h" />
     <ClInclude Include="includes\gpu\BoidData.h" />
     <ClInclude Include="includes\gpu\cuda_kernel.cuh" />
+    <ClInclude Include="includes\gpu\Simulation.cuh" />
     <ClInclude Include="include\custom\ResourceManager.h" />
     <ClInclude Include="include\custom\Shader.h" />
     <ClInclude Include="include\custom\Simulation.h" />
@@ -270,7 +271,6 @@
   <ItemGroup>
     <ClCompile Include="src\core\BoidRules.cpp" />
     <ClCompile Include="src\core\main.cpp" />
-    <ClCompile Include="src\core\Simulation.cpp" />
     <ClCompile Include="src\graphics\BoidRenderer.cpp" />
     <ClCompile Include="src\graphics\GridRenderer.cpp" />
     <ClCompile Include="src\graphics\Shader.cpp" />
@@ -297,6 +297,7 @@
   <ItemGroup>
     <CudaCompile Include="src\gpu\BoidData.cu" />
     <CudaCompile Include="src\gpu\cuda_kernel.cu" />
+    <CudaCompile Include="src\gpu\Simulation.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

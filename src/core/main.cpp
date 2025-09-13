@@ -1,7 +1,7 @@
 #include <external/glad/glad.h>
 #include <external/GLFW/glfw3.h>
 
-#include <core/Simulation.h>
+#include <gpu/Simulation.cuh>
 #include <utility/ResourceManager.h>
 
 #include <iostream>
