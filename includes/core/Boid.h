@@ -1,3 +1,6 @@
+#pragma once
+#include <glm/glm.hpp>
+
 enum BoidType { PREY, PREDATOR, LEADER };
 
 struct Boid {

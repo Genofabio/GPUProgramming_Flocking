@@ -16,6 +16,7 @@
 #include <core/Grid.h>
 #include <core/UniformBoidGrid.h>
 #include <core/BoidParams.h>
+#include <gpu/BoidData.h>
 
 class Simulation
 {
@@ -39,6 +40,10 @@ public:
     void saveProfilerCSV(const std::string& path);
 
 private:
+    // GPU data
+    BoidData gpuBoids;
+    bool boidDataInitialized = false;
+
     // Agenti e ostacoli
     std::vector<Boid> boids;
     std::vector<Wall> walls;
@@ -46,7 +51,6 @@ private:
     // Griglie
     Grid wallGrid;
     UniformBoidGrid boidGrid;
-
 
     // Parametri di simulazione
     BoidParams params;
