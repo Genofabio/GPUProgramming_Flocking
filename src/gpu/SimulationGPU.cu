@@ -12,6 +12,9 @@
 #include <gpu/cuda_kernel.cuh>
 #include <cuda_runtime.h>
 
+#include <thrust/sort.h>
+#include <thrust/device_ptr.h>
+
 SimulationGPU::SimulationGPU(unsigned int width, unsigned int height)
     : keys()
     , width(width)
@@ -114,6 +117,13 @@ void SimulationGPU::init()
 
     // Initialize walls
     initWalls(50);
+
+    // Numero boid e celle griglia
+    size_t N = boids.size();
+    size_t numCells = boidGrid.nRows * boidGrid.nCols;
+
+    // Allocazione dei buffer della uniform grid
+    allocateGridBuffers(N, numCells);
 }
 
 void SimulationGPU::update(float dt)
@@ -315,40 +325,70 @@ void SimulationGPU::initWalls(int count)
 // === HELPER Update ===
 void SimulationGPU::computeForces(std::vector<glm::vec2>& velocityChanges) {
     int N = static_cast<int>(boids.size());
+    if (N == 0) return;
 
     int threads = 256;
     int blocks = (N + threads - 1) / threads;
 
-    // --- Alloca temporaneamente velChange sul device ---
+    // --- 1. Calcola gli indici della griglia ---
+    kernComputeIndices << <blocks, threads >> > (
+        N,
+        gpuBoids.posX, gpuBoids.posY,
+        dev_particleGridIndices,
+        dev_particleArrayIndices,
+        boidGrid.nCols, boidGrid.nRows,
+        0.0f, 0.0f,
+        boidGrid.cellWidth
+        );
+    cudaDeviceSynchronize();
+
+    // --- 2. Ordina per cella (thrust) ---
+    thrust::device_ptr<int> devGridKeys(dev_particleGridIndices);
+    thrust::device_ptr<int> devArrayIndices(dev_particleArrayIndices);
+    thrust::sort_by_key(devGridKeys, devGridKeys + N, devArrayIndices);
+
+    // --- 3. Trova start/end per ogni cella ---
+    kernIdentifyCellStartEnd << <blocks, threads >> > (
+        N,
+        dev_particleGridIndices,
+        dev_gridCellStartIndices,
+        dev_gridCellEndIndices
+        );
+    cudaDeviceSynchronize();
+
+    // --- 4. Alloca temporaneamente velocity change sul device ---
     float* d_velChangeX = nullptr;
     float* d_velChangeY = nullptr;
     cudaMalloc(&d_velChangeX, N * sizeof(float));
     cudaMalloc(&d_velChangeY, N * sizeof(float));
-
-    // Inizializza a zero
     cudaMemset(d_velChangeX, 0, N * sizeof(float));
     cudaMemset(d_velChangeY, 0, N * sizeof(float));
 
-    // --- Lancia il kernel usando gli array temporanei ---
-    computeForcesKernel << <blocks, threads >> > (
+    // --- 5. Lancia il kernel delle forze aggiornato ---
+    computeForcesKernelGridOptimized << <blocks, threads >> > (
         N,
         gpuBoids.posX, gpuBoids.posY,
         gpuBoids.velX, gpuBoids.velY,
         gpuBoids.influence,
         gpuBoids.type,
-        d_velChangeX,
-        d_velChangeY,
+        dev_particleArrayIndices,
+        dev_particleGridIndices,
+        dev_gridCellStartIndices,
+        dev_gridCellEndIndices,
+        boidGrid.nCols, boidGrid.nRows,
+        boidGrid.cellWidth,
         params.cohesionDistance, params.cohesionScale,
         params.separationDistance, params.separationScale,
         params.alignmentDistance, params.alignmentScale,
         static_cast<float>(width),
         static_cast<float>(height),
-        params.borderAlertDistance
+        params.borderAlertDistance,
+        d_velChangeX,
+        d_velChangeY
         );
-
     cudaDeviceSynchronize();
 
-    // --- Copia i risultati sul CPU ---
+    // --- 6. Copia i risultati sul CPU ---
     velocityChanges.resize(N);
     std::vector<float> tmpX(N), tmpY(N);
     cudaMemcpy(tmpX.data(), d_velChangeX, N * sizeof(float), cudaMemcpyDeviceToHost);
@@ -357,10 +397,11 @@ void SimulationGPU::computeForces(std::vector<glm::vec2>& velocityChanges) {
     for (int i = 0; i < N; i++)
         velocityChanges[i] = glm::vec2(tmpX[i], tmpY[i]);
 
-    // --- Libera la memoria temporanea ---
+    // --- 7. Libera memoria temporanea ---
     cudaFree(d_velChangeX);
     cudaFree(d_velChangeY);
 }
+
 
 
 void SimulationGPU::applyVelocity(float dt, std::vector<glm::vec2>& velocityChanges)
@@ -413,4 +454,48 @@ void SimulationGPU::spawnNewBoids()
     // Spawn nuovi boid
     for (auto& p : spawnPairs)
         boids.push_back(BoidRules::computeSpawnedBoid(boids[p.first], boids[p.second], currentTime));
+}
+
+void SimulationGPU::allocateGridBuffers(size_t N, size_t numCells)
+{
+    // Prima liberiamo eventuali buffer già allocati
+    freeGridBuffers();
+
+    // Allochiamo i buffer legati ai boid
+    if (cudaMalloc(&dev_particleGridIndices, N * sizeof(int)) != cudaSuccess)
+        throw std::runtime_error("cudaMalloc failed: dev_particleGridIndices");
+
+    if (cudaMalloc(&dev_particleArrayIndices, N * sizeof(int)) != cudaSuccess)
+        throw std::runtime_error("cudaMalloc failed: dev_particleArrayIndices");
+
+    // Allochiamo i buffer legati alle celle della griglia
+    if (cudaMalloc(&dev_gridCellStartIndices, numCells * sizeof(int)) != cudaSuccess)
+        throw std::runtime_error("cudaMalloc failed: dev_gridCellStartIndices");
+
+    if (cudaMalloc(&dev_gridCellEndIndices, numCells * sizeof(int)) != cudaSuccess)
+        throw std::runtime_error("cudaMalloc failed: dev_gridCellEndIndices");
+
+    // Inizializziamo le celle a -1 (vuote)
+    cudaMemset(dev_gridCellStartIndices, -1, numCells * sizeof(int));
+    cudaMemset(dev_gridCellEndIndices, -1, numCells * sizeof(int));
+}
+
+void SimulationGPU::freeGridBuffers()
+{
+    if (dev_particleGridIndices) {
+        cudaFree(dev_particleGridIndices);
+        dev_particleGridIndices = nullptr;
+    }
+    if (dev_particleArrayIndices) {
+        cudaFree(dev_particleArrayIndices);
+        dev_particleArrayIndices = nullptr;
+    }
+    if (dev_gridCellStartIndices) {
+        cudaFree(dev_gridCellStartIndices);
+        dev_gridCellStartIndices = nullptr;
+    }
+    if (dev_gridCellEndIndices) {
+        cudaFree(dev_gridCellEndIndices);
+        dev_gridCellEndIndices = nullptr;
+    }
 }

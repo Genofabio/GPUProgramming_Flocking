@@ -44,6 +44,12 @@ private:
     BoidData gpuBoids;
     bool boidDataInitialized = false;
 
+    // GPU buffers per la uniform grid
+    int* dev_particleGridIndices = nullptr;     // a quale cella appartiene ogni boid
+    int* dev_particleArrayIndices = nullptr;    // mapping da "posizione nell’array" -> boid originale
+    int* dev_gridCellStartIndices = nullptr;    // start index per ogni cella
+    int* dev_gridCellEndIndices = nullptr;      // end index per ogni cella
+
     // Agenti e ostacoli
     std::vector<Boid> boids;
     std::vector<Wall> walls;
@@ -80,4 +86,8 @@ private:
     void applyVelocity(float dt, std::vector<glm::vec2>& velocityChanges);
     void checkEatenPrey();
     void spawnNewBoids();
+
+    // Helper GPU
+    void allocateGridBuffers(size_t N, size_t numCells);
+    void freeGridBuffers();
 };
