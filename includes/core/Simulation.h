@@ -16,9 +16,8 @@
 #include <core/Grid.h>
 #include <core/UniformBoidGrid.h>
 #include <core/BoidParams.h>
-#include <gpu/BoidData.h>
 
-class Simulation
+class SimulationGPU
 {
 public:
     // Stato della simulazione
@@ -27,8 +26,8 @@ public:
     float currentTime = 0.0f;
 
     // Costruttori / distruttore
-    Simulation(unsigned int width, unsigned int height);
-    ~Simulation();
+    SimulationGPU(unsigned int width, unsigned int height);
+    ~SimulationGPU();
 
     void init();
     void processInput(float dt);
@@ -40,10 +39,6 @@ public:
     void saveProfilerCSV(const std::string& path);
 
 private:
-    // GPU data
-    BoidData gpuBoids;
-    bool boidDataInitialized = false;
-
     // Agenti e ostacoli
     std::vector<Boid> boids;
     std::vector<Wall> walls;
@@ -51,6 +46,7 @@ private:
     // Griglie
     Grid wallGrid;
     UniformBoidGrid boidGrid;
+
 
     // Parametri di simulazione
     BoidParams params;

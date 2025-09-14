@@ -384,9 +384,6 @@
     <ClInclude Include="includes\core\Profiler.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="includes\core\Simulation.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
     <ClInclude Include="includes\core\Wall.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
@@ -406,7 +403,7 @@
     <ClInclude Include="includes\gpu\BoidData.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="includes\gpu\Simulation.cuh" />
+    <ClInclude Include="includes\gpu\SimulationGPU.cuh" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\main.cpp">
@@ -443,8 +440,8 @@
   <ItemGroup>
     <None Include="shaders\sprite_shader.vert" />
     <None Include="shaders\sprite_shader.frag" />
-    <None Include="shaders\boid_shader.vert" />
-    <None Include="shaders\boid_shader.frag" />
+    <None Include="shaders\gpu_boid_shader.vert" />
+    <None Include="shaders\gpu_boid_shader.frag" />
     <None Include="shaders\text_shader.frag" />
     <None Include="shaders\text_shader.vert" />
     <None Include="shaders\vector_shader.frag" />
@@ -457,6 +454,6 @@
   <ItemGroup>
     <CudaCompile Include="src\gpu\cuda_kernel.cu" />
     <CudaCompile Include="src\gpu\BoidData.cu" />
-    <CudaCompile Include="src\gpu\Simulation.cu" />
+    <CudaCompile Include="src\gpu\SimulationGPU.cu" />
   </ItemGroup>
 </Project>

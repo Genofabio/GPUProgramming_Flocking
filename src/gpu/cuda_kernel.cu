@@ -19,68 +19,69 @@ __global__ void computeForcesKernel(
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= N) return;
 
-    if (type[i] != 0) return; // solo PREY
-
     float px = posX[i];
     float py = posY[i];
 
-    float perceivedCenterX = 0.0f;
-    float perceivedCenterY = 0.0f;
-    float perceivedVelX = 0.0f;
-    float perceivedVelY = 0.0f;
-    float sepX = 0.0f;
-    float sepY = 0.0f;
-    float totalWeight = 0.0f;
-    int neighborCount = 0;
+    // --- componenti distinte ---
+    float cohX = 0.0f, cohY = 0.0f;  // coesione
+    float sepX = 0.0f, sepY = 0.0f;  // separazione
+    float aliX = 0.0f, aliY = 0.0f;  // allineamento
 
-    // Loop unico per tutti i vicini
+    int neighborCount = 0;
+    float totalWeight = 0.0f;
+
+    // loop sui vicini
     for (int j = 0; j < N; j++) {
         if (i == j) continue;
-        if (type[j] != 0) continue; // solo PREY
+        //if (type[j] != 0) continue; // solo PREY
 
         float dx = posX[j] - px;
         float dy = posY[j] - py;
         float dist = sqrtf(dx * dx + dy * dy);
 
-        // Coesione
+        // --- coesione ---
         if (dist < cohesionDistance) {
-            perceivedCenterX += posX[j];
-            perceivedCenterY += posY[j];
+            cohX += posX[j];
+            cohY += posY[j];
             neighborCount++;
         }
 
-        // Separazione
+        // --- separazione ---
         if (dist < separationDistance && dist > 0.0f) {
             sepX += (px - posX[j]) / dist;
             sepY += (py - posY[j]) / dist;
         }
 
-        // Allineamento
+        // --- allineamento ---
         if (dist < alignmentDistance) {
             float w = influence[j];
-            perceivedVelX += velX[j] * w;
-            perceivedVelY += velY[j] * w;
+            aliX += velX[j] * w;
+            aliY += velY[j] * w;
             totalWeight += w;
         }
     }
 
-    // Coesione finale
+    // normalizzazione coesione
     if (neighborCount > 0) {
-        perceivedCenterX = (perceivedCenterX / neighborCount - px) * cohesionScale;
-        perceivedCenterY = (perceivedCenterY / neighborCount - py) * cohesionScale;
+        cohX = (cohX / neighborCount - px);
+        cohY = (cohY / neighborCount - py);
     }
 
-    // Allineamento finale
+    // normalizzazione allineamento
     if (totalWeight > 0.0f) {
-        perceivedVelX = (perceivedVelX / totalWeight) * alignmentScale;
-        perceivedVelY = (perceivedVelY / totalWeight) * alignmentScale;
+        aliX = (aliX / totalWeight);
+        aliY = (aliY / totalWeight);
     }
 
-    // Separazione
-    sepX *= separationScale;
-    sepY *= separationScale;
+    if (i < 10) {
+        printf("Boid %d: coh=(%.6f, %.6f) sep=(%.6f, %.6f) ali=(%.6f, %.6f) cohesionScale=%.6f\n",
+            i, cohX * cohesionScale, cohY * cohesionScale,
+            sepX * separationScale, sepY * separationScale,
+            aliX * alignmentScale, aliY * alignmentScale,
+            cohesionScale);
+    }
 
-    // Somma finale
-    outVelChangeX[i] = perceivedCenterX + sepX + perceivedVelX;
-    outVelChangeY[i] = perceivedCenterY + sepY + perceivedVelY;
+    // --- somma finale ---
+    outVelChangeX[i] = cohX * cohesionScale + sepX * separationScale + aliX * alignmentScale;
+    outVelChangeY[i] = cohY * cohesionScale + sepY * separationScale + aliY * alignmentScale;
 }

@@ -40,7 +40,8 @@ void allocateBoidDataGPU(BoidData& bd, size_t N) {
 void copyBoidsToGPU(const std::vector<Boid>& cpuBoids, BoidData& bd) {
     size_t N = cpuBoids.size();
 
-    std::vector<float> posX(N), posY(N), velX(N), velY(N), driftX(N), driftY(N);
+    std::vector<float> posX(N), posY(N), velX(N), velY(N);
+    std::vector<float> driftX(N), driftY(N);
     std::vector<float> scale(N), influence(N), birthTime(N);
     std::vector<int> type(N), age(N);
     std::vector<float> colorR(N), colorG(N), colorB(N);

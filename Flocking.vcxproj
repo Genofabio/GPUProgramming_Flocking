@@ -140,7 +140,6 @@
     <ClInclude Include="includes\core\BoidRules.h" />
     <ClInclude Include="includes\core\Grid.h" />
     <ClInclude Include="includes\core\Profiler.h" />
-    <ClInclude Include="includes\core\Simulation.h" />
     <ClInclude Include="includes\core\UniformBoidGrid.h" />
     <ClInclude Include="includes\core\Wall.h" />
     <ClInclude Include="includes\custom\BoidRenderer.h" />
@@ -260,7 +259,7 @@
     <ClInclude Include="includes\GLFW\glfw3native.h" />
     <ClInclude Include="includes\gpu\BoidData.h" />
     <ClInclude Include="includes\gpu\cuda_kernel.cuh" />
-    <ClInclude Include="includes\gpu\Simulation.cuh" />
+    <ClInclude Include="includes\gpu\SimulationGPU.cuh" />
     <ClInclude Include="include\custom\ResourceManager.h" />
     <ClInclude Include="include\custom\Shader.h" />
     <ClInclude Include="include\custom\Simulation.h" />
@@ -281,8 +280,8 @@
     <ClCompile Include="src\utility\ResourceManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\boid_shader.frag" />
-    <None Include="shaders\boid_shader.vert" />
+    <None Include="shaders\gpu_boid_shader.frag" />
+    <None Include="shaders\gpu_boid_shader.vert" />
     <None Include="shaders\sprite_shader.frag" />
     <None Include="shaders\sprite_shader.vert" />
     <None Include="shaders\text_shader.frag" />
@@ -297,7 +296,7 @@
   <ItemGroup>
     <CudaCompile Include="src\gpu\BoidData.cu" />
     <CudaCompile Include="src\gpu\cuda_kernel.cu" />
-    <CudaCompile Include="src\gpu\Simulation.cu" />
+    <CudaCompile Include="src\gpu\SimulationGPU.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -5,14 +5,14 @@
 #include <algorithm>
 #include <random>
 
-#include <gpu/Simulation.cuh>
+#include <gpu/SimulationGPU.cuh>
 #include <utility/ResourceManager.h>
 #include <gpu/BoidData.h>
 #include <core/Boid.h>
 #include <gpu/cuda_kernel.cuh>
 #include <cuda_runtime.h>
 
-Simulation::Simulation(unsigned int width, unsigned int height)
+SimulationGPU::SimulationGPU(unsigned int width, unsigned int height)
     : keys()
     , width(width)
     , height(height)
@@ -59,13 +59,13 @@ Simulation::Simulation(unsigned int width, unsigned int height)
     params.allyRadius = 50.0f;
 
     // Griglia boid basata sulla distanza massima di interazione
-    float maxBoidDistance = 300.0f;//std::max({ params.cohesionDistance, params.separationDistance, params.alignmentDistance, params.borderDistance, params.predatorFearDistance, params.predatorChaseDistance, params.predatorSeparationDistance, params.predatorEatDistance });
+    float maxBoidDistance = 2 * std::max({ params.cohesionDistance, params.separationDistance, params.alignmentDistance, params.borderDistance, params.predatorFearDistance, params.predatorChaseDistance, params.predatorSeparationDistance, params.predatorEatDistance });
     int nCols = static_cast<int>(std::ceil(width / maxBoidDistance));
     int nRows = static_cast<int>(std::ceil(height / maxBoidDistance));
     boidGrid = UniformBoidGrid(nRows, nCols, static_cast<float>(width), static_cast<float>(height));
 }
 
-Simulation::~Simulation()
+SimulationGPU::~SimulationGPU()
 {
     delete wallRenderer;
     delete boidRenderer;
@@ -74,10 +74,10 @@ Simulation::~Simulation()
     delete vectorRenderer;
 }
 
-void Simulation::init()
+void SimulationGPU::init()
 {
     // Shader setup
-    ResourceManager::LoadShader("shaders/boid_shader.vert", "shaders/boid_shader.frag", nullptr, "boid");
+    ResourceManager::LoadShader("shaders/gpu_boid_shader.vert", "shaders/gpu_boid_shader.frag", nullptr, "boid");
     ResourceManager::LoadShader("shaders/wall_shader.vert", "shaders/wall_shader.frag", nullptr, "wall");
     ResourceManager::LoadShader("shaders/grid_shader.vert", "shaders/grid_shader.frag", nullptr, "grid");
     ResourceManager::LoadShader("shaders/text_shader.vert", "shaders/text_shader.frag", nullptr, "text");
@@ -102,7 +102,7 @@ void Simulation::init()
 
     // Initialize boids
     initLeaders(0);
-    initPrey(200);
+    initPrey(20);
     initPredators(0);
 
     // Allocate and copy boid data to GPU
@@ -113,14 +113,15 @@ void Simulation::init()
     }
 
     // Initialize walls
-    initWalls(0);
+    initWalls(50);
 }
 
-void Simulation::update(float dt)
+void SimulationGPU::update(float dt)
 {
     profiler.start();
     currentTime += dt;
 
+    // Aggiorna griglia CPU
     std::vector<glm::vec2> positions;
     for (const auto& b : boids)
         positions.push_back(b.position);
@@ -130,22 +131,26 @@ void Simulation::update(float dt)
     size_t N = boids.size();
     std::vector<glm::vec2> velocityChanges(N, glm::vec2(0.0f));
 
-    // 1. Calcola tutte le forze
+    // Aggiorna GPU con i dati CPU
+
+    // 1. Calcola tutte le forze sul GPU
     computeForces(velocityChanges);
 
-    // 2. Applica le velocità ai boid
+    // 2. Applica le velocità ai boid CPU
     applyVelocity(dt, velocityChanges);
 
     // 3. Controlla quali prede sono state mangiate e le rimuove
-    checkEatenPrey();
+    //checkEatenPrey();
 
     // 4. Gestisce l'accoppiamento e lo spawn di nuovi boid
-    spawnNewBoids();
+    //spawnNewBoids();
 
-    profiler.log("update", profiler.stop());
+    copyBoidsToGPU(boids, gpuBoids);
+
+    //profiler.log("update", profiler.stop());
 }
 
-void Simulation::render()
+void SimulationGPU::render()
 {
     profiler.start();
 
@@ -155,10 +160,25 @@ void Simulation::render()
     //gridRenderer->draw(boidGrid, glm::vec3(0.6f, 0.6f, 0.6f));
 
     // 2. Draw boids
-    for (const Boid& b : boids) {
+    /*for (const Boid& b : boids) {
         float angle = glm::degrees(atan2(b.velocity.y, b.velocity.x)) + 270.0f;
         boidRenderer->draw(b.position, angle, b.color, 10.0f * b.scale);
+    }*/
+
+    std::vector<glm::vec2> positions;
+    std::vector<float> rotations;
+    std::vector<glm::vec3> colors;
+    std::vector<float> scales;
+
+    for (const auto& b : boids) {
+        positions.push_back(b.position);
+        rotations.push_back(glm::degrees(atan2(b.velocity.y, b.velocity.x)) + 270.0f);
+        colors.push_back(b.color);
+        scales.push_back(10.0f * b.scale);
     }
+
+    boidRenderer->updateInstances(positions, rotations, colors, scales);
+    boidRenderer->draw();
 
     // 3. Draw walls
     glLineWidth(3.0f);
@@ -192,19 +212,19 @@ void Simulation::render()
     textRenderer->draw("Boids: " + std::to_string(boids.size()), margin, height - margin - 40.0f, scale, color);
 }
 
-void Simulation::processInput(float dt) {}
+void SimulationGPU::processInput(float dt) {}
 
-void Simulation::updateStats(float dt) {
+void SimulationGPU::updateStats(float dt) {
     profiler.updateFrameStats(dt);
 }
 
-void Simulation::saveProfilerCSV(const std::string& path) {
+void SimulationGPU::saveProfilerCSV(const std::string& path) {
     profiler.saveCSV(path);
 }
 
 
 // === HELPER Init ===
-void Simulation::initLeaders(int count)
+void SimulationGPU::initLeaders(int count)
 {
     for (int i = 0; i < count; ++i) {
         Boid b;
@@ -219,7 +239,7 @@ void Simulation::initLeaders(int count)
     }
 }
 
-void Simulation::initPrey(int count)
+void SimulationGPU::initPrey(int count)
 {
     std::uniform_int_distribution<int> ageDist(0, 6);
     std::uniform_real_distribution<float> offsetDist(0.0f, 30.0f);
@@ -239,7 +259,7 @@ void Simulation::initPrey(int count)
     }
 }
 
-void Simulation::initPredators(int count)
+void SimulationGPU::initPredators(int count)
 {
     for (int i = 0; i < count; ++i) {
         Boid b;
@@ -254,7 +274,7 @@ void Simulation::initPredators(int count)
     }
 }
 
-void Simulation::initWalls(int count)
+void SimulationGPU::initWalls(int count)
 {
     auto candidates = wallGrid.cellEdges;
     std::shuffle(candidates.begin(), candidates.end(), rng);
@@ -293,93 +313,61 @@ void Simulation::initWalls(int count)
 }
 
 // === HELPER Update ===
-void Simulation::computeForces(std::vector<glm::vec2>& velocityChanges) {
+void SimulationGPU::computeForces(std::vector<glm::vec2>& velocityChanges) {
     int N = static_cast<int>(boids.size());
 
     int threads = 256;
     int blocks = (N + threads - 1) / threads;
 
+    // --- Alloca temporaneamente velChange sul device ---
+    float* d_velChangeX = nullptr;
+    float* d_velChangeY = nullptr;
+    cudaMalloc(&d_velChangeX, N * sizeof(float));
+    cudaMalloc(&d_velChangeY, N * sizeof(float));
+
+    // Inizializza a zero
+    cudaMemset(d_velChangeX, 0, N * sizeof(float));
+    cudaMemset(d_velChangeY, 0, N * sizeof(float));
+
+    printf("computeForces: N=%d, cohesionDistance=%.3f, cohesionScale=%.3f, "
+        "separationDistance=%.3f, separationScale=%.3f, "
+        "alignmentDistance=%.3f, alignmentScale=%.3f\n",
+        N,
+        params.cohesionDistance, params.cohesionScale,
+        params.separationDistance, params.separationScale,
+        params.alignmentDistance, params.alignmentScale);
+
+    // Lancia il kernel usando gli array temporanei
     computeForcesKernel << <blocks, threads >> > (
         N,
         gpuBoids.posX, gpuBoids.posY,
         gpuBoids.velX, gpuBoids.velY,
         gpuBoids.influence,
         gpuBoids.type,
-        gpuBoids.velX, // qui puoi scrivere direttamente su velX o su buffer separato
-        gpuBoids.velY,
+        d_velChangeX,  // array temporaneo
+        d_velChangeY,  // array temporaneo
         params.cohesionDistance, params.cohesionScale,
         params.separationDistance, params.separationScale,
         params.alignmentDistance, params.alignmentScale
-        );
+    );
 
     cudaDeviceSynchronize();
+
+    // Copia i risultati sul CPU
+    velocityChanges.resize(N);
+    std::vector<float> tmpX(N), tmpY(N);
+    cudaMemcpy(tmpX.data(), d_velChangeX, N * sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(tmpY.data(), d_velChangeY, N * sizeof(float), cudaMemcpyDeviceToHost);
+
+    for (int i = 0; i < N; i++)
+        velocityChanges[i] = glm::vec2(tmpX[i], tmpY[i]);
+
+    // Libera la memoria temporanea
+    cudaFree(d_velChangeX);
+    cudaFree(d_velChangeY);
 }
 
-//void Simulation::computeForces(std::vector<glm::vec2>& velocityChanges)
-//{
-//    size_t N = boids.size();
-//
-//    for (size_t i = 0; i < N; ++i) {
-//        Boid& b = boids[i];
-//        glm::vec2 totalChange(0.0f);
-//
-//        BoidRules::computeBoidUpgrade(b, currentTime);
-//
-//        int col = static_cast<int>(b.position.x / wallGrid.cellWidth);
-//        int row = static_cast<int>(b.position.y / wallGrid.cellHeight);
-//
-//        // Ottieni boid vicini
-//        std::vector<size_t> nearbyIndices = boidGrid.getNearbyBoids(b.position);
-//
-//        // Suddividi i vicini per tipo
-//        std::vector<size_t> nearbyPrey, nearbyPredators, nearbyLeaders, nearbyAllies;
-//        for (size_t idx : nearbyIndices) {
-//            const Boid& other = boids[idx];
-//            if (&b == &other) continue;
-//
-//            switch (other.type) {
-//            case PREY:   nearbyPrey.push_back(idx); nearbyAllies.push_back(idx); break;
-//            case PREDATOR: nearbyPredators.push_back(idx); break;
-//            case LEADER: nearbyLeaders.push_back(idx); break;
-//            }
-//        }
-//
-//        switch (b.type) {
-//        case PREY:
-//            totalChange += BoidRules::computeCohesion(b, boids, nearbyPrey, params.cohesionDistance, params.cohesionScale);
-//            totalChange += BoidRules::computeSeparation(b, boids, nearbyPrey, params.separationDistance, params.separationScale);
-//            totalChange += BoidRules::computeAlignment(b, boids, nearbyPrey, params.alignmentDistance, params.alignmentScale);
-//            totalChange += BoidRules::computeFollowLeaders(b, boids, nearbyLeaders, params.leaderInfluenceDistance, params.leaderInfluenceScale);
-//            totalChange += BoidRules::computeBorderRepulsion(b.position, static_cast<float>(width), static_cast<float>(height), params.borderAlertDistance);
-//            totalChange += BoidRules::computeWallRepulsion(b.position, b.velocity, walls);
-//            totalChange += BoidRules::computeEvadePredators(b, boids, nearbyPredators, nearbyAllies, params.predatorFearDistance, params.predatorFearScale, params.allyRadius);
-//            break;
-//
-//        case PREDATOR:
-//            b.debugVectors[0] = BoidRules::computeChasePrey(i, boids, nearbyPrey, params.predatorChaseDistance, params.predatorChaseScale, params.predatorBoostRadius);
-//            b.debugVectors[1] = BoidRules::computePredatorSeparation(b, boids, nearbyPredators, params.predatorSeparationDistance) * params.predatorSeparationScale;
-//            b.debugVectors[2] = BoidRules::computeBorderRepulsion(b.position, static_cast<float>(width), static_cast<float>(height), params.borderAlertDistance);
-//            b.debugVectors[3] = BoidRules::computeWallRepulsion(b.position, b.velocity, walls);
-//
-//            totalChange = b.debugVectors[0] + b.debugVectors[1] + b.debugVectors[2] + b.debugVectors[3];
-//            break;
-//
-//        case LEADER:
-//            b.debugVectors[0] = BoidRules::computeLeaderSeparation(b, boids, nearbyLeaders, params.desiredLeaderDistance);
-//            b.debugVectors[1] = BoidRules::computeBorderRepulsion(b.position, static_cast<float>(width), static_cast<float>(height), params.borderAlertDistance);
-//            b.debugVectors[2] = BoidRules::computeWallRepulsion(b.position, b.velocity, walls);
-//            b.debugVectors[3] = BoidRules::computeEvadePredators(b, boids, nearbyPredators, nearbyAllies, params.predatorFearDistance, params.predatorFearScale, params.allyRadius);
-//
-//            totalChange = b.debugVectors[0] + b.debugVectors[1] + b.debugVectors[2] + b.debugVectors[3];
-//            break;
-//        }
-//
-//        velocityChanges[i] = totalChange;
-//    }
-//}
-
-
-void Simulation::applyVelocity(float dt, std::vector<glm::vec2>& velocityChanges)
+void SimulationGPU::applyVelocity(float dt, std::vector<glm::vec2>& velocityChanges)
 {
     size_t N = boids.size();
     for (size_t i = 0; i < N; ++i) {
@@ -391,7 +379,7 @@ void Simulation::applyVelocity(float dt, std::vector<glm::vec2>& velocityChanges
     }
 }
 
-void Simulation::checkEatenPrey()
+void SimulationGPU::checkEatenPrey()
 {
     size_t N = boids.size();
     std::vector<size_t> eatenPreyLocal;
@@ -415,7 +403,7 @@ void Simulation::checkEatenPrey()
     }
 }
 
-void Simulation::spawnNewBoids()
+void SimulationGPU::spawnNewBoids()
 {
     std::vector<std::pair<size_t, size_t>> spawnPairs;
     std::vector<int> boidCouplesLocal;
