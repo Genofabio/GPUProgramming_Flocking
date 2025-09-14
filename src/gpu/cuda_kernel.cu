@@ -14,7 +14,8 @@ __global__ void computeForcesKernel(
     float* outVelChangeY,
     float cohesionDistance, float cohesionScale,
     float separationDistance, float separationScale,
-    float alignmentDistance, float alignmentScale
+    float alignmentDistance, float alignmentScale,
+    float width, float height, float borderAlertDistance
 ) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= N) return;
@@ -23,17 +24,16 @@ __global__ void computeForcesKernel(
     float py = posY[i];
 
     // --- componenti distinte ---
-    float cohX = 0.0f, cohY = 0.0f;  // coesione
-    float sepX = 0.0f, sepY = 0.0f;  // separazione
-    float aliX = 0.0f, aliY = 0.0f;  // allineamento
+    float cohX = 0.0f, cohY = 0.0f;
+    float sepX = 0.0f, sepY = 0.0f;
+    float aliX = 0.0f, aliY = 0.0f;
 
     int neighborCount = 0;
     float totalWeight = 0.0f;
 
-    // loop sui vicini
+    // --- Loop sui vicini ---
     for (int j = 0; j < N; j++) {
         if (i == j) continue;
-        //if (type[j] != 0) continue; // solo PREY
 
         float dx = posX[j] - px;
         float dy = posY[j] - py;
@@ -61,27 +61,32 @@ __global__ void computeForcesKernel(
         }
     }
 
-    // normalizzazione coesione
+    // Normalizzazione coesione
     if (neighborCount > 0) {
-        cohX = (cohX / neighborCount - px);
-        cohY = (cohY / neighborCount - py);
+        cohX = (cohX / neighborCount - px) * cohesionScale;
+        cohY = (cohY / neighborCount - py) * cohesionScale;
     }
 
-    // normalizzazione allineamento
+    // Normalizzazione allineamento
     if (totalWeight > 0.0f) {
-        aliX = (aliX / totalWeight);
-        aliY = (aliY / totalWeight);
+        aliX = (aliX / totalWeight) * alignmentScale;
+        aliY = (aliY / totalWeight) * alignmentScale;
     }
 
-    if (i < 10) {
-        printf("Boid %d: coh=(%.6f, %.6f) sep=(%.6f, %.6f) ali=(%.6f, %.6f) cohesionScale=%.6f\n",
-            i, cohX * cohesionScale, cohY * cohesionScale,
-            sepX * separationScale, sepY * separationScale,
-            aliX * alignmentScale, aliY * alignmentScale,
-            cohesionScale);
-    }
+    // Scaling separazione
+    sepX *= separationScale;
+    sepY *= separationScale;
 
-    // --- somma finale ---
-    outVelChangeX[i] = cohX * cohesionScale + sepX * separationScale + aliX * alignmentScale;
-    outVelChangeY[i] = cohY * cohesionScale + sepY * separationScale + aliY * alignmentScale;
+    // --- Border Repulsion ---
+    float borderX = 0.0f, borderY = 0.0f;
+    if (px < borderAlertDistance) borderX += (borderAlertDistance - px);
+    if ((width - px) < borderAlertDistance) borderX -= (borderAlertDistance - (width - px));
+    if (py < borderAlertDistance) borderY += (borderAlertDistance - py);
+    if ((height - py) < borderAlertDistance) borderY -= (borderAlertDistance - (height - py));
+    borderX *= 0.2f;
+    borderY *= 0.2f;
+
+    // --- Somma finale ---
+    outVelChangeX[i] = cohX + sepX + aliX + borderX;
+    outVelChangeY[i] = cohY + sepY + aliY + borderY;
 }

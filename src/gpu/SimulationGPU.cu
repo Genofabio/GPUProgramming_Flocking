@@ -329,31 +329,26 @@ void SimulationGPU::computeForces(std::vector<glm::vec2>& velocityChanges) {
     cudaMemset(d_velChangeX, 0, N * sizeof(float));
     cudaMemset(d_velChangeY, 0, N * sizeof(float));
 
-    printf("computeForces: N=%d, cohesionDistance=%.3f, cohesionScale=%.3f, "
-        "separationDistance=%.3f, separationScale=%.3f, "
-        "alignmentDistance=%.3f, alignmentScale=%.3f\n",
-        N,
-        params.cohesionDistance, params.cohesionScale,
-        params.separationDistance, params.separationScale,
-        params.alignmentDistance, params.alignmentScale);
-
-    // Lancia il kernel usando gli array temporanei
+    // --- Lancia il kernel usando gli array temporanei ---
     computeForcesKernel << <blocks, threads >> > (
         N,
         gpuBoids.posX, gpuBoids.posY,
         gpuBoids.velX, gpuBoids.velY,
         gpuBoids.influence,
         gpuBoids.type,
-        d_velChangeX,  // array temporaneo
-        d_velChangeY,  // array temporaneo
+        d_velChangeX,
+        d_velChangeY,
         params.cohesionDistance, params.cohesionScale,
         params.separationDistance, params.separationScale,
-        params.alignmentDistance, params.alignmentScale
-    );
+        params.alignmentDistance, params.alignmentScale,
+        static_cast<float>(width),
+        static_cast<float>(height),
+        params.borderAlertDistance
+        );
 
     cudaDeviceSynchronize();
 
-    // Copia i risultati sul CPU
+    // --- Copia i risultati sul CPU ---
     velocityChanges.resize(N);
     std::vector<float> tmpX(N), tmpY(N);
     cudaMemcpy(tmpX.data(), d_velChangeX, N * sizeof(float), cudaMemcpyDeviceToHost);
@@ -362,10 +357,11 @@ void SimulationGPU::computeForces(std::vector<glm::vec2>& velocityChanges) {
     for (int i = 0; i < N; i++)
         velocityChanges[i] = glm::vec2(tmpX[i], tmpY[i]);
 
-    // Libera la memoria temporanea
+    // --- Libera la memoria temporanea ---
     cudaFree(d_velChangeX);
     cudaFree(d_velChangeY);
 }
+
 
 void SimulationGPU::applyVelocity(float dt, std::vector<glm::vec2>& velocityChanges)
 {

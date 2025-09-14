@@ -10,5 +10,6 @@ __global__ void computeForcesKernel(
     float* outVelChangeY,
     float cohesionDistance, float cohesionScale,
     float separationDistance, float separationScale,
-    float alignmentDistance, float alignmentScale
+    float alignmentDistance, float alignmentScale,
+    float width, float height, float borderAlertDistance
 );
