@@ -17,6 +17,9 @@ struct BoidData {
     int* type = nullptr;
     int* age = nullptr;
     float* birthTime = nullptr;
+    float* velChangeX = nullptr;
+    float* velChangeY = nullptr;
+    float* rotations = nullptr;
     float* colorR = { nullptr };
     float* colorG = { nullptr };
     float* colorB = { nullptr };

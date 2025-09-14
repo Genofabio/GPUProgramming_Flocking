@@ -26,9 +26,15 @@ void allocateBoidDataGPU(BoidData& bd, size_t N) {
     CUDA_CHECK(cudaMalloc(&bd.age, N * sizeof(int)));
     CUDA_CHECK(cudaMalloc(&bd.birthTime, N * sizeof(float)));
 
+    CUDA_CHECK(cudaMalloc(&bd.velChangeX, N * sizeof(float)));
+    CUDA_CHECK(cudaMalloc(&bd.velChangeY, N * sizeof(float)));
+
     CUDA_CHECK(cudaMalloc(&bd.colorR, N * sizeof(float)));
     CUDA_CHECK(cudaMalloc(&bd.colorG, N * sizeof(float)));
     CUDA_CHECK(cudaMalloc(&bd.colorB, N * sizeof(float)));
+
+    // --- Nuovo buffer per rotazioni ---
+    CUDA_CHECK(cudaMalloc(&bd.rotations, N * sizeof(float)));
 
     for (int i = 0; i < 5; ++i)
         CUDA_CHECK(cudaMalloc(&bd.debugX[i], N * sizeof(float)));
@@ -155,6 +161,12 @@ void freeBoidDataGPU(BoidData& bd) {
     cudaFree(bd.type); cudaFree(bd.age); cudaFree(bd.birthTime);
 
     cudaFree(bd.colorR); cudaFree(bd.colorG); cudaFree(bd.colorB);
+
+    cudaFree(bd.velChangeX);
+    cudaFree(bd.velChangeY);
+
+    // --- Libera il nuovo buffer ---
+    cudaFree(bd.rotations);
 
     for (int i = 0; i < 5; i++) { cudaFree(bd.debugX[i]); cudaFree(bd.debugY[i]); }
 }

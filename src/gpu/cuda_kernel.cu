@@ -171,3 +171,50 @@ __global__ void kernIdentifyCellStartEnd(
         gridCellEndIndices[currentCell] = i;
     }
 }
+
+__global__ void kernApplyVelocityChange(
+    int N,
+    float* posX, float* posY,
+    float* velX, float* velY,
+    const float* velChangeX, const float* velChangeY,
+    float dt, float slowDownFactor, float maxSpeed)
+{
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= N) return;
+
+    // Applica la variazione di velocità con il fattore di rallentamento
+    velX[i] += velChangeX[i] * slowDownFactor;
+    velY[i] += velChangeY[i] * slowDownFactor;
+
+    // Limita la velocità
+    float speed = sqrtf(velX[i] * velX[i] + velY[i] * velY[i]);
+    if (speed > maxSpeed) {
+        velX[i] = (velX[i] / speed) * maxSpeed;
+        velY[i] = (velY[i] / speed) * maxSpeed;
+    }
+
+    // Aggiorna la posizione
+    posX[i] += velX[i] * dt;
+    posY[i] += velY[i] * dt;
+}
+
+__global__ void kernComputeRotations(int N, const float* velX, const float* velY, float* rotations) {
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= N) return;
+
+    float angle = atan2f(velY[i], velX[i]);   // radianti
+    angle = angle * (180.0f / 3.14159265f);   // conversione in gradi
+    rotations[i] = angle + 270.0f;            // offset per far “puntare” il modello in avanti
+}
+
+__global__ void kernIntegratePositions(int N, float dt,
+    float* posX, float* posY,
+    const float* velX, const float* velY) {
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= N) return;
+
+    posX[i] += velX[i] * dt;
+    posY[i] += velY[i] * dt;
+}
+
+

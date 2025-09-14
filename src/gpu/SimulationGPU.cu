@@ -15,6 +15,12 @@
 #include <thrust/sort.h>
 #include <thrust/device_ptr.h>
 
+#define CUDA_CHECK(err) \
+    if(err != cudaSuccess) { \
+        std::cerr << "CUDA error: " << cudaGetErrorString(err) << std::endl; \
+        exit(EXIT_FAILURE); \
+    }
+
 SimulationGPU::SimulationGPU(unsigned int width, unsigned int height)
     : keys()
     , width(width)
@@ -105,7 +111,7 @@ void SimulationGPU::init()
 
     // Initialize boids
     initLeaders(0);
-    initPrey(20);
+    initPrey(3000);
     initPredators(0);
 
     // Allocate and copy boid data to GPU
@@ -126,39 +132,189 @@ void SimulationGPU::init()
     allocateGridBuffers(N, numCells);
 }
 
+//void SimulationGPU::update(float dt)
+//{
+//    profiler.start();
+//    currentTime += dt;
+//
+//    // Aggiorna griglia CPU
+//    std::vector<glm::vec2> positions;
+//    for (const auto& b : boids)
+//        positions.push_back(b.position);
+//
+//    boidGrid.updateCells(positions);
+//
+//    size_t N = boids.size();
+//    std::vector<glm::vec2> velocityChanges(N, glm::vec2(0.0f));
+//
+//    // Aggiorna GPU con i dati CPU
+//
+//    // 1. Calcola tutte le forze sul GPU
+//    computeForces(velocityChanges);
+//
+//    std::vector<glm::vec2> positions;
+//    std::vector<float> rotations;
+//    std::vector<glm::vec3> colors;
+//    std::vector<float> scales;
+//
+//    // 2. Applica le velocità ai boid CPU
+//    //applyVelocity(dt, velocityChanges);
+//
+//    // 3. Controlla quali prede sono state mangiate e le rimuove
+//    //checkEatenPrey();
+//
+//    // 4. Gestisce l'accoppiamento e lo spawn di nuovi boid
+//    //spawnNewBoids();
+//
+//    //copyBoidsToGPU(boids, gpuBoids);
+//
+//    //profiler.log("update", profiler.stop());
+//
+//    cudaMemset(gpuBoids.velChangeX, 0, N * sizeof(float));
+//    cudaMemset(gpuBoids.velChangeY, 0, N * sizeof(float));
+//}
+
+//void SimulationGPU::update(float dt)
+//{
+//    //profiler.start();
+//    currentTime += dt;
+//
+//    size_t N = boids.size();
+//    if (N == 0) return;
+//
+//    // --- 1. Calcola tutte le forze sul GPU ---
+//    std::vector<glm::vec2> velocityChanges(N, glm::vec2(0.0f));
+//    computeForces(velocityChanges);
+//
+//    // --- 2. Copia dati GPU necessari per il rendering ---
+//    std::vector<glm::vec2> positions(N);
+//    std::vector<float> rotations(N);
+//    std::vector<glm::vec3> colors(N);
+//    std::vector<float> scales(N);
+//
+//    // Copia posizioni
+//    std::vector<float> posX(N), posY(N);
+//    CUDA_CHECK(cudaMemcpy(posX.data(), gpuBoids.posX, N * sizeof(float), cudaMemcpyDeviceToHost));
+//    CUDA_CHECK(cudaMemcpy(posY.data(), gpuBoids.posY, N * sizeof(float), cudaMemcpyDeviceToHost));
+//
+//    for (size_t i = 0; i < N; i++)
+//        positions[i] = { posX[i], posY[i] };
+//
+//    // Copia velocità per calcolare rotazioni
+//    std::vector<float> velX(N), velY(N);
+//    CUDA_CHECK(cudaMemcpy(velX.data(), gpuBoids.velX, N * sizeof(float), cudaMemcpyDeviceToHost));
+//    CUDA_CHECK(cudaMemcpy(velY.data(), gpuBoids.velY, N * sizeof(float), cudaMemcpyDeviceToHost));
+//
+//    for (size_t i = 0; i < N; i++)
+//        rotations[i] = atan2f(velY[i], velX[i]);
+//
+//    // Copia colori
+//    std::vector<float> colorR(N), colorG(N), colorB(N);
+//    CUDA_CHECK(cudaMemcpy(colorR.data(), gpuBoids.colorR, N * sizeof(float), cudaMemcpyDeviceToHost));
+//    CUDA_CHECK(cudaMemcpy(colorG.data(), gpuBoids.colorG, N * sizeof(float), cudaMemcpyDeviceToHost));
+//    CUDA_CHECK(cudaMemcpy(colorB.data(), gpuBoids.colorB, N * sizeof(float), cudaMemcpyDeviceToHost));
+//
+//    for (size_t i = 0; i < N; i++)
+//        colors[i] = { colorR[i], colorG[i], colorB[i] };
+//
+//    // Copia scale
+//    CUDA_CHECK(cudaMemcpy(scales.data(), gpuBoids.scale, N * sizeof(float), cudaMemcpyDeviceToHost));
+//
+//    // --- 3. Altri aggiornamenti della simulazione (opzionali) ---
+//    //applyVelocity(dt, velocityChanges);
+//    //checkEatenPrey();
+//    //spawnNewBoids();
+//    //copyBoidsToGPU(boids, gpuBoids);
+//
+//    // --- 4. Resetta le velocità di cambiamento sul GPU ---
+//    cudaMemset(gpuBoids.velChangeX, 0, N * sizeof(float));
+//    cudaMemset(gpuBoids.velChangeY, 0, N * sizeof(float));
+//
+//    //profiler.log("update", profiler.stop());
+//
+//    // Ora positions, rotations, colors e scales sono pronti per il rendering
+//}
+
 void SimulationGPU::update(float dt)
 {
-    profiler.start();
     currentTime += dt;
-
-    // Aggiorna griglia CPU
-    std::vector<glm::vec2> positions;
-    for (const auto& b : boids)
-        positions.push_back(b.position);
-
-    boidGrid.updateCells(positions);
-
     size_t N = boids.size();
-    std::vector<glm::vec2> velocityChanges(N, glm::vec2(0.0f));
+    if (N == 0) return;
 
-    // Aggiorna GPU con i dati CPU
+    int threads = 256;
+    int blocks = (N + threads - 1) / threads;
 
-    // 1. Calcola tutte le forze sul GPU
-    computeForces(velocityChanges);
+    // --- 1. Calcola le forze e accumula variazioni velocità ---
+    computeForces();
 
-    // 2. Applica le velocità ai boid CPU
-    applyVelocity(dt, velocityChanges);
+    // --- 2. Aggiorna velocità e posizioni con i delta ---
+    kernApplyVelocityChange << <blocks, threads >> > (
+        static_cast<int>(N),
+        gpuBoids.posX, gpuBoids.posY,
+        gpuBoids.velX, gpuBoids.velY,
+        gpuBoids.velChangeX, gpuBoids.velChangeY,
+        dt, params.slowDownFactor, params.maxSpeed
+        );
+    cudaDeviceSynchronize();
 
-    // 3. Controlla quali prede sono state mangiate e le rimuove
-    //checkEatenPrey();
+    // --- 3. Calcola rotazioni dai vettori velocità ---
+    kernComputeRotations << <blocks, threads >> > (
+        static_cast<int>(N),
+        gpuBoids.velX, gpuBoids.velY,
+        gpuBoids.rotations
+        );
+    cudaDeviceSynchronize();
 
-    // 4. Gestisce l'accoppiamento e lo spawn di nuovi boid
-    //spawnNewBoids();
+    // --- 4. Copia solo i dati necessari per il rendering ---
+    renderPositions.resize(N);
+    renderRotations.resize(N);
+    renderColors.resize(N);
+    renderScales.resize(N);
 
-    copyBoidsToGPU(boids, gpuBoids);
+    std::vector<float> posX(N), posY(N);
+    CUDA_CHECK(cudaMemcpy(posX.data(), gpuBoids.posX, N * sizeof(float), cudaMemcpyDeviceToHost));
+    CUDA_CHECK(cudaMemcpy(posY.data(), gpuBoids.posY, N * sizeof(float), cudaMemcpyDeviceToHost));
+    for (size_t i = 0; i < N; i++)
+        renderPositions[i] = { posX[i], posY[i] };
 
-    //profiler.log("update", profiler.stop());
+    CUDA_CHECK(cudaMemcpy(renderRotations.data(), gpuBoids.rotations, N * sizeof(float), cudaMemcpyDeviceToHost));
+
+    std::vector<float> colorR(N), colorG(N), colorB(N);
+    CUDA_CHECK(cudaMemcpy(colorR.data(), gpuBoids.colorR, N * sizeof(float), cudaMemcpyDeviceToHost));
+    CUDA_CHECK(cudaMemcpy(colorG.data(), gpuBoids.colorG, N * sizeof(float), cudaMemcpyDeviceToHost));
+    CUDA_CHECK(cudaMemcpy(colorB.data(), gpuBoids.colorB, N * sizeof(float), cudaMemcpyDeviceToHost));
+    for (size_t i = 0; i < N; i++)
+        renderColors[i] = { colorR[i], colorG[i], colorB[i] };
+
+    CUDA_CHECK(cudaMemcpy(renderScales.data(), gpuBoids.scale, N * sizeof(float), cudaMemcpyDeviceToHost));
+
+    // --- 5. Resetta i delta velocità ---
+    cudaMemset(gpuBoids.velChangeX, 0, N * sizeof(float));
+    cudaMemset(gpuBoids.velChangeY, 0, N * sizeof(float));
+
+    // --- DEBUG: stampa primi boid ---
+    //for (int i = 0; i < std::min<size_t>(N, 5); i++) {
+    //    std::cout << "Boid " << i
+    //        << " pos=(" << renderPositions[i].x << ", " << renderPositions[i].y << ")"
+    //        << " vel=(";
+
+    //    float vx, vy;
+    //    CUDA_CHECK(cudaMemcpy(&vx, gpuBoids.velX + i, sizeof(float), cudaMemcpyDeviceToHost));
+    //    CUDA_CHECK(cudaMemcpy(&vy, gpuBoids.velY + i, sizeof(float), cudaMemcpyDeviceToHost));
+
+    //    std::cout << vx << ", " << vy << ")"
+    //        << " rot=" << renderRotations[i]
+    //        << " scale=" << renderScales[i]
+    //        << " color=(" << renderColors[i].r << "," << renderColors[i].g << "," << renderColors[i].b << ")"
+    //        << std::endl;
+    //}
+
+    // --- 6. Aggiorna il renderer ---
+    for (size_t i = 0; i < N; i++)
+        renderScales[i] *= 8.0f;
+    boidRenderer->updateInstances(renderPositions, renderRotations, renderColors, renderScales);
 }
+
 
 void SimulationGPU::render()
 {
@@ -169,25 +325,7 @@ void SimulationGPU::render()
     gridRenderer->draw(wallGrid, glm::vec3(0.2f, 0.2f, 0.2f));
     //gridRenderer->draw(boidGrid, glm::vec3(0.6f, 0.6f, 0.6f));
 
-    // 2. Draw boids
-    /*for (const Boid& b : boids) {
-        float angle = glm::degrees(atan2(b.velocity.y, b.velocity.x)) + 270.0f;
-        boidRenderer->draw(b.position, angle, b.color, 10.0f * b.scale);
-    }*/
-
-    std::vector<glm::vec2> positions;
-    std::vector<float> rotations;
-    std::vector<glm::vec3> colors;
-    std::vector<float> scales;
-
-    for (const auto& b : boids) {
-        positions.push_back(b.position);
-        rotations.push_back(glm::degrees(atan2(b.velocity.y, b.velocity.x)) + 270.0f);
-        colors.push_back(b.color);
-        scales.push_back(10.0f * b.scale);
-    }
-
-    boidRenderer->updateInstances(positions, rotations, colors, scales);
+    // 2. Draw boids (usa i vettori aggiornati da update())
     boidRenderer->draw();
 
     // 3. Draw walls
@@ -198,17 +336,8 @@ void SimulationGPU::render()
     profiler.log("render", profiler.stop());
 
     // 4. Draw debug vectors
-    //for (Boid& b : boids) {
-    //    if (b.type == LEADER || b.type == PREDATOR) {
-    //        glm::vec2 start = b.position;
-
-    //        vectorRenderer->DrawVector(start, start + b.debugVectors[0] * 20.0f, glm::vec3(1.0f, 1.0f, 0.0f)); // giallo
-    //        vectorRenderer->DrawVector(start, start + b.debugVectors[1] * 20.0f, glm::vec3(1.0f, 0.0f, 0.0f)); // rosso
-    //        vectorRenderer->DrawVector(start, start + b.debugVectors[2] * 20.0f, glm::vec3(0.05f, 0.8f, 0.7f)); // ciano
-    //        vectorRenderer->DrawVector(start, start + b.debugVectors[3] * 20.0f, glm::vec3(0.0f, 0.0f, 1.0f)); // blu
-    //        //vectorRenderer->DrawVector(start, start + b.debugVectors[4] * 20.0f, glm::vec3(1.0f, 0.0f, 1.0f)); // magenta
-    //    }
-    //}
+    // Qui potremmo in futuro leggere i vettori di debug dalla GPU
+    // per ora resta commentato o continua a usare boids CPU se servono test
 
     // 5. Draw HUD / stats
     float margin = 10.0f;
@@ -217,9 +346,11 @@ void SimulationGPU::render()
 
     double fps = profiler.getCurrentFPS();
     if (fps > 0.0)
-        textRenderer->draw("FPS: " + std::to_string(static_cast<int>(fps)), margin, height - margin - 20.0f, scale, color);
+        textRenderer->draw("FPS: " + std::to_string(static_cast<int>(fps)),
+            margin, height - margin - 20.0f, scale, color);
 
-    textRenderer->draw("Boids: " + std::to_string(boids.size()), margin, height - margin - 40.0f, scale, color);
+    textRenderer->draw("Boids: " + std::to_string(boids.size()),
+        margin, height - margin - 40.0f, scale, color);
 }
 
 void SimulationGPU::processInput(float dt) {}
@@ -323,7 +454,7 @@ void SimulationGPU::initWalls(int count)
 }
 
 // === HELPER Update ===
-void SimulationGPU::computeForces(std::vector<glm::vec2>& velocityChanges) {
+void SimulationGPU::computeForces() {
     int N = static_cast<int>(boids.size());
     if (N == 0) return;
 
@@ -331,7 +462,7 @@ void SimulationGPU::computeForces(std::vector<glm::vec2>& velocityChanges) {
     int blocks = (N + threads - 1) / threads;
 
     // --- 1. Calcola gli indici della griglia ---
-    kernComputeIndices << <blocks, threads >> > (
+    kernComputeIndices <<<blocks, threads >>> (
         N,
         gpuBoids.posX, gpuBoids.posY,
         dev_particleGridIndices,
@@ -348,7 +479,7 @@ void SimulationGPU::computeForces(std::vector<glm::vec2>& velocityChanges) {
     thrust::sort_by_key(devGridKeys, devGridKeys + N, devArrayIndices);
 
     // --- 3. Trova start/end per ogni cella ---
-    kernIdentifyCellStartEnd << <blocks, threads >> > (
+    kernIdentifyCellStartEnd <<<blocks, threads>>> (
         N,
         dev_particleGridIndices,
         dev_gridCellStartIndices,
@@ -356,16 +487,8 @@ void SimulationGPU::computeForces(std::vector<glm::vec2>& velocityChanges) {
         );
     cudaDeviceSynchronize();
 
-    // --- 4. Alloca temporaneamente velocity change sul device ---
-    float* d_velChangeX = nullptr;
-    float* d_velChangeY = nullptr;
-    cudaMalloc(&d_velChangeX, N * sizeof(float));
-    cudaMalloc(&d_velChangeY, N * sizeof(float));
-    cudaMemset(d_velChangeX, 0, N * sizeof(float));
-    cudaMemset(d_velChangeY, 0, N * sizeof(float));
-
-    // --- 5. Lancia il kernel delle forze aggiornato ---
-    computeForcesKernelGridOptimized << <blocks, threads >> > (
+    // --- 4. Lancia il kernel delle forze ---
+    computeForcesKernelGridOptimized <<<blocks, threads >>> (
         N,
         gpuBoids.posX, gpuBoids.posY,
         gpuBoids.velX, gpuBoids.velY,
@@ -383,25 +506,11 @@ void SimulationGPU::computeForces(std::vector<glm::vec2>& velocityChanges) {
         static_cast<float>(width),
         static_cast<float>(height),
         params.borderAlertDistance,
-        d_velChangeX,
-        d_velChangeY
+        gpuBoids.velChangeX,
+        gpuBoids.velChangeY
         );
     cudaDeviceSynchronize();
-
-    // --- 6. Copia i risultati sul CPU ---
-    velocityChanges.resize(N);
-    std::vector<float> tmpX(N), tmpY(N);
-    cudaMemcpy(tmpX.data(), d_velChangeX, N * sizeof(float), cudaMemcpyDeviceToHost);
-    cudaMemcpy(tmpY.data(), d_velChangeY, N * sizeof(float), cudaMemcpyDeviceToHost);
-
-    for (int i = 0; i < N; i++)
-        velocityChanges[i] = glm::vec2(tmpX[i], tmpY[i]);
-
-    // --- 7. Libera memoria temporanea ---
-    cudaFree(d_velChangeX);
-    cudaFree(d_velChangeY);
 }
-
 
 
 void SimulationGPU::applyVelocity(float dt, std::vector<glm::vec2>& velocityChanges)

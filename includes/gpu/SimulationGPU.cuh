@@ -50,6 +50,11 @@ private:
     int* dev_gridCellStartIndices = nullptr;    // start index per ogni cella
     int* dev_gridCellEndIndices = nullptr;      // end index per ogni cella
 
+    std::vector<glm::vec2> renderPositions;
+    std::vector<float> renderRotations;
+    std::vector<glm::vec3> renderColors;
+    std::vector<float> renderScales;
+
     // Agenti e ostacoli
     std::vector<Boid> boids;
     std::vector<Wall> walls;
@@ -82,7 +87,7 @@ private:
     void initWalls(int n);
 
     // Helper update
-    void computeForces(std::vector<glm::vec2>& velocityChanges);
+    void computeForces();
     void applyVelocity(float dt, std::vector<glm::vec2>& velocityChanges);
     void checkEatenPrey();
     void spawnNewBoids();

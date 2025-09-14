@@ -39,3 +39,14 @@ __global__ void kernIdentifyCellStartEnd(
     int* gridCellStartIndices,
     int* gridCellEndIndices
 );
+
+__global__ void kernApplyVelocityChange(
+    int N,
+    float* posX, float* posY,
+    float* velX, float* velY,
+    const float* velChangeX, const float* velChangeY,
+    float dt, float slowDownFactor, float maxSpeed);
+__global__ void kernComputeRotations(int N, const float* velX, const float* velY, float* rotations);
+__global__ void kernIntegratePositions(int N, float dt,
+    float* posX, float* posY,
+	const float* velX, const float* velY);
