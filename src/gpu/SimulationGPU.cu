@@ -132,111 +132,9 @@ void SimulationGPU::init()
     allocateGridBuffers(N, numCells);
 }
 
-//void SimulationGPU::update(float dt)
-//{
-//    profiler.start();
-//    currentTime += dt;
-//
-//    // Aggiorna griglia CPU
-//    std::vector<glm::vec2> positions;
-//    for (const auto& b : boids)
-//        positions.push_back(b.position);
-//
-//    boidGrid.updateCells(positions);
-//
-//    size_t N = boids.size();
-//    std::vector<glm::vec2> velocityChanges(N, glm::vec2(0.0f));
-//
-//    // Aggiorna GPU con i dati CPU
-//
-//    // 1. Calcola tutte le forze sul GPU
-//    computeForces(velocityChanges);
-//
-//    std::vector<glm::vec2> positions;
-//    std::vector<float> rotations;
-//    std::vector<glm::vec3> colors;
-//    std::vector<float> scales;
-//
-//    // 2. Applica le velocità ai boid CPU
-//    //applyVelocity(dt, velocityChanges);
-//
-//    // 3. Controlla quali prede sono state mangiate e le rimuove
-//    //checkEatenPrey();
-//
-//    // 4. Gestisce l'accoppiamento e lo spawn di nuovi boid
-//    //spawnNewBoids();
-//
-//    //copyBoidsToGPU(boids, gpuBoids);
-//
-//    //profiler.log("update", profiler.stop());
-//
-//    cudaMemset(gpuBoids.velChangeX, 0, N * sizeof(float));
-//    cudaMemset(gpuBoids.velChangeY, 0, N * sizeof(float));
-//}
-
-//void SimulationGPU::update(float dt)
-//{
-//    //profiler.start();
-//    currentTime += dt;
-//
-//    size_t N = boids.size();
-//    if (N == 0) return;
-//
-//    // --- 1. Calcola tutte le forze sul GPU ---
-//    std::vector<glm::vec2> velocityChanges(N, glm::vec2(0.0f));
-//    computeForces(velocityChanges);
-//
-//    // --- 2. Copia dati GPU necessari per il rendering ---
-//    std::vector<glm::vec2> positions(N);
-//    std::vector<float> rotations(N);
-//    std::vector<glm::vec3> colors(N);
-//    std::vector<float> scales(N);
-//
-//    // Copia posizioni
-//    std::vector<float> posX(N), posY(N);
-//    CUDA_CHECK(cudaMemcpy(posX.data(), gpuBoids.posX, N * sizeof(float), cudaMemcpyDeviceToHost));
-//    CUDA_CHECK(cudaMemcpy(posY.data(), gpuBoids.posY, N * sizeof(float), cudaMemcpyDeviceToHost));
-//
-//    for (size_t i = 0; i < N; i++)
-//        positions[i] = { posX[i], posY[i] };
-//
-//    // Copia velocità per calcolare rotazioni
-//    std::vector<float> velX(N), velY(N);
-//    CUDA_CHECK(cudaMemcpy(velX.data(), gpuBoids.velX, N * sizeof(float), cudaMemcpyDeviceToHost));
-//    CUDA_CHECK(cudaMemcpy(velY.data(), gpuBoids.velY, N * sizeof(float), cudaMemcpyDeviceToHost));
-//
-//    for (size_t i = 0; i < N; i++)
-//        rotations[i] = atan2f(velY[i], velX[i]);
-//
-//    // Copia colori
-//    std::vector<float> colorR(N), colorG(N), colorB(N);
-//    CUDA_CHECK(cudaMemcpy(colorR.data(), gpuBoids.colorR, N * sizeof(float), cudaMemcpyDeviceToHost));
-//    CUDA_CHECK(cudaMemcpy(colorG.data(), gpuBoids.colorG, N * sizeof(float), cudaMemcpyDeviceToHost));
-//    CUDA_CHECK(cudaMemcpy(colorB.data(), gpuBoids.colorB, N * sizeof(float), cudaMemcpyDeviceToHost));
-//
-//    for (size_t i = 0; i < N; i++)
-//        colors[i] = { colorR[i], colorG[i], colorB[i] };
-//
-//    // Copia scale
-//    CUDA_CHECK(cudaMemcpy(scales.data(), gpuBoids.scale, N * sizeof(float), cudaMemcpyDeviceToHost));
-//
-//    // --- 3. Altri aggiornamenti della simulazione (opzionali) ---
-//    //applyVelocity(dt, velocityChanges);
-//    //checkEatenPrey();
-//    //spawnNewBoids();
-//    //copyBoidsToGPU(boids, gpuBoids);
-//
-//    // --- 4. Resetta le velocità di cambiamento sul GPU ---
-//    cudaMemset(gpuBoids.velChangeX, 0, N * sizeof(float));
-//    cudaMemset(gpuBoids.velChangeY, 0, N * sizeof(float));
-//
-//    //profiler.log("update", profiler.stop());
-//
-//    // Ora positions, rotations, colors e scales sono pronti per il rendering
-//}
-
 void SimulationGPU::update(float dt)
 {
+    profiler.start();
     currentTime += dt;
     size_t N = boids.size();
     if (N == 0) return;
@@ -313,6 +211,8 @@ void SimulationGPU::update(float dt)
     for (size_t i = 0; i < N; i++)
         renderScales[i] *= 8.0f;
     boidRenderer->updateInstances(renderPositions, renderRotations, renderColors, renderScales);
+
+    profiler.log("update", profiler.stop());
 }
 
 

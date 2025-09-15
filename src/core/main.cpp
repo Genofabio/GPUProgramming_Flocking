@@ -31,6 +31,7 @@ int main(int argc, char* argv[])
 
     GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Flocking Simulation", nullptr, nullptr);
     glfwMakeContextCurrent(window);
+    glfwSwapInterval(0);
 
     // glad: load all OpenGL function pointers
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))

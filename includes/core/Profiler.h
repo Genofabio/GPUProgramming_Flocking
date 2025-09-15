@@ -6,17 +6,24 @@
 #include <numeric>
 #include <fstream>
 #include <iostream>
+#include <stack>
 
 class Profiler {
 public:
-    // Avvia cronometro
+    // Avvia un timer (annidabile)
     void start() {
-        start_time = clock_type::now();
+        start_stack.push(clock_type::now());
     }
 
-    // Ferma cronometro e ritorna durata in millisecondi
+    // Ferma l'ultimo timer e ritorna durata in ms
     double stop() {
+        if (start_stack.empty()) {
+            std::cerr << "Profiler error: stop() called without matching start()\n";
+            return 0.0;
+        }
         auto end_time = clock_type::now();
+        auto start_time = start_stack.top();
+        start_stack.pop();
         ms duration = end_time - start_time;
         return duration.count();
     }
@@ -64,33 +71,31 @@ public:
         }
     }
 
-    // --- Nuova funzione: gestisce FPS e stampa periodica ---
+    // --- Gestione FPS ---
     void updateFrameStats(double dt) {
         frameCounter++;
         consoleTimer += dt;
         if (consoleTimer >= 1.0) {
-            currentFPS = static_cast<double>(frameCounter) / consoleTimer;  // <-- salvo l'FPS
+            currentFPS = static_cast<double>(frameCounter) / consoleTimer;
             std::cout << "\n";
-            printAverage("update");
-            printAverage("render");
+            printAllAverages();
             std::cout << "FPS: " << static_cast<int>(currentFPS) << "\n";
-            // reset
             frameCounter = 0;
             consoleTimer = 0.0;
         }
     }
 
-    double getCurrentFPS() const { return currentFPS; }   // <-- nuovo getter
+    double getCurrentFPS() const { return currentFPS; }
 
 private:
     using clock_type = std::chrono::high_resolution_clock;
     using ms = std::chrono::duration<double, std::milli>;
 
-    clock_type::time_point start_time;
+    std::stack<clock_type::time_point> start_stack;
     std::map<std::string, std::vector<double>> measurements;
 
-    // --- Nuovi membri per FPS ---
-    double consoleTimer = 0.0;  // accumula secondi
-    int frameCounter = 0;       // conta frame nell'intervallo
+    // FPS
+    double consoleTimer = 0.0;
+    int frameCounter = 0;
     double currentFPS = 0.0;
 };
