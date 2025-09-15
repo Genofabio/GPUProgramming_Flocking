@@ -1,6 +1,7 @@
 #pragma once
 
 #include <random>
+#include <vector>
 
 #include <external/glad/glad.h>
 #include <external/GLFW/glfw3.h>
@@ -17,6 +18,7 @@
 #include <core/UniformBoidGrid.h>
 #include <core/BoidParams.h>
 #include <gpu/BoidData.h>
+#include <gpu/GridData.h>  // nuova struct per i buffer della griglia
 
 class SimulationGPU
 {
@@ -45,10 +47,13 @@ private:
     bool boidDataInitialized = false;
 
     // GPU buffers per la uniform grid
-    int* dev_particleGridIndices = nullptr;     // a quale cella appartiene ogni boid
-    int* dev_particleArrayIndices = nullptr;    // mapping da "posizione nell’array" -> boid originale
-    int* dev_gridCellStartIndices = nullptr;    // start index per ogni cella
-    int* dev_gridCellEndIndices = nullptr;      // end index per ogni cella
+    GridData gridData;   // struct che contiene tutti i buffer della griglia
+
+    // Buffer GPU per il rendering
+    glm::vec2* devRenderPositions = nullptr;
+    float* devRenderRotations = nullptr;
+    glm::vec3* devRenderColors = nullptr;
+    float* devRenderScales = nullptr;
 
     std::vector<glm::vec2> renderPositions;
     std::vector<float> renderRotations;
@@ -88,11 +93,7 @@ private:
 
     // Helper update
     void computeForces();
-    void applyVelocity(float dt, std::vector<glm::vec2>& velocityChanges);
     void checkEatenPrey();
     void spawnNewBoids();
 
-    // Helper GPU
-    void allocateGridBuffers(size_t N, size_t numCells);
-    void freeGridBuffers();
 };

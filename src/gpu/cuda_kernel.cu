@@ -30,10 +30,6 @@ __global__ void computeForcesKernelGridOptimized(
     int sortedIdx = particleArrayIndices[i];  // usa l'indice ordinato
     float px = posX_sorted[sortedIdx];
     float py = posY_sorted[sortedIdx];
-    float vx = velX_sorted[sortedIdx];
-    float vy = velY_sorted[sortedIdx];
-    float wInfluence = influence_sorted[sortedIdx];
-    int t = type_sorted[sortedIdx];
 
     float cohX = 0.0f, cohY = 0.0f;
     float sepX = 0.0f, sepY = 0.0f;
@@ -273,8 +269,25 @@ __global__ void kernReorderData(
     velChangeY_sorted[i] = velChangeY[srcIdx];
 }
 
+__global__ void copyRenderDataKernel(
+    int N,
+    const float* posX, const float* posY,
+    const float* rotations,
+    const float* colorR, const float* colorG, const float* colorB,
+    const float* scale,
+    glm::vec2* outPositions,
+    float* outRotations,
+    glm::vec3* outColors,
+    float* outScales)
+{
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= N) return;
 
-
+    outPositions[i] = { posX[i], posY[i] };
+    outRotations[i] = rotations[i];
+    outColors[i] = { colorR[i], colorG[i], colorB[i] };
+    outScales[i] = scale[i];
+}
 
 
 

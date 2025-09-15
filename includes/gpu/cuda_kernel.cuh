@@ -1,5 +1,6 @@
 #pragma once
 #include <cuda_runtime.h>
+#include <glm/glm.hpp>
 
 
 __global__ void computeForcesKernelGridOptimized(
@@ -67,3 +68,14 @@ __global__ void kernComputeRotations(int N, const float* velX, const float* velY
 __global__ void kernIntegratePositions(int N, float dt,
     float* posX, float* posY,
 	const float* velX, const float* velY);
+
+__global__ void copyRenderDataKernel(
+    int N,
+    const float* posX, const float* posY,
+    const float* rotations,
+    const float* colorR, const float* colorG, const float* colorB,
+    const float* scale,
+    glm::vec2* outPositions,
+    float* outRotations,
+    glm::vec3* outColors,
+    float* outScales);

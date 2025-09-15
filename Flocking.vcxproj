@@ -259,6 +259,7 @@
     <ClInclude Include="includes\GLFW\glfw3native.h" />
     <ClInclude Include="includes\gpu\BoidData.h" />
     <ClInclude Include="includes\gpu\cuda_kernel.cuh" />
+    <ClInclude Include="includes\gpu\GridData.h" />
     <ClInclude Include="includes\gpu\SimulationGPU.cuh" />
     <ClInclude Include="include\custom\ResourceManager.h" />
     <ClInclude Include="include\custom\Shader.h" />
@@ -296,6 +297,7 @@
   <ItemGroup>
     <CudaCompile Include="src\gpu\BoidData.cu" />
     <CudaCompile Include="src\gpu\cuda_kernel.cu" />
+    <CudaCompile Include="src\gpu\GridData.cu" />
     <CudaCompile Include="src\gpu\SimulationGPU.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

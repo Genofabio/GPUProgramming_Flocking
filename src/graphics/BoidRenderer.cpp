@@ -34,14 +34,14 @@ void BoidRenderer::updateInstances(const std::vector<glm::vec2>& positions,
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-    glBufferData(GL_ARRAY_BUFFER, N * sizeof(InstanceData), instanceData.data(), GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(N * sizeof(InstanceData)), instanceData.data(), GL_DYNAMIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void BoidRenderer::draw() {
     shader.Use();
     glBindVertexArray(vao);
-    glDrawArraysInstanced(GL_TRIANGLES, 0, 3, instanceData.size());
+    glDrawArraysInstanced(GL_TRIANGLES, 0, 3, static_cast<GLsizei>(instanceData.size()));
     glBindVertexArray(0);
 }
 

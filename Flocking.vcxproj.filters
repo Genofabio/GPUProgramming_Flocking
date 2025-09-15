@@ -404,6 +404,9 @@
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="includes\gpu\SimulationGPU.cuh" />
+    <ClInclude Include="includes\gpu\GridData.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\main.cpp">
@@ -455,5 +458,6 @@
     <CudaCompile Include="src\gpu\cuda_kernel.cu" />
     <CudaCompile Include="src\gpu\BoidData.cu" />
     <CudaCompile Include="src\gpu\SimulationGPU.cu" />
+    <CudaCompile Include="src\gpu\GridData.cu" />
   </ItemGroup>
 </Project>

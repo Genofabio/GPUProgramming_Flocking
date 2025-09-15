@@ -126,55 +126,6 @@ void copyBoidsToGPU(const std::vector<Boid>& cpuBoids, BoidData& bd) {
     CUDA_CHECK(cudaMemcpy(bd.colorB_sorted, colorB.data(), N * sizeof(float), cudaMemcpyHostToDevice));
 }
 
-// --- Copia GPU -> CPU ---
-void copyBoidsToCPU(BoidData& bd, std::vector<Boid>& cpuBoids) {
-    size_t N = bd.N;
-    cpuBoids.resize(N);
-
-    std::vector<float> posX(N), posY(N), velX(N), velY(N), driftX(N), driftY(N);
-    std::vector<float> scale(N), influence(N), birthTime(N);
-    std::vector<int> type(N), age(N);
-    std::vector<float> colorR(N), colorG(N), colorB(N);
-    std::vector<float> debugX[5], debugY[5];
-    for (int i = 0; i < 5; i++) { debugX[i].resize(N); debugY[i].resize(N); }
-
-    CUDA_CHECK(cudaMemcpy(posX.data(), bd.posX, N * sizeof(float), cudaMemcpyDeviceToHost));
-    CUDA_CHECK(cudaMemcpy(posY.data(), bd.posY, N * sizeof(float), cudaMemcpyDeviceToHost));
-    CUDA_CHECK(cudaMemcpy(velX.data(), bd.velX, N * sizeof(float), cudaMemcpyDeviceToHost));
-    CUDA_CHECK(cudaMemcpy(velY.data(), bd.velY, N * sizeof(float), cudaMemcpyDeviceToHost));
-    CUDA_CHECK(cudaMemcpy(driftX.data(), bd.driftX, N * sizeof(float), cudaMemcpyDeviceToHost));
-    CUDA_CHECK(cudaMemcpy(driftY.data(), bd.driftY, N * sizeof(float), cudaMemcpyDeviceToHost));
-
-    CUDA_CHECK(cudaMemcpy(scale.data(), bd.scale, N * sizeof(float), cudaMemcpyDeviceToHost));
-    CUDA_CHECK(cudaMemcpy(influence.data(), bd.influence, N * sizeof(float), cudaMemcpyDeviceToHost));
-    CUDA_CHECK(cudaMemcpy(type.data(), bd.type, N * sizeof(int), cudaMemcpyDeviceToHost));
-    CUDA_CHECK(cudaMemcpy(age.data(), bd.age, N * sizeof(int), cudaMemcpyDeviceToHost));
-    CUDA_CHECK(cudaMemcpy(birthTime.data(), bd.birthTime, N * sizeof(float), cudaMemcpyDeviceToHost));
-
-    CUDA_CHECK(cudaMemcpy(colorR.data(), bd.colorR, N * sizeof(float), cudaMemcpyDeviceToHost));
-    CUDA_CHECK(cudaMemcpy(colorG.data(), bd.colorG, N * sizeof(float), cudaMemcpyDeviceToHost));
-    CUDA_CHECK(cudaMemcpy(colorB.data(), bd.colorB, N * sizeof(float), cudaMemcpyDeviceToHost));
-
-    for (int j = 0; j < 5; j++) {
-        CUDA_CHECK(cudaMemcpy(debugX[j].data(), bd.debugX[j], N * sizeof(float), cudaMemcpyDeviceToHost));
-        CUDA_CHECK(cudaMemcpy(debugY[j].data(), bd.debugY[j], N * sizeof(float), cudaMemcpyDeviceToHost));
-    }
-
-    for (size_t i = 0; i < N; i++) {
-        cpuBoids[i].position = { posX[i], posY[i] };
-        cpuBoids[i].velocity = { velX[i], velY[i] };
-        cpuBoids[i].drift = { driftX[i], driftY[i] };
-        cpuBoids[i].scale = scale[i];
-        cpuBoids[i].influence = influence[i];
-        cpuBoids[i].type = static_cast<BoidType>(type[i]);
-        cpuBoids[i].age = age[i];
-        cpuBoids[i].birthTime = birthTime[i];
-        cpuBoids[i].color = { colorR[i], colorG[i], colorB[i] };
-        for (int j = 0; j < 5; j++)
-            cpuBoids[i].debugVectors[j] = { debugX[j][i], debugY[j][i] };
-    }
-}
-
 // --- Libera GPU ---
 void freeBoidDataGPU(BoidData& bd) {
     cudaFree(bd.posX); cudaFree(bd.posY);

@@ -1,8 +1,6 @@
 #include <set>
-#include <map>
 #include <iostream>
 #include <cmath>
-#include <algorithm>
 #include <random>
 
 #include <gpu/SimulationGPU.cuh>
@@ -34,31 +32,31 @@ SimulationGPU::SimulationGPU(unsigned int width, unsigned int height)
     , dist(-1.0f, 1.0f)
 {
     // Inizializzazione dei parametri di boid
-    params.maxSpeed = 100.0f;          // come prima, velocità naturale
-    params.slowDownFactor = 0.3f;      // frenata normale
+    params.maxSpeed = 100.0f;
+    params.slowDownFactor = 0.3f;
 
-    // Distanze (adattate a maxBoidDistance = 150)
-    params.cohesionDistance = 60.0f;   // leggermente più piccolo per stare entro griglia
-    params.separationDistance = 20.0f; // mantenere sicurezza nelle collisioni
-    params.alignmentDistance = 40.0f;  // simile all’originale ma compatto
-    params.borderDistance = 80.0f;     // non serve così grande
+    // Distanze 
+    params.cohesionDistance = 60.0f;
+    params.separationDistance = 20.0f;
+    params.alignmentDistance = 40.0f;
+    params.borderDistance = 80.0f;
     params.predatorFearDistance = 100.0f;
     params.predatorChaseDistance = 120.0f;
     params.predatorSeparationDistance = 50.0f;
-    params.predatorEatDistance = 5.0f; // come prima
+    params.predatorEatDistance = 5.0f;
 
     // Scale (forza delle regole)
-    params.cohesionScale = 0.1f;      // originale
-    params.separationScale = 2.2f;     // come prima
-    params.alignmentScale = 0.19f;     // originale
-    params.borderScale = 0.3f;         // coerente
-    params.predatorFearScale = 0.8f;   // originale
+    params.cohesionScale = 0.1f;
+    params.separationScale = 2.2f;
+    params.alignmentScale = 0.19f;
+    params.borderScale = 0.3f;
+    params.predatorFearScale = 0.8f;
     params.predatorChaseScale = 0.12f;
     params.predatorSeparationScale = 2.0f;
     params.borderAlertDistance = height / 5.0f;
 
     // Social/extra
-    params.leaderInfluenceDistance = 120.0f; // ridotto proporzionalmente
+    params.leaderInfluenceDistance = 120.0f;
     params.leaderInfluenceScale = 1.0f;
     params.mateDistance = 10.0f;
     params.mateThreshold = 200;
@@ -81,6 +79,14 @@ SimulationGPU::~SimulationGPU()
     delete textRenderer;
     delete gridRenderer;
     delete vectorRenderer;
+
+    if (devRenderPositions) { cudaFree(devRenderPositions); devRenderPositions = nullptr; }
+    if (devRenderRotations) { cudaFree(devRenderRotations); devRenderRotations = nullptr; }
+    if (devRenderColors) { cudaFree(devRenderColors); devRenderColors = nullptr; }
+    if (devRenderScales) { cudaFree(devRenderScales); devRenderScales = nullptr; }
+
+    freeGridDataGPU(gridData);
+    freeBoidDataGPU(gpuBoids);
 }
 
 void SimulationGPU::init()
@@ -114,7 +120,7 @@ void SimulationGPU::init()
     initPrey(3000);
     initPredators(0);
 
-    // Allocate and copy boid data to GPU
+    // Allocate and copy boid data to GPU if not done yet
     if (!boidDataInitialized) {
         allocateBoidDataGPU(gpuBoids, boids.size());
         copyBoidsToGPU(boids, gpuBoids);
@@ -124,17 +130,19 @@ void SimulationGPU::init()
     // Initialize walls
     initWalls(50);
 
-    // Numero boid e celle griglia
+    // Allocate grid buffers
     size_t N = boids.size();
     size_t numCells = boidGrid.nRows * boidGrid.nCols;
+    allocateGridDataGPU(gridData, N, numCells);
 
-    // Allocazione dei buffer della uniform grid
-    allocateGridBuffers(N, numCells);
+    // Allocate rendering buffers
+    CUDA_CHECK(cudaMalloc(&devRenderPositions, N * sizeof(glm::vec2)));
+    CUDA_CHECK(cudaMalloc(&devRenderRotations, N * sizeof(float)));
+    CUDA_CHECK(cudaMalloc(&devRenderColors, N * sizeof(glm::vec3)));
+    CUDA_CHECK(cudaMalloc(&devRenderScales, N * sizeof(float)));
 }
 
 void SimulationGPU::update(float dt) {
-    profiler.start();
-
     profiler.start();
     currentTime += dt;
     size_t N = boids.size();
@@ -143,111 +151,82 @@ void SimulationGPU::update(float dt) {
     int threads = 256;
     int blocks = (N + threads - 1) / threads;
 
-    // 1. Calcola le forze
+    // --- 1. Resetta i delta velocità ---
+    cudaMemset(gpuBoids.velChangeX_sorted, 0, N * sizeof(float));
+    cudaMemset(gpuBoids.velChangeY_sorted, 0, N * sizeof(float));
+
+    // --- 2. Calcola le forze ---
     computeForces();
 
-    // 2. Applica le variazioni di velocità dai buffer sorted
+    // --- 3. Applica le variazioni di velocità dai buffer sorted ---
     kernApplyVelocityChangeSorted << <blocks, threads >> > (
         static_cast<int>(N),
         gpuBoids.velChangeX_sorted, gpuBoids.velChangeY_sorted,
         gpuBoids.posX, gpuBoids.posY,
         gpuBoids.velX, gpuBoids.velY,
-        dev_particleArrayIndices,
+        gridData.particleArrayIndices, // <--- sostituito
         dt, params.slowDownFactor, params.maxSpeed
         );
-    cudaDeviceSynchronize();
 
-    // 3. Calcola le rotazioni dai vettori velocità (rimane sui buffer originali)
+    // --- 4. Calcola le rotazioni dai vettori velocità ---
     kernComputeRotations << <blocks, threads >> > (
         static_cast<int>(N),
         gpuBoids.velX, gpuBoids.velY,
         gpuBoids.rotations
         );
+
+    // --- 5. Copia i dati per il rendering sui buffer device ---
+    copyRenderDataKernel << <blocks, threads >> > (
+        static_cast<int>(N),
+        gpuBoids.posX, gpuBoids.posY,
+        gpuBoids.rotations,
+        gpuBoids.colorR, gpuBoids.colorG, gpuBoids.colorB,
+        gpuBoids.scale,
+        devRenderPositions,
+        devRenderRotations,
+        devRenderColors,
+        devRenderScales
+        );
+
+    // --- 6. Sincronizza prima di copiare i dati su CPU ---
     cudaDeviceSynchronize();
 
-    // --- 4. Copia solo i dati necessari per il rendering ---
+    // --- 7. Copia i dati da GPU a CPU ---
     renderPositions.resize(N);
     renderRotations.resize(N);
     renderColors.resize(N);
     renderScales.resize(N);
 
-    std::vector<float> posX(N), posY(N);
-    CUDA_CHECK(cudaMemcpy(posX.data(), gpuBoids.posX, N * sizeof(float), cudaMemcpyDeviceToHost));
-    CUDA_CHECK(cudaMemcpy(posY.data(), gpuBoids.posY, N * sizeof(float), cudaMemcpyDeviceToHost));
+    CUDA_CHECK(cudaMemcpy(renderPositions.data(), devRenderPositions, N * sizeof(glm::vec2), cudaMemcpyDeviceToHost));
+    CUDA_CHECK(cudaMemcpy(renderRotations.data(), devRenderRotations, N * sizeof(float), cudaMemcpyDeviceToHost));
+    CUDA_CHECK(cudaMemcpy(renderColors.data(), devRenderColors, N * sizeof(glm::vec3), cudaMemcpyDeviceToHost));
+    CUDA_CHECK(cudaMemcpy(renderScales.data(), devRenderScales, N * sizeof(float), cudaMemcpyDeviceToHost));
 
-    for (size_t i = 0; i < N; i++) {
-        renderPositions[i] = { posX[i], posY[i] };
-    }
-
-    CUDA_CHECK(cudaMemcpy(renderRotations.data(), gpuBoids.rotations, N * sizeof(float), cudaMemcpyDeviceToHost));
-
-    std::vector<float> colorR(N), colorG(N), colorB(N);
-    CUDA_CHECK(cudaMemcpy(colorR.data(), gpuBoids.colorR, N * sizeof(float), cudaMemcpyDeviceToHost));
-    CUDA_CHECK(cudaMemcpy(colorG.data(), gpuBoids.colorG, N * sizeof(float), cudaMemcpyDeviceToHost));
-    CUDA_CHECK(cudaMemcpy(colorB.data(), gpuBoids.colorB, N * sizeof(float), cudaMemcpyDeviceToHost));
-
-    for (size_t i = 0; i < N; i++) {
-        renderColors[i] = { colorR[i], colorG[i], colorB[i] };
-    }
-
-    CUDA_CHECK(cudaMemcpy(renderScales.data(), gpuBoids.scale, N * sizeof(float), cudaMemcpyDeviceToHost));
-
-    // --- 5. Resetta i delta velocità ---
-    // 5. Resetta i delta velocità sorted
-    cudaMemset(gpuBoids.velChangeX_sorted, 0, N * sizeof(float));
-    cudaMemset(gpuBoids.velChangeY_sorted, 0, N * sizeof(float));
-
-    // --- DEBUG: stampa primi boid ---
-    /*
-    for (int i = 0; i < std::min<size_t>(N, 5); i++) {
-        std::cout << "Boid " << i
-                  << " pos=(" << renderPositions[i].x << ", " << renderPositions[i].y << ")"
-                  << " vel=(";
-        float vx, vy;
-        CUDA_CHECK(cudaMemcpy(&vx, gpuBoids.velX + i, sizeof(float), cudaMemcpyDeviceToHost));
-        CUDA_CHECK(cudaMemcpy(&vy, gpuBoids.velY + i, sizeof(float), cudaMemcpyDeviceToHost));
-        std::cout << vx << ", " << vy << ")"
-                  << " rot=" << renderRotations[i]
-                  << " scale=" << renderScales[i]
-                  << " color=(" << renderColors[i].r << "," << renderColors[i].g << "," << renderColors[i].b << ")"
-                  << std::endl;
-    }
-    */
-
-    // --- 6. Aggiorna il renderer ---
-    for (size_t i = 0; i < N; i++) {
-        renderScales[i] *= 8.0f;
-    }
+    // --- 8. Aggiorna il renderer ---
     boidRenderer->updateInstances(renderPositions, renderRotations, renderColors, renderScales);
 
     profiler.log("update", profiler.stop());
 }
 
-
 void SimulationGPU::render()
 {
     profiler.start();
 
-    // 1. Draw grid
+    // Grid
     glLineWidth(1.0f);
     gridRenderer->draw(wallGrid, glm::vec3(0.2f, 0.2f, 0.2f));
-    //gridRenderer->draw(boidGrid, glm::vec3(0.6f, 0.6f, 0.6f));
 
-    // 2. Draw boids (usa i vettori aggiornati da update())
+    // Boids
     boidRenderer->draw();
 
-    // 3. Draw walls
+    // Walls
     glLineWidth(3.0f);
     for (const Wall& w : walls)
         wallRenderer->draw(w, glm::vec3(0.25f, 0.88f, 0.82f));
 
     profiler.log("render", profiler.stop());
 
-    // 4. Draw debug vectors
-    // Qui potremmo in futuro leggere i vettori di debug dalla GPU
-    // per ora resta commentato o continua a usare boids CPU se servono test
-
-    // 5. Draw HUD / stats
+    // HUD / Stats
     float margin = 10.0f;
     float scale = 0.7f;
     glm::vec3 color(0.9f, 0.9f, 0.3f);
@@ -261,6 +240,7 @@ void SimulationGPU::render()
         margin, height - margin - 40.0f, scale, color);
 }
 
+
 void SimulationGPU::processInput(float dt) {}
 
 void SimulationGPU::updateStats(float dt) {
@@ -270,7 +250,6 @@ void SimulationGPU::updateStats(float dt) {
 void SimulationGPU::saveProfilerCSV(const std::string& path) {
     profiler.saveCSV(path);
 }
-
 
 // === HELPER Init ===
 void SimulationGPU::initLeaders(int count)
@@ -301,7 +280,7 @@ void SimulationGPU::initPrey(int count)
         b.birthTime = currentTime + offsetDist(rng);
         b.age = ageDist(rng);
         float t = b.age / 10.0f;
-        b.scale = 1.0f + 0.04f * b.age;
+        b.scale = (1.0f + 0.04f * b.age) * 8.0f;
         b.color = glm::mix(glm::vec3(0.2f, 0.2f, 0.9f), glm::vec3(0.05f, 0.8f, 0.7f), t);
         b.influence = 0.8f + 0.04f * b.age;
         boids.push_back(b);
@@ -345,7 +324,7 @@ void SimulationGPU::initWalls(int count)
             (!horizontal && (vertexOccupancy[p1].first || vertexOccupancy[p2].first))) continue;
 
         Wall w({ edge.first, edge.second }, height / 11.0f, 3.0f);
-        walls.push_back(w);  // popola direttamente il membro della classe
+        walls.push_back(w);  
 
         usedEdges.insert({ p1, p2 });
         if (horizontal) {
@@ -369,24 +348,23 @@ void SimulationGPU::computeForces() {
     int threads = 256;
     int blocks = (N + threads - 1) / threads;
 
-    // 1. Calcola gli indici della griglia
+    // --- 1. Calcola gli indici della griglia ---
     kernComputeIndices << <blocks, threads >> > (
         N,
         gpuBoids.posX, gpuBoids.posY,
-        dev_particleGridIndices,
-        dev_particleArrayIndices,
+        gridData.particleGridIndices,
+        gridData.particleArrayIndices,
         boidGrid.nCols, boidGrid.nRows,
         0.0f, 0.0f,
         boidGrid.cellWidth
         );
-    cudaDeviceSynchronize();
 
-    // 2. Ordina per cella
-    thrust::device_ptr<int> devGridKeys(dev_particleGridIndices);
-    thrust::device_ptr<int> devArrayIndices(dev_particleArrayIndices);
+    // --- 2. Ordina per cella ---
+    thrust::device_ptr<int> devGridKeys(gridData.particleGridIndices);
+    thrust::device_ptr<int> devArrayIndices(gridData.particleArrayIndices);
     thrust::sort_by_key(devGridKeys, devGridKeys + N, devArrayIndices);
 
-    // 3. Reorder dei buffer
+    // --- 3. Reorder dei buffer ---
     kernReorderData << <blocks, threads >> > (
         N,
         gpuBoids.posX, gpuBoids.posY,
@@ -395,7 +373,7 @@ void SimulationGPU::computeForces() {
         gpuBoids.type,
         gpuBoids.colorR, gpuBoids.colorG, gpuBoids.colorB,
         gpuBoids.velChangeX, gpuBoids.velChangeY,
-        dev_particleArrayIndices,
+        gridData.particleArrayIndices,
         gpuBoids.posX_sorted, gpuBoids.posY_sorted,
         gpuBoids.velX_sorted, gpuBoids.velY_sorted,
         gpuBoids.scale_sorted, gpuBoids.influence_sorted,
@@ -403,28 +381,26 @@ void SimulationGPU::computeForces() {
         gpuBoids.colorR_sorted, gpuBoids.colorG_sorted, gpuBoids.colorB_sorted,
         gpuBoids.velChangeX_sorted, gpuBoids.velChangeY_sorted
         );
-    cudaDeviceSynchronize();
 
-    // 4. Trova start/end per ogni cella
+    // --- 4. Trova start/end per ogni cella ---
     kernIdentifyCellStartEnd << <blocks, threads >> > (
         N,
-        dev_particleGridIndices,
-        dev_gridCellStartIndices,
-        dev_gridCellEndIndices
+        gridData.particleGridIndices,
+        gridData.cellStartIndices,
+        gridData.cellEndIndices
         );
-    cudaDeviceSynchronize();
 
-    // 5. Calcola le forze sui buffer ordinati
+    // --- 5. Calcola le forze sui buffer ordinati ---
     computeForcesKernelGridOptimized << <blocks, threads >> > (
         N,
         gpuBoids.posX_sorted, gpuBoids.posY_sorted,
         gpuBoids.velX_sorted, gpuBoids.velY_sorted,
         gpuBoids.influence_sorted,
         gpuBoids.type_sorted,
-        dev_particleArrayIndices,
-        dev_particleGridIndices,
-        dev_gridCellStartIndices,
-        dev_gridCellEndIndices,
+        gridData.particleArrayIndices,
+        gridData.particleGridIndices,
+        gridData.cellStartIndices,
+        gridData.cellEndIndices,
         boidGrid.nCols, boidGrid.nRows,
         boidGrid.cellWidth,
         params.cohesionDistance, params.cohesionScale,
@@ -436,22 +412,8 @@ void SimulationGPU::computeForces() {
         gpuBoids.velChangeX_sorted,
         gpuBoids.velChangeY_sorted
         );
+
     cudaDeviceSynchronize();
-}
-
-
-
-
-void SimulationGPU::applyVelocity(float dt, std::vector<glm::vec2>& velocityChanges)
-{
-    size_t N = boids.size();
-    for (size_t i = 0; i < N; ++i) {
-        Boid& b = boids[i];
-        b.velocity += velocityChanges[i] * params.slowDownFactor;
-        float speed = glm::length(b.velocity);
-        if (speed > params.maxSpeed) b.velocity = (b.velocity / speed) * params.maxSpeed;
-        b.position += b.velocity * dt;
-    }
 }
 
 void SimulationGPU::checkEatenPrey()
@@ -492,48 +454,4 @@ void SimulationGPU::spawnNewBoids()
     // Spawn nuovi boid
     for (auto& p : spawnPairs)
         boids.push_back(BoidRules::computeSpawnedBoid(boids[p.first], boids[p.second], currentTime));
-}
-
-void SimulationGPU::allocateGridBuffers(size_t N, size_t numCells)
-{
-    // Prima liberiamo eventuali buffer già allocati
-    freeGridBuffers();
-
-    // Allochiamo i buffer legati ai boid
-    if (cudaMalloc(&dev_particleGridIndices, N * sizeof(int)) != cudaSuccess)
-        throw std::runtime_error("cudaMalloc failed: dev_particleGridIndices");
-
-    if (cudaMalloc(&dev_particleArrayIndices, N * sizeof(int)) != cudaSuccess)
-        throw std::runtime_error("cudaMalloc failed: dev_particleArrayIndices");
-
-    // Allochiamo i buffer legati alle celle della griglia
-    if (cudaMalloc(&dev_gridCellStartIndices, numCells * sizeof(int)) != cudaSuccess)
-        throw std::runtime_error("cudaMalloc failed: dev_gridCellStartIndices");
-
-    if (cudaMalloc(&dev_gridCellEndIndices, numCells * sizeof(int)) != cudaSuccess)
-        throw std::runtime_error("cudaMalloc failed: dev_gridCellEndIndices");
-
-    // Inizializziamo le celle a -1 (vuote)
-    cudaMemset(dev_gridCellStartIndices, -1, numCells * sizeof(int));
-    cudaMemset(dev_gridCellEndIndices, -1, numCells * sizeof(int));
-}
-
-void SimulationGPU::freeGridBuffers()
-{
-    if (dev_particleGridIndices) {
-        cudaFree(dev_particleGridIndices);
-        dev_particleGridIndices = nullptr;
-    }
-    if (dev_particleArrayIndices) {
-        cudaFree(dev_particleArrayIndices);
-        dev_particleArrayIndices = nullptr;
-    }
-    if (dev_gridCellStartIndices) {
-        cudaFree(dev_gridCellStartIndices);
-        dev_gridCellStartIndices = nullptr;
-    }
-    if (dev_gridCellEndIndices) {
-        cudaFree(dev_gridCellEndIndices);
-        dev_gridCellEndIndices = nullptr;
-    }
 }

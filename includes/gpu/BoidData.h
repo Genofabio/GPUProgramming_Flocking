@@ -7,7 +7,7 @@
 struct BoidData {
     size_t N = 0;
 
-    // --- Originali (non ordinati, come adesso) ---
+    // --- Originali  ---
     float* posX = nullptr;
     float* posY = nullptr;
     float* velX = nullptr;
@@ -28,7 +28,7 @@ struct BoidData {
     float* debugX[5] = { nullptr };
     float* debugY[5] = { nullptr };
 
-    // --- Nuovi buffer ordinati per cella (coerenti) ---
+    // --- Ordinati ---
     float* posX_sorted = nullptr;
     float* posY_sorted = nullptr;
     float* velX_sorted = nullptr;
@@ -45,5 +45,4 @@ struct BoidData {
 
 void allocateBoidDataGPU(BoidData& bd, size_t N);
 void copyBoidsToGPU(const std::vector<Boid>& cpuBoids, BoidData& bd);
-void copyBoidsToCPU(BoidData& bd, std::vector<Boid>& cpuBoids);
 void freeBoidDataGPU(BoidData& bd);
