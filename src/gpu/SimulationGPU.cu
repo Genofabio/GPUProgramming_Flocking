@@ -132,8 +132,9 @@ void SimulationGPU::init()
     allocateGridBuffers(N, numCells);
 }
 
-void SimulationGPU::update(float dt)
-{
+void SimulationGPU::update(float dt) {
+    profiler.start();
+
     profiler.start();
     currentTime += dt;
     size_t N = boids.size();
@@ -142,20 +143,21 @@ void SimulationGPU::update(float dt)
     int threads = 256;
     int blocks = (N + threads - 1) / threads;
 
-    // --- 1. Calcola le forze e accumula variazioni velocità ---
+    // 1. Calcola le forze
     computeForces();
 
-    // --- 2. Aggiorna velocità e posizioni con i delta ---
-    kernApplyVelocityChange << <blocks, threads >> > (
+    // 2. Applica le variazioni di velocità dai buffer sorted
+    kernApplyVelocityChangeSorted << <blocks, threads >> > (
         static_cast<int>(N),
+        gpuBoids.velChangeX_sorted, gpuBoids.velChangeY_sorted,
         gpuBoids.posX, gpuBoids.posY,
         gpuBoids.velX, gpuBoids.velY,
-        gpuBoids.velChangeX, gpuBoids.velChangeY,
+        dev_particleArrayIndices,
         dt, params.slowDownFactor, params.maxSpeed
         );
     cudaDeviceSynchronize();
 
-    // --- 3. Calcola rotazioni dai vettori velocità ---
+    // 3. Calcola le rotazioni dai vettori velocità (rimane sui buffer originali)
     kernComputeRotations << <blocks, threads >> > (
         static_cast<int>(N),
         gpuBoids.velX, gpuBoids.velY,
@@ -172,8 +174,10 @@ void SimulationGPU::update(float dt)
     std::vector<float> posX(N), posY(N);
     CUDA_CHECK(cudaMemcpy(posX.data(), gpuBoids.posX, N * sizeof(float), cudaMemcpyDeviceToHost));
     CUDA_CHECK(cudaMemcpy(posY.data(), gpuBoids.posY, N * sizeof(float), cudaMemcpyDeviceToHost));
-    for (size_t i = 0; i < N; i++)
+
+    for (size_t i = 0; i < N; i++) {
         renderPositions[i] = { posX[i], posY[i] };
+    }
 
     CUDA_CHECK(cudaMemcpy(renderRotations.data(), gpuBoids.rotations, N * sizeof(float), cudaMemcpyDeviceToHost));
 
@@ -181,35 +185,39 @@ void SimulationGPU::update(float dt)
     CUDA_CHECK(cudaMemcpy(colorR.data(), gpuBoids.colorR, N * sizeof(float), cudaMemcpyDeviceToHost));
     CUDA_CHECK(cudaMemcpy(colorG.data(), gpuBoids.colorG, N * sizeof(float), cudaMemcpyDeviceToHost));
     CUDA_CHECK(cudaMemcpy(colorB.data(), gpuBoids.colorB, N * sizeof(float), cudaMemcpyDeviceToHost));
-    for (size_t i = 0; i < N; i++)
+
+    for (size_t i = 0; i < N; i++) {
         renderColors[i] = { colorR[i], colorG[i], colorB[i] };
+    }
 
     CUDA_CHECK(cudaMemcpy(renderScales.data(), gpuBoids.scale, N * sizeof(float), cudaMemcpyDeviceToHost));
 
     // --- 5. Resetta i delta velocità ---
-    cudaMemset(gpuBoids.velChangeX, 0, N * sizeof(float));
-    cudaMemset(gpuBoids.velChangeY, 0, N * sizeof(float));
+    // 5. Resetta i delta velocità sorted
+    cudaMemset(gpuBoids.velChangeX_sorted, 0, N * sizeof(float));
+    cudaMemset(gpuBoids.velChangeY_sorted, 0, N * sizeof(float));
 
     // --- DEBUG: stampa primi boid ---
-    //for (int i = 0; i < std::min<size_t>(N, 5); i++) {
-    //    std::cout << "Boid " << i
-    //        << " pos=(" << renderPositions[i].x << ", " << renderPositions[i].y << ")"
-    //        << " vel=(";
-
-    //    float vx, vy;
-    //    CUDA_CHECK(cudaMemcpy(&vx, gpuBoids.velX + i, sizeof(float), cudaMemcpyDeviceToHost));
-    //    CUDA_CHECK(cudaMemcpy(&vy, gpuBoids.velY + i, sizeof(float), cudaMemcpyDeviceToHost));
-
-    //    std::cout << vx << ", " << vy << ")"
-    //        << " rot=" << renderRotations[i]
-    //        << " scale=" << renderScales[i]
-    //        << " color=(" << renderColors[i].r << "," << renderColors[i].g << "," << renderColors[i].b << ")"
-    //        << std::endl;
-    //}
+    /*
+    for (int i = 0; i < std::min<size_t>(N, 5); i++) {
+        std::cout << "Boid " << i
+                  << " pos=(" << renderPositions[i].x << ", " << renderPositions[i].y << ")"
+                  << " vel=(";
+        float vx, vy;
+        CUDA_CHECK(cudaMemcpy(&vx, gpuBoids.velX + i, sizeof(float), cudaMemcpyDeviceToHost));
+        CUDA_CHECK(cudaMemcpy(&vy, gpuBoids.velY + i, sizeof(float), cudaMemcpyDeviceToHost));
+        std::cout << vx << ", " << vy << ")"
+                  << " rot=" << renderRotations[i]
+                  << " scale=" << renderScales[i]
+                  << " color=(" << renderColors[i].r << "," << renderColors[i].g << "," << renderColors[i].b << ")"
+                  << std::endl;
+    }
+    */
 
     // --- 6. Aggiorna il renderer ---
-    for (size_t i = 0; i < N; i++)
+    for (size_t i = 0; i < N; i++) {
         renderScales[i] *= 8.0f;
+    }
     boidRenderer->updateInstances(renderPositions, renderRotations, renderColors, renderScales);
 
     profiler.log("update", profiler.stop());
@@ -361,8 +369,8 @@ void SimulationGPU::computeForces() {
     int threads = 256;
     int blocks = (N + threads - 1) / threads;
 
-    // --- 1. Calcola gli indici della griglia ---
-    kernComputeIndices <<<blocks, threads >>> (
+    // 1. Calcola gli indici della griglia
+    kernComputeIndices << <blocks, threads >> > (
         N,
         gpuBoids.posX, gpuBoids.posY,
         dev_particleGridIndices,
@@ -373,13 +381,32 @@ void SimulationGPU::computeForces() {
         );
     cudaDeviceSynchronize();
 
-    // --- 2. Ordina per cella (thrust) ---
+    // 2. Ordina per cella
     thrust::device_ptr<int> devGridKeys(dev_particleGridIndices);
     thrust::device_ptr<int> devArrayIndices(dev_particleArrayIndices);
     thrust::sort_by_key(devGridKeys, devGridKeys + N, devArrayIndices);
 
-    // --- 3. Trova start/end per ogni cella ---
-    kernIdentifyCellStartEnd <<<blocks, threads>>> (
+    // 3. Reorder dei buffer
+    kernReorderData << <blocks, threads >> > (
+        N,
+        gpuBoids.posX, gpuBoids.posY,
+        gpuBoids.velX, gpuBoids.velY,
+        gpuBoids.scale, gpuBoids.influence,
+        gpuBoids.type,
+        gpuBoids.colorR, gpuBoids.colorG, gpuBoids.colorB,
+        gpuBoids.velChangeX, gpuBoids.velChangeY,
+        dev_particleArrayIndices,
+        gpuBoids.posX_sorted, gpuBoids.posY_sorted,
+        gpuBoids.velX_sorted, gpuBoids.velY_sorted,
+        gpuBoids.scale_sorted, gpuBoids.influence_sorted,
+        gpuBoids.type_sorted,
+        gpuBoids.colorR_sorted, gpuBoids.colorG_sorted, gpuBoids.colorB_sorted,
+        gpuBoids.velChangeX_sorted, gpuBoids.velChangeY_sorted
+        );
+    cudaDeviceSynchronize();
+
+    // 4. Trova start/end per ogni cella
+    kernIdentifyCellStartEnd << <blocks, threads >> > (
         N,
         dev_particleGridIndices,
         dev_gridCellStartIndices,
@@ -387,13 +414,13 @@ void SimulationGPU::computeForces() {
         );
     cudaDeviceSynchronize();
 
-    // --- 4. Lancia il kernel delle forze ---
-    computeForcesKernelGridOptimized <<<blocks, threads >>> (
+    // 5. Calcola le forze sui buffer ordinati
+    computeForcesKernelGridOptimized << <blocks, threads >> > (
         N,
-        gpuBoids.posX, gpuBoids.posY,
-        gpuBoids.velX, gpuBoids.velY,
-        gpuBoids.influence,
-        gpuBoids.type,
+        gpuBoids.posX_sorted, gpuBoids.posY_sorted,
+        gpuBoids.velX_sorted, gpuBoids.velY_sorted,
+        gpuBoids.influence_sorted,
+        gpuBoids.type_sorted,
         dev_particleArrayIndices,
         dev_particleGridIndices,
         dev_gridCellStartIndices,
@@ -406,11 +433,13 @@ void SimulationGPU::computeForces() {
         static_cast<float>(width),
         static_cast<float>(height),
         params.borderAlertDistance,
-        gpuBoids.velChangeX,
-        gpuBoids.velChangeY
+        gpuBoids.velChangeX_sorted,
+        gpuBoids.velChangeY_sorted
         );
     cudaDeviceSynchronize();
 }
+
+
 
 
 void SimulationGPU::applyVelocity(float dt, std::vector<glm::vec2>& velocityChanges)

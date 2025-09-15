@@ -6,10 +6,10 @@
 
 __global__ void computeForcesKernelGridOptimized(
     int N,
-    const float* posX, const float* posY,
-    const float* velX, const float* velY,
-    const float* influence,
-    const int* type,
+    const float* posX_sorted, const float* posY_sorted,
+    const float* velX_sorted, const float* velY_sorted,
+    const float* influence_sorted,
+    const int* type_sorted,
     const int* particleArrayIndices,
     const int* particleGridIndices,
     const int* gridCellStartIndices,
@@ -27,8 +27,13 @@ __global__ void computeForcesKernelGridOptimized(
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= N) return;
 
-    float px = posX[i];
-    float py = posY[i];
+    int sortedIdx = particleArrayIndices[i];  // usa l'indice ordinato
+    float px = posX_sorted[sortedIdx];
+    float py = posY_sorted[sortedIdx];
+    float vx = velX_sorted[sortedIdx];
+    float vy = velY_sorted[sortedIdx];
+    float wInfluence = influence_sorted[sortedIdx];
+    int t = type_sorted[sortedIdx];
 
     float cohX = 0.0f, cohY = 0.0f;
     float sepX = 0.0f, sepY = 0.0f;
@@ -69,29 +74,34 @@ __global__ void computeForcesKernelGridOptimized(
         if (startIdx == -1) continue;
 
         for (int jIdx = startIdx; jIdx <= endIdx; ++jIdx) {
-            int j = particleArrayIndices[jIdx];
+            int j = particleArrayIndices[jIdx];  // indice ordinato del vicino
             if (i == j) continue;
 
-            float dx = posX[j] - px;
-            float dy = posY[j] - py;
+            float neighX = posX_sorted[j];
+            float neighY = posY_sorted[j];
+            float neighVX = velX_sorted[j];
+            float neighVY = velY_sorted[j];
+            float neighInfluence = influence_sorted[j];
+
+            float dx = neighX - px;
+            float dy = neighY - py;
             float dist = sqrtf(dx * dx + dy * dy);
 
             if (dist < cohesionDistance) {
-                cohX += posX[j];
-                cohY += posY[j];
+                cohX += neighX;
+                cohY += neighY;
                 neighborCount++;
             }
 
             if (dist < separationDistance && dist > 0.0f) {
-                sepX += (px - posX[j]) / dist;
-                sepY += (py - posY[j]) / dist;
+                sepX += (px - neighX) / dist;
+                sepY += (py - neighY) / dist;
             }
 
             if (dist < alignmentDistance) {
-                float w = influence[j];
-                aliX += velX[j] * w;
-                aliY += velY[j] * w;
-                totalWeight += w;
+                aliX += neighVX * neighInfluence;
+                aliY += neighVY * neighInfluence;
+                totalWeight += neighInfluence;
             }
         }
     }
@@ -118,9 +128,11 @@ __global__ void computeForcesKernelGridOptimized(
     borderX *= 0.2f;
     borderY *= 0.2f;
 
-    outVelChangeX[i] = cohX + sepX + aliX + borderX;
-    outVelChangeY[i] = cohY + sepY + aliY + borderY;
+    outVelChangeX[sortedIdx] = cohX + sepX + aliX + borderX;
+    outVelChangeY[sortedIdx] = cohY + sepY + aliY + borderY;
 }
+
+
 
 
 __global__ void kernComputeIndices(
@@ -172,30 +184,33 @@ __global__ void kernIdentifyCellStartEnd(
     }
 }
 
-__global__ void kernApplyVelocityChange(
+__global__ void kernApplyVelocityChangeSorted(
     int N,
+    const float* velChangeX_sorted, const float* velChangeY_sorted,
     float* posX, float* posY,
     float* velX, float* velY,
-    const float* velChangeX, const float* velChangeY,
+    const int* particleArrayIndices,
     float dt, float slowDownFactor, float maxSpeed)
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= N) return;
 
+    int origIdx = particleArrayIndices[i];
+
     // Applica la variazione di velocità con il fattore di rallentamento
-    velX[i] += velChangeX[i] * slowDownFactor;
-    velY[i] += velChangeY[i] * slowDownFactor;
+    velX[origIdx] += velChangeX_sorted[i] * slowDownFactor;
+    velY[origIdx] += velChangeY_sorted[i] * slowDownFactor;
 
     // Limita la velocità
-    float speed = sqrtf(velX[i] * velX[i] + velY[i] * velY[i]);
+    float speed = sqrtf(velX[origIdx] * velX[origIdx] + velY[origIdx] * velY[origIdx]);
     if (speed > maxSpeed) {
-        velX[i] = (velX[i] / speed) * maxSpeed;
-        velY[i] = (velY[i] / speed) * maxSpeed;
+        velX[origIdx] = (velX[origIdx] / speed) * maxSpeed;
+        velY[origIdx] = (velY[origIdx] / speed) * maxSpeed;
     }
 
     // Aggiorna la posizione
-    posX[i] += velX[i] * dt;
-    posY[i] += velY[i] * dt;
+    posX[origIdx] += velX[origIdx] * dt;
+    posY[origIdx] += velY[origIdx] * dt;
 }
 
 __global__ void kernComputeRotations(int N, const float* velX, const float* velY, float* rotations) {
@@ -216,5 +231,50 @@ __global__ void kernIntegratePositions(int N, float dt,
     posX[i] += velX[i] * dt;
     posY[i] += velY[i] * dt;
 }
+
+__global__ void kernReorderData(
+    int N,
+    const float* posX, const float* posY,
+    const float* velX, const float* velY,
+    const float* scale, const float* influence,
+    const int* type,
+    const float* colorR, const float* colorG, const float* colorB,
+    const float* velChangeX, const float* velChangeY,
+    const int* particleArrayIndices, // permutazione ordinata
+    float* posX_sorted, float* posY_sorted,
+    float* velX_sorted, float* velY_sorted,
+    float* scale_sorted, float* influence_sorted,
+    int* type_sorted,
+    float* colorR_sorted, float* colorG_sorted, float* colorB_sorted,
+    float* velChangeX_sorted, float* velChangeY_sorted
+)
+{
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= N) return;
+
+    int srcIdx = particleArrayIndices[i]; // indice originale
+
+    posX_sorted[i] = posX[srcIdx];
+    posY_sorted[i] = posY[srcIdx];
+
+    velX_sorted[i] = velX[srcIdx];
+    velY_sorted[i] = velY[srcIdx];
+
+    scale_sorted[i] = scale[srcIdx];
+    influence_sorted[i] = influence[srcIdx];
+
+    type_sorted[i] = type[srcIdx];
+
+    colorR_sorted[i] = colorR[srcIdx];
+    colorG_sorted[i] = colorG[srcIdx];
+    colorB_sorted[i] = colorB[srcIdx];
+
+    velChangeX_sorted[i] = velChangeX[srcIdx];
+    velChangeY_sorted[i] = velChangeY[srcIdx];
+}
+
+
+
+
 
 

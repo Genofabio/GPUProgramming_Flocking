@@ -6,6 +6,8 @@
 
 struct BoidData {
     size_t N = 0;
+
+    // --- Originali (non ordinati, come adesso) ---
     float* posX = nullptr;
     float* posY = nullptr;
     float* velX = nullptr;
@@ -20,11 +22,25 @@ struct BoidData {
     float* velChangeX = nullptr;
     float* velChangeY = nullptr;
     float* rotations = nullptr;
-    float* colorR = { nullptr };
-    float* colorG = { nullptr };
-    float* colorB = { nullptr };
+    float* colorR = nullptr;
+    float* colorG = nullptr;
+    float* colorB = nullptr;
     float* debugX[5] = { nullptr };
     float* debugY[5] = { nullptr };
+
+    // --- Nuovi buffer ordinati per cella (coerenti) ---
+    float* posX_sorted = nullptr;
+    float* posY_sorted = nullptr;
+    float* velX_sorted = nullptr;
+    float* velY_sorted = nullptr;
+    float* velChangeX_sorted = nullptr;
+    float* velChangeY_sorted = nullptr;
+    float* scale_sorted = nullptr;
+    float* influence_sorted = nullptr;
+    int* type_sorted = nullptr;
+    float* colorR_sorted = nullptr;
+    float* colorG_sorted = nullptr;
+    float* colorB_sorted = nullptr;
 };
 
 void allocateBoidDataGPU(BoidData& bd, size_t N);
