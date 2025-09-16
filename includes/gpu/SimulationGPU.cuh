@@ -60,9 +60,13 @@ private:
     std::vector<glm::vec3> renderColors;
     std::vector<float> renderScales;
 
-    // Agenti e ostacoli
+    // Agenti 
     std::vector<Boid> boids;
+
+    // Ostacoli
     std::vector<Wall> walls;
+    float2* wallsDevicePositions = nullptr;
+    size_t numWallSegments = 0;
 
     // Griglie
     Grid wallGrid;
@@ -90,6 +94,7 @@ private:
     void initPrey(int count);
     void initPredators(int count);
     void initWalls(int n);
+    void prepareWallsGPU();
 
     // Helper update
     void computeForces();

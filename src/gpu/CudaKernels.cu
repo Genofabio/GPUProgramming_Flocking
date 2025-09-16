@@ -19,7 +19,11 @@ __global__ void computeForcesKernelAggressive(
     float separationDistance, float separationScale,
     float alignmentDistance, float alignmentScale,
     float width, float height, float borderAlertDistance,
-    float* outVelChangeX, float* outVelChangeY)
+    float* outVelChangeX, float* outVelChangeY,
+    int numWalls,
+    const float2* wallPositions,   // x,y start/end concatenati
+    float wallRepulsionDistance,
+    float wallRepulsionScale)
 {
     extern __shared__ float shMem[];
     float* shPosX = shMem;
@@ -134,8 +138,62 @@ __global__ void computeForcesKernelAggressive(
     borderX *= 0.2f;
     borderY *= 0.2f;
 
-    outVelChangeX[i] = cohX + sepX + aliX + borderX;
-    outVelChangeY[i] = cohY + sepY + aliY + borderY;
+    // --- Repulsione dai muri ---
+    float wallRepX = 0.f, wallRepY = 0.f;
+
+    float lookAhead = 30.0f;
+
+    // Calcola direzione normalizzata della velocità
+    float velLen = sqrtf(velX_sorted[i] * velX_sorted[i] + velY_sorted[i] * velY_sorted[i]);
+    float dirX = (velLen > 0.0001f) ? velX_sorted[i] / velLen : 0.f;
+    float dirY = (velLen > 0.0001f) ? velY_sorted[i] / velLen : 0.f;
+
+    for (int w = 0; w < numWalls; ++w) {
+        float2 start = wallPositions[2 * w];     // punto inizio muro
+        float2 end = wallPositions[2 * w + 1]; // punto fine muro
+
+        // distanza punto-muro: proiezione del boid sul segmento
+        float dx = px - start.x;
+        float dy = py - start.y;
+        float wallLenX = end.x - start.x;
+        float wallLenY = end.y - start.y;
+        float wallLenSq = wallLenX * wallLenX + wallLenY * wallLenY;
+
+        float t = fmaxf(0.f, fminf(1.f, (dx * wallLenX + dy * wallLenY) / wallLenSq));
+
+        float closestX = start.x + t * wallLenX;
+        float closestY = start.y + t * wallLenY;
+
+        float distX = px - closestX;
+        float distY = py - closestY;
+        float dist = sqrtf(distX * distX + distY * distY);
+
+        if (dist < wallRepulsionDistance && dist > 0.001f) {
+            // safe lookahead (per evitare instabilità troppo vicino al muro)
+            float safeLookAhead = fmaxf(0.001f, fminf(lookAhead, dist - 0.2f));
+            float probeX = px + dirX * safeLookAhead;
+            float probeY = py + dirY * safeLookAhead;
+
+            // direzione "via dal muro"
+            float awayX = probeX - closestX;
+            float awayY = probeY - closestY;
+            float awayLen = sqrtf(awayX * awayX + awayY * awayY);
+            if (awayLen > 0.0001f) {
+                awayX /= awayLen;
+                awayY /= awayLen;
+            }
+
+            // forza con fattore quadratico e divisione per distanza
+            float factor = (wallRepulsionDistance - dist) / dist;
+            float force = factor * factor * wallRepulsionScale;
+
+            wallRepX += awayX * force;
+            wallRepY += awayY * force;
+        }
+    }
+
+    outVelChangeX[i] = cohX + sepX + aliX + borderX + wallRepX;
+    outVelChangeY[i] = cohY + sepY + aliY + borderY + wallRepY;
 }
 
 

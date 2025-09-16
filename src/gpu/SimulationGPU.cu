@@ -7,7 +7,7 @@
 #include <utility/ResourceManager.h>
 #include <gpu/BoidData.h>
 #include <core/Boid.h>
-#include <gpu/cuda_kernel.cuh>
+#include <gpu/CudaKernels.cuh>
 #include <cuda_runtime.h>
 
 #include <thrust/sort.h>
@@ -53,7 +53,11 @@ SimulationGPU::SimulationGPU(unsigned int width, unsigned int height)
     params.predatorFearScale = 0.8f;
     params.predatorChaseScale = 0.12f;
     params.predatorSeparationScale = 2.0f;
-    params.borderAlertDistance = height / 5.0f;
+    params.borderAlertDistance = 120.0f;
+
+    // Muri
+    params.wallRepulsionDistance = 50.0f; 
+    params.wallRepulsionScale = 5.0f;     
 
     // Social/extra
     params.leaderInfluenceDistance = 120.0f;
@@ -84,6 +88,8 @@ SimulationGPU::~SimulationGPU()
     if (devRenderRotations) { cudaFree(devRenderRotations); devRenderRotations = nullptr; }
     if (devRenderColors) { cudaFree(devRenderColors); devRenderColors = nullptr; }
     if (devRenderScales) { cudaFree(devRenderScales); devRenderScales = nullptr; }
+
+    if (wallsDevicePositions) cudaFree(wallsDevicePositions);
 
     freeGridDataGPU(gridData);
     freeBoidDataGPU(gpuBoids);
@@ -129,6 +135,9 @@ void SimulationGPU::init()
 
     // Initialize walls
     initWalls(50);
+
+	// Preprocessing wall data for GPU
+    prepareWallsGPU();
 
     // Allocate grid buffers
     size_t N = boids.size();
@@ -340,6 +349,41 @@ void SimulationGPU::initWalls(int count)
     }
 }
 
+void SimulationGPU::prepareWallsGPU() {
+    // Conta i segmenti totali
+    numWallSegments = 0;
+    for (const auto& w : walls) {
+        if (w.points.size() >= 2)
+            numWallSegments += static_cast<size_t>(w.points.size() - 1);
+    }
+
+    if (numWallSegments == 0) return;
+
+    // Alloca array host temporaneo: 2 punti per segmento
+    std::vector<float2> hPositions(numWallSegments * 2);
+
+    size_t idx = 0;
+    for (const auto& w : walls) {
+        for (size_t i = 0; i + 1 < w.points.size(); ++i) {
+            glm::vec2 a = w.points[i];
+            glm::vec2 b = w.points[i + 1];
+
+            // Salva i due estremi del segmento
+            hPositions[2 * idx] = make_float2(a.x, a.y);
+            hPositions[2 * idx + 1] = make_float2(b.x, b.y);
+
+            idx++;
+        }
+    }
+
+    // Alloca GPU 
+    CUDA_CHECK(cudaMalloc(&wallsDevicePositions, hPositions.size() * sizeof(float2)));
+
+    // Copia dati su GPU
+    CUDA_CHECK(cudaMemcpy(wallsDevicePositions, hPositions.data(),
+        hPositions.size() * sizeof(float2), cudaMemcpyHostToDevice));
+}
+
 // === HELPER Update ===
 void SimulationGPU::computeForces() {
     int N = static_cast<int>(boids.size());
@@ -394,6 +438,7 @@ void SimulationGPU::computeForces() {
     // Ogni boid necessita di 5 float in shared memory (posX, posY, velX, velY, influence)
 	profiler.start();
     size_t shMemSize = threads * 5 * sizeof(float);
+
     computeForcesKernelAggressive << <blocks, threads, shMemSize >> > (
         N,
         gpuBoids.posX_sorted, gpuBoids.posY_sorted,
@@ -410,7 +455,11 @@ void SimulationGPU::computeForces() {
         static_cast<float>(height),
         params.borderAlertDistance,
         gpuBoids.velChangeX_sorted,
-        gpuBoids.velChangeY_sorted
+        gpuBoids.velChangeY_sorted,
+        numWallSegments,
+        reinterpret_cast<float2*>(wallsDevicePositions),   
+        params.wallRepulsionDistance,
+        params.wallRepulsionScale
         );
 
     cudaDeviceSynchronize();

@@ -58,7 +58,11 @@ __global__ void computeForcesKernelAggressive(
     float separationDistance, float separationScale,
     float alignmentDistance, float alignmentScale,
     float width, float height, float borderAlertDistance,
-    float* outVelChangeX, float* outVelChangeY
+    float* outVelChangeX, float* outVelChangeY,
+    int numWalls,
+    const float2* wallPositions,   
+    float wallRepulsionDistance,
+    float wallRepulsionScale
 );
 
 // ============================================================

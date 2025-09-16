@@ -16,6 +16,7 @@ struct BoidParams {
     float predatorEatDistance;
     float leaderInfluenceDistance;
     float desiredLeaderDistance;
+    float wallRepulsionDistance;
 
     // Pesi per le regole
     float cohesionScale;
@@ -27,6 +28,7 @@ struct BoidParams {
     float predatorSeparationScale;
     float borderAlertDistance;
     float leaderInfluenceScale;
+    float wallRepulsionScale;
 
     // Parametri specifici
     float mateDistance;
