@@ -259,7 +259,7 @@
     <ClInclude Include="includes\GLFW\glfw3.h" />
     <ClInclude Include="includes\GLFW\glfw3native.h" />
     <ClInclude Include="includes\gpu\BoidData.h" />
-    <ClInclude Include="includes\gpu\cuda_kernel.cuh" />
+    <ClInclude Include="includes\gpu\CudaKernels.cuh" />
     <ClInclude Include="includes\gpu\GridData.h" />
     <ClInclude Include="includes\gpu\SimulationGPU.cuh" />
     <ClInclude Include="include\custom\ResourceManager.h" />
@@ -297,7 +297,7 @@
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="src\gpu\BoidData.cu" />
-    <CudaCompile Include="src\gpu\cuda_kernel.cu" />
+    <CudaCompile Include="src\gpu\CudaKernels.cu" />
     <CudaCompile Include="src\gpu\GridData.cu" />
     <CudaCompile Include="src\gpu\SimulationGPU.cu" />
   </ItemGroup>

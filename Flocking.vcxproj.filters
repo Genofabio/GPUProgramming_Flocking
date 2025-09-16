@@ -399,7 +399,7 @@
     <ClInclude Include="includes\custom\VectorRenderer.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="includes\gpu\cuda_kernel.cuh" />
+    <ClInclude Include="includes\gpu\CudaKernels.cuh" />
     <ClInclude Include="includes\gpu\BoidData.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
@@ -455,7 +455,7 @@
     <Library Include="libs\glfw3.lib" />
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="src\gpu\cuda_kernel.cu" />
+    <CudaCompile Include="src\gpu\CudaKernels.cu" />
     <CudaCompile Include="src\gpu\BoidData.cu" />
     <CudaCompile Include="src\gpu\SimulationGPU.cu" />
     <CudaCompile Include="src\gpu\GridData.cu" />
