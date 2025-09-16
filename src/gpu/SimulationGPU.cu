@@ -117,7 +117,7 @@ void SimulationGPU::init()
 
     // Initialize boids
     initLeaders(0);
-    initPrey(3000);
+    initPrey(5000);
     initPredators(0);
 
     // Allocate and copy boid data to GPU if not done yet
@@ -390,15 +390,15 @@ void SimulationGPU::computeForces() {
         gridData.cellEndIndices
         );
 
-    // --- 5. Calcola le forze sui buffer ordinati ---
-    computeForcesKernelGridOptimized << <blocks, threads >> > (
+    // --- 5. Calcola le forze sui buffer ordinati usando il kernel ottimizzato con tiling ---
+    // Ogni boid necessita di 5 float in shared memory (posX, posY, velX, velY, influence)
+	profiler.start();
+    size_t shMemSize = threads * 5 * sizeof(float);
+    computeForcesKernelAggressive << <blocks, threads, shMemSize >> > (
         N,
         gpuBoids.posX_sorted, gpuBoids.posY_sorted,
         gpuBoids.velX_sorted, gpuBoids.velY_sorted,
         gpuBoids.influence_sorted,
-        gpuBoids.type_sorted,
-        gridData.particleArrayIndices,
-        gridData.particleGridIndices,
         gridData.cellStartIndices,
         gridData.cellEndIndices,
         boidGrid.nCols, boidGrid.nRows,
@@ -414,7 +414,9 @@ void SimulationGPU::computeForces() {
         );
 
     cudaDeviceSynchronize();
+	profiler.log("compute forces", profiler.stop());
 }
+
 
 void SimulationGPU::checkEatenPrey()
 {

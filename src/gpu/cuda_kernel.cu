@@ -3,131 +3,240 @@
 #include <cuda.h>
 #include <stdio.h>
 #include <gpu/cuda_kernel.cuh>
+#include <algorithm>
 
-__global__ void computeForcesKernelGridOptimized(
+//__global__ void computeForcesKernelGridOptimized(
+//    int N,
+//    const float* posX_sorted, const float* posY_sorted,
+//    const float* velX_sorted, const float* velY_sorted,
+//    const float* influence_sorted,
+//    const int* type_sorted,
+//    const int* particleArrayIndices,
+//    const int* particleGridIndices,
+//    const int* gridCellStartIndices,
+//    const int* gridCellEndIndices,
+//    int gridResolutionX,
+//    int gridResolutionY,
+//    float cellWidth,
+//    float cohesionDistance, float cohesionScale,
+//    float separationDistance, float separationScale,
+//    float alignmentDistance, float alignmentScale,
+//    float width, float height, float borderAlertDistance,
+//    float* outVelChangeX, float* outVelChangeY
+//)
+//{
+//    int i = blockIdx.x * blockDim.x + threadIdx.x;
+//    if (i >= N) return;
+//
+//    // --- Shared memory dinamica ---
+//    extern __shared__ float shMemory[];
+//    float* shPosX = shMemory;                     // blockDim.x elementi
+//    float* shPosY = shPosX + blockDim.x;
+//    float* shVelX = shPosY + blockDim.x;
+//    float* shVelY = shVelX + blockDim.x;
+//    float* shInfluence = shVelY + blockDim.x;
+//    int* shType = (int*)(shInfluence + blockDim.x);
+//
+//    int tid = threadIdx.x;
+//    int blockStart = blockIdx.x * blockDim.x;
+//
+//    // --- Caricamento collaborativo in shared memory ---
+//    for (int idx = tid; idx < blockDim.x && (blockStart + idx) < N; idx += blockDim.x) {
+//        int sortedIdx = particleArrayIndices[blockStart + idx];
+//        shPosX[idx] = posX_sorted[sortedIdx];
+//        shPosY[idx] = posY_sorted[sortedIdx];
+//        shVelX[idx] = velX_sorted[sortedIdx];
+//        shVelY[idx] = velY_sorted[sortedIdx];
+//        shInfluence[idx] = influence_sorted[sortedIdx];
+//        shType[idx] = type_sorted[sortedIdx];
+//    }
+//    __syncthreads();
+//
+//    // --- Variabili locali ---
+//    int sortedIdx = particleArrayIndices[i];
+//    float px = shPosX[tid];
+//    float py = shPosY[tid];
+//
+//    float cohX = 0.0f, cohY = 0.0f;
+//    float sepX = 0.0f, sepY = 0.0f;
+//    float aliX = 0.0f, aliY = 0.0f;
+//
+//    int neighborCount = 0;
+//    float totalWeight = 0.0f;
+//
+//    int col = int(px / cellWidth);
+//    int row = int(py / cellWidth);
+//    col = (col < 0) ? 0 : (col >= gridResolutionX ? gridResolutionX - 1 : col);
+//    row = (row < 0) ? 0 : (row >= gridResolutionY ? gridResolutionY - 1 : row);
+//
+//    float localX = (px - col * cellWidth) / cellWidth;
+//    float localY = (py - row * cellWidth) / cellWidth;
+//    int worldDx = (localX > 0.5f) ? 1 : -1;
+//    int worldDy = (localY > 0.5f) ? 1 : -1;
+//
+//    int dr[4] = { 0, worldDy, 0, worldDy };
+//    int dc[4] = { 0, 0, worldDx, worldDx };
+//
+//    for (int q = 0; q < 4; ++q) {
+//        int neighRow = row + dr[q];
+//        int neighCol = col + dc[q];
+//        if (neighRow < 0 || neighRow >= gridResolutionY) continue;
+//        if (neighCol < 0 || neighCol >= gridResolutionX) continue;
+//
+//        int neighCell = neighCol + neighRow * gridResolutionX;
+//        int startIdx = gridCellStartIndices[neighCell];
+//        int endIdx = gridCellEndIndices[neighCell];
+//        if (startIdx == -1) continue;
+//
+//        for (int jIdx = startIdx; jIdx <= endIdx; ++jIdx) {
+//            int j = particleArrayIndices[jIdx]; // indice globale del vicino
+//            if (i == j) continue;
+//
+//            float neighX, neighY, neighVX, neighVY, neighInfluence;
+//
+//            int jThread = j - blockStart;
+//            if (jThread >= 0 && jThread < blockDim.x) {
+//                // vicino nello stesso blocco -> shared memory
+//                neighX = shPosX[jThread];
+//                neighY = shPosY[jThread];
+//                neighVX = shVelX[jThread];
+//                neighVY = shVelY[jThread];
+//                neighInfluence = shInfluence[jThread];
+//            }
+//            else {
+//                // vicino in altro blocco -> global memory
+//                neighX = posX_sorted[j];
+//                neighY = posY_sorted[j];
+//                neighVX = velX_sorted[j];
+//                neighVY = velY_sorted[j];
+//                neighInfluence = influence_sorted[j];
+//            }
+//
+//            float dx = neighX - px;
+//            float dy = neighY - py;
+//            float dist = sqrtf(dx * dx + dy * dy);
+//
+//            if (dist < cohesionDistance) { cohX += neighX; cohY += neighY; neighborCount++; }
+//            if (dist < separationDistance && dist > 0.0f) { sepX += (px - neighX) / dist; sepY += (py - neighY) / dist; }
+//            if (dist < alignmentDistance) { aliX += neighVX * neighInfluence; aliY += neighVY * neighInfluence; totalWeight += neighInfluence; }
+//        }
+//    }
+//
+//    if (neighborCount > 0) { cohX = (cohX / neighborCount - px) * cohesionScale; cohY = (cohY / neighborCount - py) * cohesionScale; }
+//    if (totalWeight > 0.0f) { aliX = (aliX / totalWeight) * alignmentScale; aliY = (aliY / totalWeight) * alignmentScale; }
+//
+//    sepX *= separationScale; sepY *= separationScale;
+//
+//    float borderX = 0.0f, borderY = 0.0f;
+//    if (px < borderAlertDistance) borderX += (borderAlertDistance - px);
+//    if ((width - px) < borderAlertDistance) borderX -= (borderAlertDistance - (width - px));
+//    if (py < borderAlertDistance) borderY += (borderAlertDistance - py);
+//    if ((height - py) < borderAlertDistance) borderY -= (borderAlertDistance - (height - py));
+//    borderX *= 0.2f; borderY *= 0.2f;
+//
+//    outVelChangeX[sortedIdx] = cohX + sepX + aliX + borderX;
+//    outVelChangeY[sortedIdx] = cohY + sepY + aliY + borderY;
+//}  15.1ms
+
+__global__ void computeForcesKernelAggressive(
     int N,
     const float* posX_sorted, const float* posY_sorted,
     const float* velX_sorted, const float* velY_sorted,
     const float* influence_sorted,
-    const int* type_sorted,
-    const int* particleArrayIndices,
-    const int* particleGridIndices,
     const int* gridCellStartIndices,
     const int* gridCellEndIndices,
-    int gridResolutionX,
-    int gridResolutionY,
+    int gridResolutionX, int gridResolutionY,
     float cellWidth,
     float cohesionDistance, float cohesionScale,
     float separationDistance, float separationScale,
     float alignmentDistance, float alignmentScale,
     float width, float height, float borderAlertDistance,
-    float* outVelChangeX, float* outVelChangeY
-)
+    float* outVelChangeX, float* outVelChangeY)
 {
+    extern __shared__ float shMem[];
+    float* shPosX = shMem;
+    float* shPosY = shPosX + blockDim.x;
+    float* shVelX = shPosY + blockDim.x;
+    float* shVelY = shVelX + blockDim.x;
+    float* shInfluence = shVelY + blockDim.x;
+
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= N) return;
 
-    int sortedIdx = particleArrayIndices[i];  // usa l'indice ordinato
-    float px = posX_sorted[sortedIdx];
-    float py = posY_sorted[sortedIdx];
+    float px = posX_sorted[i];
+    float py = posY_sorted[i];
 
-    float cohX = 0.0f, cohY = 0.0f;
-    float sepX = 0.0f, sepY = 0.0f;
-    float aliX = 0.0f, aliY = 0.0f;
-
+    float cohX = 0.f, cohY = 0.f, sepX = 0.f, sepY = 0.f, aliX = 0.f, aliY = 0.f;
     int neighborCount = 0;
-    float totalWeight = 0.0f;
+    float totalWeight = 0.f;
 
-    int col = int(px / cellWidth);
-    int row = int(py / cellWidth);
+    int col = min(max(int(px / cellWidth), 0), gridResolutionX - 1);
+    int row = min(max(int(py / cellWidth), 0), gridResolutionY - 1);
 
-    // clamp esplicito
-    if (col < 0) col = 0;
-    if (col >= gridResolutionX) col = gridResolutionX - 1;
-    if (row < 0) row = 0;
-    if (row >= gridResolutionY) row = gridResolutionY - 1;
-
-    // --- logica delle 4 celle ---
-    float localX = (px - col * cellWidth) / cellWidth;
-    float localY = (py - row * cellWidth) / cellWidth;
-
-    int worldDx = (localX > 0.5f) ? 1 : -1;
-    int worldDy = (localY > 0.5f) ? 1 : -1;
-
-    int dr[4] = { 0, worldDy, 0, worldDy };
-    int dc[4] = { 0, 0, worldDx, worldDx };
+    int dr[4] = { 0, (px - col * cellWidth > 0.5f * cellWidth) ? 1 : -1, 0, (px - col * cellWidth > 0.5f * cellWidth) ? 1 : -1 };
+    int dc[4] = { 0, 0, (py - row * cellWidth > 0.5f * cellWidth) ? 1 : -1, (py - row * cellWidth > 0.5f * cellWidth) ? 1 : -1 };
 
     for (int q = 0; q < 4; ++q) {
         int neighRow = row + dr[q];
         int neighCol = col + dc[q];
-
         if (neighRow < 0 || neighRow >= gridResolutionY) continue;
         if (neighCol < 0 || neighCol >= gridResolutionX) continue;
 
-        int neighCell = neighCol + neighRow * gridResolutionX;
-        int startIdx = gridCellStartIndices[neighCell];
-        int endIdx = gridCellEndIndices[neighCell];
+        int cellIdx = neighCol + neighRow * gridResolutionX;
+        int startIdx = gridCellStartIndices[cellIdx];
+        int endIdx = gridCellEndIndices[cellIdx];
         if (startIdx == -1) continue;
 
-        for (int jIdx = startIdx; jIdx <= endIdx; ++jIdx) {
-            int j = particleArrayIndices[jIdx];  // indice ordinato del vicino
-            if (i == j) continue;
+        int tileSize = endIdx - startIdx + 1;
 
-            float neighX = posX_sorted[j];
-            float neighY = posY_sorted[j];
-            float neighVX = velX_sorted[j];
-            float neighVY = velY_sorted[j];
-            float neighInfluence = influence_sorted[j];
-
-            float dx = neighX - px;
-            float dy = neighY - py;
-            float dist = sqrtf(dx * dx + dy * dy);
-
-            if (dist < cohesionDistance) {
-                cohX += neighX;
-                cohY += neighY;
-                neighborCount++;
+        // Caricamento tiling in shared memory
+        for (int offset = 0; offset < tileSize; offset += blockDim.x) {
+            int tid = threadIdx.x + offset;
+            if (tid < tileSize) {
+                int idxTile = startIdx + tid;
+                shPosX[threadIdx.x] = posX_sorted[idxTile];
+                shPosY[threadIdx.x] = posY_sorted[idxTile];
+                shVelX[threadIdx.x] = velX_sorted[idxTile];
+                shVelY[threadIdx.x] = velY_sorted[idxTile];
+                shInfluence[threadIdx.x] = influence_sorted[idxTile];
             }
+            __syncthreads();
 
-            if (dist < separationDistance && dist > 0.0f) {
-                sepX += (px - neighX) / dist;
-                sepY += (py - neighY) / dist;
-            }
+            int limit = min(tileSize - offset, blockDim.x);
+            for (int j = 0; j < limit; ++j) {
+                int globalIdx = startIdx + offset + j;
+                if (globalIdx == i) continue;
 
-            if (dist < alignmentDistance) {
-                aliX += neighVX * neighInfluence;
-                aliY += neighVY * neighInfluence;
-                totalWeight += neighInfluence;
+                float dx = shPosX[j] - px;
+                float dy = shPosY[j] - py;
+                float dist = sqrtf(dx * dx + dy * dy);
+
+                if (dist < cohesionDistance) { cohX += shPosX[j]; cohY += shPosY[j]; neighborCount++; }
+                if (dist < separationDistance && dist>0.f) { sepX += (px - shPosX[j]) / dist; sepY += (py - shPosY[j]) / dist; }
+                if (dist < alignmentDistance) { aliX += shVelX[j] * shInfluence[j]; aliY += shVelY[j] * shInfluence[j]; totalWeight += shInfluence[j]; }
             }
+            __syncthreads();
         }
     }
 
-    if (neighborCount > 0) {
-        cohX = (cohX / neighborCount - px) * cohesionScale;
-        cohY = (cohY / neighborCount - py) * cohesionScale;
-    }
+    if (neighborCount > 0) { cohX = (cohX / neighborCount - px) * cohesionScale; cohY = (cohY / neighborCount - py) * cohesionScale; }
+    if (totalWeight > 0) { aliX = (aliX / totalWeight) * alignmentScale; aliY = (aliY / totalWeight) * alignmentScale; }
 
-    if (totalWeight > 0.0f) {
-        aliX = (aliX / totalWeight) * alignmentScale;
-        aliY = (aliY / totalWeight) * alignmentScale;
-    }
+    sepX *= separationScale; sepY *= separationScale;
 
-    sepX *= separationScale;
-    sepY *= separationScale;
-
-    // Border
-    float borderX = 0.0f, borderY = 0.0f;
+    // --- Border forces ---
+    float borderX = 0.f, borderY = 0.f;
     if (px < borderAlertDistance) borderX += (borderAlertDistance - px);
     if ((width - px) < borderAlertDistance) borderX -= (borderAlertDistance - (width - px));
     if (py < borderAlertDistance) borderY += (borderAlertDistance - py);
     if ((height - py) < borderAlertDistance) borderY -= (borderAlertDistance - (height - py));
-    borderX *= 0.2f;
-    borderY *= 0.2f;
+    borderX *= 0.2f; borderY *= 0.2f;
 
-    outVelChangeX[sortedIdx] = cohX + sepX + aliX + borderX;
-    outVelChangeY[sortedIdx] = cohY + sepY + aliY + borderY;
+    outVelChangeX[i] = cohX + sepX + aliX + borderX;
+    outVelChangeY[i] = cohY + sepY + aliY + borderY;
 }
 
+//9.5ms/10.5ms
 
 
 

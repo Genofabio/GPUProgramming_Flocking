@@ -3,25 +3,36 @@
 #include <glm/glm.hpp>
 
 
-__global__ void computeForcesKernelGridOptimized(
+//__global__ void computeForcesKernelGridOptimized(
+//    int N,
+//    const float* posX_sorted, const float* posY_sorted,
+//    const float* velX_sorted, const float* velY_sorted,
+//    const float* influence_sorted,
+//    const int* particleArrayIndices,
+//    const int* gridCellStartIndices,
+//    const int* gridCellEndIndices,
+//    int gridResolutionX, int gridResolutionY,
+//    float cellWidth,
+//    float cohesionDistance, float cohesionScale,
+//    float separationDistance, float separationScale,
+//    float alignmentDistance, float alignmentScale,
+//    float width, float height, float borderAlertDistance,
+//    float* outVelChangeX, float* outVelChangeY);
+
+__global__ void computeForcesKernelAggressive(
     int N,
     const float* posX_sorted, const float* posY_sorted,
     const float* velX_sorted, const float* velY_sorted,
     const float* influence_sorted,
-    const int* type_sorted,
-    const int* particleArrayIndices,
-    const int* particleGridIndices,
     const int* gridCellStartIndices,
     const int* gridCellEndIndices,
-    int gridResolutionX,
-    int gridResolutionY,
+    int gridResolutionX, int gridResolutionY,
     float cellWidth,
     float cohesionDistance, float cohesionScale,
     float separationDistance, float separationScale,
     float alignmentDistance, float alignmentScale,
     float width, float height, float borderAlertDistance,
-    float* outVelChangeX, float* outVelChangeY
-);
+	float* outVelChangeX, float* outVelChangeY);
 
 __global__ void kernComputeIndices(
     int N,
