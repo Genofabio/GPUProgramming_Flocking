@@ -1,6 +1,9 @@
 #pragma once
 #include <cuda_runtime.h>
 #include <glm/glm.hpp>
+#include <core/BoidParams.h>
+
+void setSimulationParamsOnGPU(int width, int height, const BoidParams& params);
 
 // ============================================================
 // 1. Utility kernels per la griglia (hashing e ordinamento)
@@ -54,16 +57,9 @@ __global__ void computeForcesKernelAggressive(
     const int* gridCellEndIndices,
     int gridResolutionX, int gridResolutionY,
     float cellWidth,
-    float cohesionDistance, float cohesionScale,
-    float separationDistance, float separationScale,
-    float alignmentDistance, float alignmentScale,
-    float width, float height, float borderAlertDistance,
     float* outVelChangeX, float* outVelChangeY,
     int numWalls,
-    const float2* wallPositions,   
-    float wallRepulsionDistance,
-    float wallRepulsionScale
-);
+    const float2* wallPositions);
 
 // ============================================================
 // 3. Integrazione e aggiornamento stato boids
@@ -75,7 +71,7 @@ __global__ void kernApplyVelocityChangeSorted(
     float* posX, float* posY,
     float* velX, float* velY,
     const int* particleArrayIndices,
-    float dt, float slowDownFactor, float maxSpeed
+    float dt
 );
 
 __global__ void kernIntegratePositions(

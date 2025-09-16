@@ -5,6 +5,86 @@
 #include <gpu/CudaKernels.cuh>
 #include <algorithm>
 
+// --- Dichiarazioni in memoria costante ---
+__constant__ int d_width;
+__constant__ int d_height;
+
+// Parametri boid generali
+__constant__ float d_maxSpeed;
+__constant__ float d_slowDownFactor;
+
+// Distanze per le regole
+__constant__ float d_cohesionDistance;
+__constant__ float d_separationDistance;
+__constant__ float d_alignmentDistance;
+__constant__ float d_borderDistance;
+__constant__ float d_predatorFearDistance;
+__constant__ float d_predatorChaseDistance;
+__constant__ float d_predatorSeparationDistance;
+__constant__ float d_predatorEatDistance;
+__constant__ float d_leaderInfluenceDistance;
+__constant__ float d_desiredLeaderDistance;
+__constant__ float d_wallRepulsionDistance;
+
+// Pesi per le regole
+__constant__ float d_cohesionScale;
+__constant__ float d_separationScale;
+__constant__ float d_alignmentScale;
+__constant__ float d_borderScale;
+__constant__ float d_predatorFearScale;
+__constant__ float d_predatorChaseScale;
+__constant__ float d_predatorSeparationScale;
+__constant__ float d_borderAlertDistance;
+__constant__ float d_leaderInfluenceScale;
+__constant__ float d_wallRepulsionScale;
+
+// Parametri specifici
+__constant__ float d_mateDistance;
+__constant__ int   d_mateThreshold;
+__constant__ int   d_matingAge;
+__constant__ float d_predatorBoostRadius;
+__constant__ float d_allyRadius;
+
+void setSimulationParamsOnGPU(int width, int height, const BoidParams& params) {
+    cudaMemcpyToSymbol(d_width, &width, sizeof(int));
+    cudaMemcpyToSymbol(d_height, &height, sizeof(int));
+
+    // Generali
+    cudaMemcpyToSymbol(d_maxSpeed, &params.maxSpeed, sizeof(float));
+    cudaMemcpyToSymbol(d_slowDownFactor, &params.slowDownFactor, sizeof(float));
+
+    // Distanze
+    cudaMemcpyToSymbol(d_cohesionDistance, &params.cohesionDistance, sizeof(float));
+    cudaMemcpyToSymbol(d_separationDistance, &params.separationDistance, sizeof(float));
+    cudaMemcpyToSymbol(d_alignmentDistance, &params.alignmentDistance, sizeof(float));
+    cudaMemcpyToSymbol(d_borderDistance, &params.borderDistance, sizeof(float));
+    cudaMemcpyToSymbol(d_predatorFearDistance, &params.predatorFearDistance, sizeof(float));
+    cudaMemcpyToSymbol(d_predatorChaseDistance, &params.predatorChaseDistance, sizeof(float));
+    cudaMemcpyToSymbol(d_predatorSeparationDistance, &params.predatorSeparationDistance, sizeof(float));
+    cudaMemcpyToSymbol(d_predatorEatDistance, &params.predatorEatDistance, sizeof(float));
+    cudaMemcpyToSymbol(d_leaderInfluenceDistance, &params.leaderInfluenceDistance, sizeof(float));
+    cudaMemcpyToSymbol(d_desiredLeaderDistance, &params.desiredLeaderDistance, sizeof(float));
+    cudaMemcpyToSymbol(d_wallRepulsionDistance, &params.wallRepulsionDistance, sizeof(float));
+
+    // Pesi
+    cudaMemcpyToSymbol(d_cohesionScale, &params.cohesionScale, sizeof(float));
+    cudaMemcpyToSymbol(d_separationScale, &params.separationScale, sizeof(float));
+    cudaMemcpyToSymbol(d_alignmentScale, &params.alignmentScale, sizeof(float));
+    cudaMemcpyToSymbol(d_borderScale, &params.borderScale, sizeof(float));
+    cudaMemcpyToSymbol(d_predatorFearScale, &params.predatorFearScale, sizeof(float));
+    cudaMemcpyToSymbol(d_predatorChaseScale, &params.predatorChaseScale, sizeof(float));
+    cudaMemcpyToSymbol(d_predatorSeparationScale, &params.predatorSeparationScale, sizeof(float));
+    cudaMemcpyToSymbol(d_borderAlertDistance, &params.borderAlertDistance, sizeof(float));
+    cudaMemcpyToSymbol(d_leaderInfluenceScale, &params.leaderInfluenceScale, sizeof(float));
+    cudaMemcpyToSymbol(d_wallRepulsionScale, &params.wallRepulsionScale, sizeof(float));
+
+    // Specifici
+    cudaMemcpyToSymbol(d_mateDistance, &params.mateDistance, sizeof(float));
+    cudaMemcpyToSymbol(d_mateThreshold, &params.mateThreshold, sizeof(int));
+    cudaMemcpyToSymbol(d_matingAge, &params.matingAge, sizeof(int));
+    cudaMemcpyToSymbol(d_predatorBoostRadius, &params.predatorBoostRadius, sizeof(float));
+    cudaMemcpyToSymbol(d_allyRadius, &params.allyRadius, sizeof(float));
+}
 
 __global__ void computeForcesKernelAggressive(
     int N,
@@ -15,15 +95,9 @@ __global__ void computeForcesKernelAggressive(
     const int* gridCellEndIndices,
     int gridResolutionX, int gridResolutionY,
     float cellWidth,
-    float cohesionDistance, float cohesionScale,
-    float separationDistance, float separationScale,
-    float alignmentDistance, float alignmentScale,
-    float width, float height, float borderAlertDistance,
     float* outVelChangeX, float* outVelChangeY,
     int numWalls,
-    const float2* wallPositions,   // x,y start/end concatenati
-    float wallRepulsionDistance,
-    float wallRepulsionScale)
+    const float2* wallPositions)  // x,y start/end concatenati
 {
     extern __shared__ float shMem[];
     float* shPosX = shMem;
@@ -98,16 +172,16 @@ __global__ void computeForcesKernelAggressive(
                 float dy = shPosY[j] - py;
                 float dist = sqrtf(dx * dx + dy * dy);
 
-                if (dist < cohesionDistance) {
+                if (dist < d_cohesionDistance) {
                     cohX += shPosX[j];
                     cohY += shPosY[j];
                     neighborCount++;
                 }
-                if (dist < separationDistance && dist > 0.f) {
+                if (dist < d_separationDistance && dist > 0.f) {
                     sepX += (px - shPosX[j]) / dist;
                     sepY += (py - shPosY[j]) / dist;
                 }
-                if (dist < alignmentDistance) {
+                if (dist < d_alignmentDistance) {
                     aliX += shVelX[j] * shInfluence[j];
                     aliY += shVelY[j] * shInfluence[j];
                     totalWeight += shInfluence[j];
@@ -118,23 +192,23 @@ __global__ void computeForcesKernelAggressive(
     }
 
     if (neighborCount > 0) {
-        cohX = (cohX / neighborCount - px) * cohesionScale;
-        cohY = (cohY / neighborCount - py) * cohesionScale;
+        cohX = (cohX / neighborCount - px) * d_cohesionScale;
+        cohY = (cohY / neighborCount - py) * d_cohesionScale;
     }
     if (totalWeight > 0.f) {
-        aliX = (aliX / totalWeight) * alignmentScale;
-        aliY = (aliY / totalWeight) * alignmentScale;
+        aliX = (aliX / totalWeight) * d_alignmentScale;
+        aliY = (aliY / totalWeight) * d_alignmentScale;
     }
 
-    sepX *= separationScale;
-    sepY *= separationScale;
+    sepX *= d_separationScale;
+    sepY *= d_separationScale;
 
     // --- Border forces ---
     float borderX = 0.f, borderY = 0.f;
-    if (px < borderAlertDistance) borderX += (borderAlertDistance - px);
-    if ((width - px) < borderAlertDistance) borderX -= (borderAlertDistance - (width - px));
-    if (py < borderAlertDistance) borderY += (borderAlertDistance - py);
-    if ((height - py) < borderAlertDistance) borderY -= (borderAlertDistance - (height - py));
+    if (px < d_borderAlertDistance) borderX += (d_borderAlertDistance - px);
+    if ((d_width - px) < d_borderAlertDistance) borderX -= (d_borderAlertDistance - (d_width - px));
+    if (py < d_borderAlertDistance) borderY += (d_borderAlertDistance - py);
+    if ((d_height - py) < d_borderAlertDistance) borderY -= (d_borderAlertDistance - (d_height - py));
     borderX *= 0.2f;
     borderY *= 0.2f;
 
@@ -168,7 +242,7 @@ __global__ void computeForcesKernelAggressive(
         float distY = py - closestY;
         float dist = sqrtf(distX * distX + distY * distY);
 
-        if (dist < wallRepulsionDistance && dist > 0.001f) {
+        if (dist < d_wallRepulsionDistance && dist > 0.001f) {
             // safe lookahead (per evitare instabilità troppo vicino al muro)
             float safeLookAhead = fmaxf(0.001f, fminf(lookAhead, dist - 0.2f));
             float probeX = px + dirX * safeLookAhead;
@@ -184,8 +258,8 @@ __global__ void computeForcesKernelAggressive(
             }
 
             // forza con fattore quadratico e divisione per distanza
-            float factor = (wallRepulsionDistance - dist) / dist;
-            float force = factor * factor * wallRepulsionScale;
+            float factor = (d_wallRepulsionDistance - dist) / dist;
+            float force = factor * factor * d_wallRepulsionScale;
 
             wallRepX += awayX * force;
             wallRepY += awayY * force;
@@ -195,7 +269,6 @@ __global__ void computeForcesKernelAggressive(
     outVelChangeX[i] = cohX + sepX + aliX + borderX + wallRepX;
     outVelChangeY[i] = cohY + sepY + aliY + borderY + wallRepY;
 }
-
 
 __global__ void kernComputeIndices(
     int N,
@@ -250,25 +323,26 @@ __global__ void kernApplyVelocityChangeSorted(
     float* posX, float* posY,
     float* velX, float* velY,
     const int* particleArrayIndices,
-    float dt, float slowDownFactor, float maxSpeed)
+    float dt)
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= N) return;
 
     int origIdx = particleArrayIndices[i];
 
-    velX[origIdx] += velChangeX_sorted[i] * slowDownFactor;
-    velY[origIdx] += velChangeY_sorted[i] * slowDownFactor;
+    velX[origIdx] += velChangeX_sorted[i] * d_slowDownFactor;
+    velY[origIdx] += velChangeY_sorted[i] * d_slowDownFactor;
 
     float speed = sqrtf(velX[origIdx] * velX[origIdx] + velY[origIdx] * velY[origIdx]);
-    if (speed > maxSpeed) {
-        velX[origIdx] = (velX[origIdx] / speed) * maxSpeed;
-        velY[origIdx] = (velY[origIdx] / speed) * maxSpeed;
+    if (speed > d_maxSpeed) {
+        velX[origIdx] = (velX[origIdx] / speed) * d_maxSpeed;
+        velY[origIdx] = (velY[origIdx] / speed) * d_maxSpeed;
     }
 
     posX[origIdx] += velX[origIdx] * dt;
     posY[origIdx] += velY[origIdx] * dt;
 }
+
 
 
 __global__ void kernComputeRotations(

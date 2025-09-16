@@ -56,8 +56,8 @@ SimulationGPU::SimulationGPU(unsigned int width, unsigned int height)
     params.borderAlertDistance = 120.0f;
 
     // Muri
-    params.wallRepulsionDistance = 50.0f; 
-    params.wallRepulsionScale = 5.0f;     
+    params.wallRepulsionDistance = 50.0f;
+    params.wallRepulsionScale = 5.0f;
 
     // Social/extra
     params.leaderInfluenceDistance = 120.0f;
@@ -136,7 +136,7 @@ void SimulationGPU::init()
     // Initialize walls
     initWalls(50);
 
-	// Preprocessing wall data for GPU
+    // Preprocessing wall data for GPU
     prepareWallsGPU();
 
     // Allocate grid buffers
@@ -149,6 +149,8 @@ void SimulationGPU::init()
     CUDA_CHECK(cudaMalloc(&devRenderRotations, N * sizeof(float)));
     CUDA_CHECK(cudaMalloc(&devRenderColors, N * sizeof(glm::vec3)));
     CUDA_CHECK(cudaMalloc(&devRenderScales, N * sizeof(float)));
+
+    setSimulationParamsOnGPU(width, height, params);
 }
 
 void SimulationGPU::update(float dt) {
@@ -174,7 +176,7 @@ void SimulationGPU::update(float dt) {
         gpuBoids.posX, gpuBoids.posY,
         gpuBoids.velX, gpuBoids.velY,
         gridData.particleArrayIndices, // <--- sostituito
-        dt, params.slowDownFactor, params.maxSpeed
+        dt
         );
 
     // --- 4. Calcola le rotazioni dai vettori velocità ---
@@ -333,7 +335,7 @@ void SimulationGPU::initWalls(int count)
             (!horizontal && (vertexOccupancy[p1].first || vertexOccupancy[p2].first))) continue;
 
         Wall w({ edge.first, edge.second }, height / 11.0f, 3.0f);
-        walls.push_back(w);  
+        walls.push_back(w);
 
         usedEdges.insert({ p1, p2 });
         if (horizontal) {
@@ -436,7 +438,7 @@ void SimulationGPU::computeForces() {
 
     // --- 5. Calcola le forze sui buffer ordinati usando il kernel ottimizzato con tiling ---
     // Ogni boid necessita di 5 float in shared memory (posX, posY, velX, velY, influence)
-	profiler.start();
+    profiler.start();
     size_t shMemSize = threads * 5 * sizeof(float);
 
     computeForcesKernelAggressive << <blocks, threads, shMemSize >> > (
@@ -448,22 +450,14 @@ void SimulationGPU::computeForces() {
         gridData.cellEndIndices,
         boidGrid.nCols, boidGrid.nRows,
         boidGrid.cellWidth,
-        params.cohesionDistance, params.cohesionScale,
-        params.separationDistance, params.separationScale,
-        params.alignmentDistance, params.alignmentScale,
-        static_cast<float>(width),
-        static_cast<float>(height),
-        params.borderAlertDistance,
         gpuBoids.velChangeX_sorted,
         gpuBoids.velChangeY_sorted,
         numWallSegments,
-        reinterpret_cast<float2*>(wallsDevicePositions),   
-        params.wallRepulsionDistance,
-        params.wallRepulsionScale
+        reinterpret_cast<float2*>(wallsDevicePositions)
         );
 
     cudaDeviceSynchronize();
-	profiler.log("compute forces", profiler.stop());
+    profiler.log("compute forces", profiler.stop());
 }
 
 
