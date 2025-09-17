@@ -97,7 +97,8 @@ __global__ void computeForcesKernelAggressive(
     float cellWidth,
     float* outVelChangeX, float* outVelChangeY,
     int numWalls,
-    const float2* wallPositions)  // x,y start/end concatenati
+    const float2* wallPositions,
+    const int* type_sorted)  // x,y start/end concatenati
 {
     extern __shared__ float shMem[];
     float* shPosX = shMem;
@@ -138,6 +139,8 @@ __global__ void computeForcesKernelAggressive(
     };
 
     for (int q = 0; q < 4; ++q) {
+        if (type_sorted[i] == 2) break;
+
         int neighRow = row + dr[q];
         int neighCol = col + dc[q];
         if (neighRow < 0 || neighRow >= gridResolutionY) continue;
@@ -181,7 +184,7 @@ __global__ void computeForcesKernelAggressive(
                     sepX += (px - shPosX[j]) / dist;
                     sepY += (py - shPosY[j]) / dist;
                 }
-                if (dist < d_alignmentDistance) {
+                if (dist < d_alignmentDistance && type_sorted[globalIdx] != 2) {
                     aliX += shVelX[j] * shInfluence[j];
                     aliY += shVelY[j] * shInfluence[j];
                     totalWeight += shInfluence[j];
@@ -323,6 +326,7 @@ __global__ void kernApplyVelocityChangeSorted(
     float* posX, float* posY,
     float* velX, float* velY,
     const int* particleArrayIndices,
+    const int* type_sorted,  // aggiungi questo array
     float dt)
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -330,15 +334,30 @@ __global__ void kernApplyVelocityChangeSorted(
 
     int origIdx = particleArrayIndices[i];
 
+    // Applica cambiamento di velocità
     velX[origIdx] += velChangeX_sorted[i] * d_slowDownFactor;
     velY[origIdx] += velChangeY_sorted[i] * d_slowDownFactor;
 
+    // Calcola velocità
     float speed = sqrtf(velX[origIdx] * velX[origIdx] + velY[origIdx] * velY[origIdx]);
+
+    // Limita la velocità massima
     if (speed > d_maxSpeed) {
         velX[origIdx] = (velX[origIdx] / speed) * d_maxSpeed;
         velY[origIdx] = (velY[origIdx] / speed) * d_maxSpeed;
+        speed = d_maxSpeed;  // aggiorna la velocità
     }
 
+    // **Mantieni velocità minima per i leader**
+    if (type_sorted[i] == 2) {  // 2 = leader
+        float minSpeed = d_maxSpeed / 1.1f; // definisci questa costante
+        if (speed < minSpeed) {
+            velX[origIdx] = (velX[origIdx] / speed) * minSpeed;
+            velY[origIdx] = (velY[origIdx] / speed) * minSpeed;
+        }
+    }
+
+    // Aggiorna posizione
     posX[origIdx] += velX[origIdx] * dt;
     posY[origIdx] += velY[origIdx] * dt;
 }
@@ -368,7 +387,6 @@ __global__ void kernIntegratePositions(
     posX[i] += velX[i] * dt;
     posY[i] += velY[i] * dt;
 }
-
 
 __global__ void kernReorderData(
     int N,
@@ -424,4 +442,75 @@ __global__ void copyRenderDataKernel(
     outRotations[i] = rotations[i];
     outColors[i] = { colorR[i], colorG[i], colorB[i] };
     outScales[i] = scale[i];
+}
+
+__global__ void computeLeaderFollowKernel(
+    int N,
+    const float* posX_sorted,
+    const float* posY_sorted,
+    const float* velX_sorted,
+    const float* velY_sorted,
+    const int* type_sorted,
+    float* velChangeX_sorted,
+    float* velChangeY_sorted)
+{
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= N) return;
+
+    float px = posX_sorted[i];
+    float py = posY_sorted[i];
+
+    float deltaX = 0.f;
+    float deltaY = 0.f;
+
+    if (type_sorted[i] == 2) {
+        // Leader: evita altri leader
+        for (int j = 0; j < N; ++j) {
+            if (j == i) continue;
+            if (type_sorted[j] != 2) continue;
+
+            float dx = px - posX_sorted[j];
+            float dy = py - posY_sorted[j];
+            float dist = sqrtf(dx * dx + dy * dy);
+            if (dist < d_desiredLeaderDistance && dist > 0.001f) {
+                float factor = (d_desiredLeaderDistance - dist) / dist;
+                deltaX += dx * factor * 0.8f;
+                deltaY += dy * factor * 0.8f;
+            }
+        }
+    }
+    else {
+        // Follower: allineamento + coesione verso leader più vicino
+        float closestDist = 1e20f;
+        int closestIdx = -1;
+
+        for (int j = 0; j < N; ++j) {
+            if (type_sorted[j] != 2) continue; // solo leader
+            float dx = posX_sorted[j] - px;
+            float dy = posY_sorted[j] - py;
+            float dist = sqrtf(dx * dx + dy * dy);
+            if (dist < d_leaderInfluenceDistance && dist < closestDist) {
+                closestDist = dist;
+                closestIdx = j;
+            }
+        }
+
+        if (closestIdx >= 0) {
+            // Coesione verso leader
+            float dx = posX_sorted[closestIdx] - px;
+            float dy = posY_sorted[closestIdx] - py;
+            float norm = (d_leaderInfluenceDistance - closestDist) / d_leaderInfluenceDistance;
+            float cohesionWeight = norm * norm;
+            deltaX += dx * cohesionWeight * d_leaderInfluenceScale * 0.5f;
+            deltaY += dy * cohesionWeight * d_leaderInfluenceScale * 0.5f;
+
+            // Allineamento con velocità del leader
+            float alignWeight = 0.5f; // puoi regolare
+            deltaX += (velX_sorted[closestIdx] - 0.0f) * alignWeight;
+            deltaY += (velY_sorted[closestIdx] - 0.0f) * alignWeight;
+        }
+    }
+
+    velChangeX_sorted[i] += deltaX;
+    velChangeY_sorted[i] += deltaY;
 }

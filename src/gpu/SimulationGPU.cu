@@ -46,7 +46,7 @@ SimulationGPU::SimulationGPU(unsigned int width, unsigned int height)
     params.predatorEatDistance = 5.0f;
 
     // Scale (forza delle regole)
-    params.cohesionScale = 0.1f;
+    params.cohesionScale = 0.07f;
     params.separationScale = 2.2f;
     params.alignmentScale = 0.19f;
     params.borderScale = 0.3f;
@@ -122,8 +122,8 @@ void SimulationGPU::init()
     vectorRenderer = new VectorRenderer(ResourceManager::GetShader("vector"));
 
     // Initialize boids
-    initLeaders(0);
-    initPrey(5000);
+    initLeaders(5);
+    initPrey(4000);
     initPredators(0);
 
     // Allocate and copy boid data to GPU if not done yet
@@ -134,7 +134,7 @@ void SimulationGPU::init()
     }
 
     // Initialize walls
-    initWalls(50);
+    initWalls(40);
 
     // Preprocessing wall data for GPU
     prepareWallsGPU();
@@ -172,10 +172,14 @@ void SimulationGPU::update(float dt) {
     // --- 3. Applica le variazioni di velocità dai buffer sorted ---
     kernApplyVelocityChangeSorted << <blocks, threads >> > (
         static_cast<int>(N),
-        gpuBoids.velChangeX_sorted, gpuBoids.velChangeY_sorted,
-        gpuBoids.posX, gpuBoids.posY,
-        gpuBoids.velX, gpuBoids.velY,
-        gridData.particleArrayIndices, // <--- sostituito
+        gpuBoids.velChangeX_sorted,
+        gpuBoids.velChangeY_sorted,
+        gpuBoids.posX,
+        gpuBoids.posY,
+        gpuBoids.velX,
+        gpuBoids.velY,
+        gridData.particleArrayIndices,
+        gpuBoids.type_sorted,  // <--- passa anche questo
         dt
         );
 
@@ -271,7 +275,7 @@ void SimulationGPU::initLeaders(int count)
         b.velocity = glm::vec2(static_cast<float>(rand() % 201 - 100) * 0.5f, static_cast<float>(rand() % 201 - 100) * 0.5f);
         b.type = BoidType::LEADER;
         b.age = 10;
-        b.scale = 1.7f;
+        b.scale = 1.7f * 8.0f;
         b.color = glm::vec3(0.9f, 0.9f, 0.2f);
         b.drift = glm::vec2(0);
         boids.push_back(b);
@@ -453,10 +457,23 @@ void SimulationGPU::computeForces() {
         gpuBoids.velChangeX_sorted,
         gpuBoids.velChangeY_sorted,
         numWallSegments,
-        reinterpret_cast<float2*>(wallsDevicePositions)
+        reinterpret_cast<float2*>(wallsDevicePositions),
+		gpuBoids.type_sorted
         );
 
+    // --- 6. Calcola la repulsione tra leader ---
+    computeLeaderFollowKernel << <blocks, threads >> > (
+        N,
+        gpuBoids.posX_sorted,
+        gpuBoids.posY_sorted,
+        gpuBoids.velX_sorted,     // velocità X dei boid
+        gpuBoids.velY_sorted,     // velocità Y dei boid
+        gpuBoids.type_sorted,
+        gpuBoids.velChangeX_sorted,
+        gpuBoids.velChangeY_sorted
+        );
     cudaDeviceSynchronize();
+
     profiler.log("compute forces", profiler.stop());
 }
 

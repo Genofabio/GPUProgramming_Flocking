@@ -59,7 +59,8 @@ __global__ void computeForcesKernelAggressive(
     float cellWidth,
     float* outVelChangeX, float* outVelChangeY,
     int numWalls,
-    const float2* wallPositions);
+    const float2* wallPositions,
+    const int* type_sorted);
 
 // ============================================================
 // 3. Integrazione e aggiornamento stato boids
@@ -71,8 +72,8 @@ __global__ void kernApplyVelocityChangeSorted(
     float* posX, float* posY,
     float* velX, float* velY,
     const int* particleArrayIndices,
-    float dt
-);
+    const int* type_sorted,  // aggiungi questo array
+    float dt);
 
 __global__ void kernIntegratePositions(
     int N, float dt,
@@ -102,3 +103,12 @@ __global__ void copyRenderDataKernel(
     float* outScales
 );
 
+__global__ void computeLeaderFollowKernel(
+    int N,
+    const float* posX_sorted,
+    const float* posY_sorted,
+    const float* velX_sorted,
+    const float* velY_sorted,
+    const int* type_sorted,
+    float* velChangeX_sorted,
+    float* velChangeY_sorted);
