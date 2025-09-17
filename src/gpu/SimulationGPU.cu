@@ -123,7 +123,7 @@ void SimulationGPU::init()
 
     // Initialize boids
     initLeaders(5);
-    initPrey(2500);
+    initPrey(5000);
     initPredators(5);
 
     // Allocate and copy boid data to GPU if not done yet
@@ -425,6 +425,8 @@ void SimulationGPU::computeForces() {
     int threads = 256;
     int blocks = (N + threads - 1) / threads;
 
+    profiler.start();
+
     // --- 1. Calcola gli indici della griglia ---
     kernComputeGridIndices << <blocks, threads >> > (
         N,
@@ -467,13 +469,26 @@ void SimulationGPU::computeForces() {
         gridData.cellEndIndices
         );
 
-    // --- 5. Calcola le forze sui buffer ordinati ---
-// Ogni boid necessita di 5 float in shared memory (posX, posY, velX, velY, influence)
-    profiler.start();
-    size_t shMemSize = threads * 5 * sizeof(float);
+    // --- 5. Inizializza stream ---
+    cudaStream_t streamBoid, streamWall, streamLeader, streamPredator;
+    cudaStreamCreate(&streamBoid);
+    cudaStreamCreate(&streamWall);
+    cudaStreamCreate(&streamLeader);
+    cudaStreamCreate(&streamPredator);
 
-    // 5a. Forze da coesione, separazione e allineamento (con tiling)
-    kernComputeBoidNeighborForces << <blocks, threads, shMemSize >> > (
+    // --- 6. Inizializza buffer temporanei a zero ---
+    cudaMemsetAsync(gpuBoids.velChangeX_boid, 0, N * sizeof(float), streamBoid);
+    cudaMemsetAsync(gpuBoids.velChangeY_boid, 0, N * sizeof(float), streamBoid);
+    cudaMemsetAsync(gpuBoids.velChangeX_wall, 0, N * sizeof(float), streamWall);
+    cudaMemsetAsync(gpuBoids.velChangeY_wall, 0, N * sizeof(float), streamWall);
+    cudaMemsetAsync(gpuBoids.velChangeX_leader, 0, N * sizeof(float), streamLeader);
+    cudaMemsetAsync(gpuBoids.velChangeY_leader, 0, N * sizeof(float), streamLeader);
+    cudaMemsetAsync(gpuBoids.velChangeX_predator, 0, N * sizeof(float), streamPredator);
+    cudaMemsetAsync(gpuBoids.velChangeY_predator, 0, N * sizeof(float), streamPredator);
+
+    // --- 7a. Forze boid classiche ---
+    size_t shMemSize = threads * 5 * sizeof(float);
+    kernComputeBoidNeighborForces << <blocks, threads, shMemSize, streamBoid >> > (
         N,
         gpuBoids.posX_sorted, gpuBoids.posY_sorted,
         gpuBoids.velX_sorted, gpuBoids.velY_sorted,
@@ -483,47 +498,71 @@ void SimulationGPU::computeForces() {
         boidGrid.nCols, boidGrid.nRows,
         boidGrid.cellWidth,
         gpuBoids.type_sorted,
-        gpuBoids.velChangeX_sorted,
-        gpuBoids.velChangeY_sorted
+        gpuBoids.velChangeX_boid,
+        gpuBoids.velChangeY_boid
         );
 
-    // 5b. Forze da border e muri
-    kernComputeBorderWallForces << <blocks, threads >> > (
+    // --- 7b. Forze muri ---
+    kernComputeBorderWallForces << <blocks, threads, 0, streamWall >> > (
         N,
         gpuBoids.posX_sorted, gpuBoids.posY_sorted,
         gpuBoids.velX_sorted, gpuBoids.velY_sorted,
         numWallSegments,
         reinterpret_cast<float2*>(wallsDevicePositions),
-        gpuBoids.velChangeX_sorted,
-        gpuBoids.velChangeY_sorted
+        gpuBoids.velChangeX_wall,
+        gpuBoids.velChangeY_wall
         );
 
-    // --- 6. Calcola la repulsione tra leader ---
-    kernLeaderFollowForces << <blocks, threads >> > (
+    // --- 7c. Leader follow forces ---
+    kernLeaderFollowForces << <blocks, threads, 0, streamLeader >> > (
         N,
         gpuBoids.posX_sorted,
         gpuBoids.posY_sorted,
-        gpuBoids.velX_sorted,     // velocità X dei boid
-        gpuBoids.velY_sorted,     // velocità Y dei boid
+        gpuBoids.velX_sorted,
+        gpuBoids.velY_sorted,
         gpuBoids.type_sorted,
-        gpuBoids.velChangeX_sorted,
-        gpuBoids.velChangeY_sorted
+        gpuBoids.velChangeX_leader,
+        gpuBoids.velChangeY_leader
         );
-    cudaDeviceSynchronize();
 
-    // --- 7. Calcola la separazione tra predatori ---
-    kernPredatorPreyForces << <blocks, threads >> > (
+    // --- 7d. Predator/prey forces ---
+    kernPredatorPreyForces << <blocks, threads, 0, streamPredator >> > (
         N,
         gpuBoids.posX_sorted,
         gpuBoids.posY_sorted,
-        gpuBoids.type_sorted,        // solo predatori (type==1) saranno aggiornati
-        gpuBoids.velChangeX_sorted,
-        gpuBoids.velChangeY_sorted
+        gpuBoids.type_sorted,
+        gpuBoids.velChangeX_predator,
+        gpuBoids.velChangeY_predator
         );
-    cudaDeviceSynchronize();
+
+    // --- 8. Sincronizza tutti gli stream ---
+    cudaStreamSynchronize(streamBoid);
+    cudaStreamSynchronize(streamWall);
+    cudaStreamSynchronize(streamLeader);
+    cudaStreamSynchronize(streamPredator);
+
+    // --- 9. Somma tutti i contributi nel buffer finale ---
+    kernSumBuffers << <blocks, threads >> > (
+        N,
+        gpuBoids.velChangeX_sorted,
+        gpuBoids.velChangeY_sorted,
+        gpuBoids.velChangeX_boid, gpuBoids.velChangeY_boid,
+        gpuBoids.velChangeX_wall, gpuBoids.velChangeY_wall,
+        gpuBoids.velChangeX_leader, gpuBoids.velChangeY_leader,
+        gpuBoids.velChangeX_predator, gpuBoids.velChangeY_predator
+        );
+
+    // --- 10. Distruggi stream ---
+    cudaStreamDestroy(streamBoid);
+    cudaStreamDestroy(streamWall);
+    cudaStreamDestroy(streamLeader);
+    cudaStreamDestroy(streamPredator);
 
     profiler.log("compute forces", profiler.stop());
 }
+
+
+
 
 
 void SimulationGPU::checkEatenPrey()

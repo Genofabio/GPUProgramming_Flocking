@@ -98,6 +98,15 @@ __global__ void kernComputeRotations(
     const float* velX, const float* velY,
     float* rotations);
 
+__global__ void kernSumBuffers(
+    int N,
+    float* outX, float* outY,
+    const float* bufX1, const float* bufY1,
+    const float* bufX2, const float* bufY2,
+    const float* bufX3, const float* bufY3,
+    const float* bufX4, const float* bufY4
+);
+
 // 5. Copia dati per il rendering
 __global__ void kernCopyRenderData(
     int N,

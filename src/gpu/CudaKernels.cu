@@ -420,13 +420,13 @@ __global__ void kernLeaderFollowForces(
             float dy = posY_sorted[closestIdx] - py;
             float norm = (d_leaderInfluenceDistance - closestDist) / d_leaderInfluenceDistance;
             float cohesionWeight = norm * norm;
-            deltaX += dx * cohesionWeight * d_leaderInfluenceScale * 0.5f;
-            deltaY += dy * cohesionWeight * d_leaderInfluenceScale * 0.5f;
+            deltaX += dx * cohesionWeight * d_leaderInfluenceScale * 0.05f;
+            deltaY += dy * cohesionWeight * d_leaderInfluenceScale * 0.05f;
 
             // Allineamento con velocità del leader
             float alignWeight = 0.5f; // puoi regolare
-            deltaX += (velX_sorted[closestIdx] - 0.0f) * alignWeight;
-            deltaY += (velY_sorted[closestIdx] - 0.0f) * alignWeight;
+            deltaX += (velX_sorted[closestIdx] - 0.0f) * alignWeight * 0.5f;
+            deltaY += (velY_sorted[closestIdx] - 0.0f) * alignWeight * 0.5f;
         }
     }
 
@@ -601,6 +601,21 @@ __global__ void kernComputeRotations(
     float angle = atan2f(velY[i], velX[i]);   // radianti
     angle = angle * (180.0f / 3.14159265f);   // in gradi
     rotations[i] = angle + 270.0f;            // offset per orientamento modello
+}
+
+__global__ void kernSumBuffers(
+    int N,
+    float* outX, float* outY,
+    const float* bufX1, const float* bufY1,
+    const float* bufX2, const float* bufY2,
+    const float* bufX3, const float* bufY3,
+    const float* bufX4, const float* bufY4
+) {
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i < N) {
+        outX[i] += bufX1[i] + bufX2[i] + bufX3[i] + bufX4[i];
+        outY[i] += bufY1[i] + bufY2[i] + bufY3[i] + bufY4[i];
+    }
 }
 
 // 5. Copia dati per il rendering

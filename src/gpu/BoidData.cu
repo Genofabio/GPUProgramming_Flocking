@@ -11,7 +11,7 @@
     }
 
 // --- Allocazione GPU ---
-void allocateBoidDataGPU(BoidData& bd, size_t N) {
+void allocateBoidDataGPU(BoidData & bd, size_t N) {
     bd.N = N;
 
     CUDA_CHECK(cudaMalloc(&bd.posX, N * sizeof(float)));
@@ -34,7 +34,6 @@ void allocateBoidDataGPU(BoidData& bd, size_t N) {
     CUDA_CHECK(cudaMalloc(&bd.colorG, N * sizeof(float)));
     CUDA_CHECK(cudaMalloc(&bd.colorB, N * sizeof(float)));
 
-    // --- Nuovo buffer per rotazioni ---
     CUDA_CHECK(cudaMalloc(&bd.rotations, N * sizeof(float)));
 
     for (int i = 0; i < 5; ++i) {
@@ -42,7 +41,7 @@ void allocateBoidDataGPU(BoidData& bd, size_t N) {
         CUDA_CHECK(cudaMalloc(&bd.debugY[i], N * sizeof(float)));
     }
 
-    // --- Buffer _sorted (senza drift_sorted) ---
+    // --- Buffer _sorted ---
     CUDA_CHECK(cudaMalloc(&bd.posX_sorted, N * sizeof(float)));
     CUDA_CHECK(cudaMalloc(&bd.posY_sorted, N * sizeof(float)));
     CUDA_CHECK(cudaMalloc(&bd.velX_sorted, N * sizeof(float)));
@@ -55,6 +54,16 @@ void allocateBoidDataGPU(BoidData& bd, size_t N) {
     CUDA_CHECK(cudaMalloc(&bd.colorR_sorted, N * sizeof(float)));
     CUDA_CHECK(cudaMalloc(&bd.colorG_sorted, N * sizeof(float)));
     CUDA_CHECK(cudaMalloc(&bd.colorB_sorted, N * sizeof(float)));
+
+    // --- Nuovi buffer temporanei per forze parallele ---
+    CUDA_CHECK(cudaMalloc(&bd.velChangeX_boid, N * sizeof(float)));
+    CUDA_CHECK(cudaMalloc(&bd.velChangeY_boid, N * sizeof(float)));
+    CUDA_CHECK(cudaMalloc(&bd.velChangeX_wall, N * sizeof(float)));
+    CUDA_CHECK(cudaMalloc(&bd.velChangeY_wall, N * sizeof(float)));
+    CUDA_CHECK(cudaMalloc(&bd.velChangeX_leader, N * sizeof(float)));
+    CUDA_CHECK(cudaMalloc(&bd.velChangeY_leader, N * sizeof(float)));
+    CUDA_CHECK(cudaMalloc(&bd.velChangeX_predator, N * sizeof(float)));
+    CUDA_CHECK(cudaMalloc(&bd.velChangeY_predator, N * sizeof(float)));
 }
 
 // --- Copia CPU -> GPU ---
@@ -149,4 +158,10 @@ void freeBoidDataGPU(BoidData& bd) {
     cudaFree(bd.scale_sorted); cudaFree(bd.influence_sorted);
     cudaFree(bd.type_sorted);
     cudaFree(bd.colorR_sorted); cudaFree(bd.colorG_sorted); cudaFree(bd.colorB_sorted);
+
+    // --- Libera nuovi buffer temporanei ---
+    cudaFree(bd.velChangeX_boid); cudaFree(bd.velChangeY_boid);
+    cudaFree(bd.velChangeX_wall); cudaFree(bd.velChangeY_wall);
+    cudaFree(bd.velChangeX_leader); cudaFree(bd.velChangeY_leader);
+    cudaFree(bd.velChangeX_predator); cudaFree(bd.velChangeY_predator);
 }

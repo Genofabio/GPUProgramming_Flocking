@@ -41,6 +41,16 @@ struct BoidData {
     float* colorR_sorted = nullptr;
     float* colorG_sorted = nullptr;
     float* colorB_sorted = nullptr;
+
+    // --- Buffer temporanei per forze parallele ---
+    float* velChangeX_boid = nullptr;
+    float* velChangeY_boid = nullptr;
+    float* velChangeX_wall = nullptr;
+    float* velChangeY_wall = nullptr;
+    float* velChangeX_leader = nullptr;
+    float* velChangeY_leader = nullptr;
+    float* velChangeX_predator = nullptr;
+    float* velChangeY_predator = nullptr;
 };
 
 void allocateBoidDataGPU(BoidData& bd, size_t N);

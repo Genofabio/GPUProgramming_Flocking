@@ -1,7 +1,7 @@
 #include <external/glad/glad.h>
 #include <external/GLFW/glfw3.h>
 
-#include <core/Simulation.h>
+#include <gpu/SimulationGPU.cuh>
 #include <utility/ResourceManager.h>
 
 #include <iostream>
@@ -15,7 +15,7 @@ const unsigned int SCREEN_WIDTH = 1500;
 const unsigned int SCREEN_HEIGHT = 1000;
 
 // Oggetto globale della simulazione
-Simulation simulation(SCREEN_WIDTH, SCREEN_HEIGHT);
+SimulationGPU simulation(SCREEN_WIDTH, SCREEN_HEIGHT);
 
 int main(int argc, char* argv[])
 {
