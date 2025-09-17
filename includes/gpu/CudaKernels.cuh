@@ -112,3 +112,11 @@ __global__ void computeLeaderFollowKernel(
     const int* type_sorted,
     float* velChangeX_sorted,
     float* velChangeY_sorted);
+
+__global__ void computePredatorKernel(
+    int N,
+    const float* posX_sorted,
+    const float* posY_sorted,
+    const int* type_sorted,
+    float* velChangeX_sorted,
+    float* velChangeY_sorted);

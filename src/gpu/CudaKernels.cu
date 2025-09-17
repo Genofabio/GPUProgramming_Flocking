@@ -139,7 +139,7 @@ __global__ void computeForcesKernelAggressive(
     };
 
     for (int q = 0; q < 4; ++q) {
-        if (type_sorted[i] == 2) break;
+        if (type_sorted[i] != 0) break;
 
         int neighRow = row + dr[q];
         int neighCol = col + dc[q];
@@ -170,6 +170,7 @@ __global__ void computeForcesKernelAggressive(
             for (int j = 0; j < limit; ++j) {
                 int globalIdx = startIdx + offset + j;
                 if (globalIdx == i) continue;
+                if (type_sorted[globalIdx] == 1) continue;
 
                 float dx = shPosX[j] - px;
                 float dy = shPosY[j] - py;
@@ -184,7 +185,7 @@ __global__ void computeForcesKernelAggressive(
                     sepX += (px - shPosX[j]) / dist;
                     sepY += (py - shPosY[j]) / dist;
                 }
-                if (dist < d_alignmentDistance && type_sorted[globalIdx] != 2) {
+                if (dist < d_alignmentDistance && type_sorted[globalIdx] == 0) {
                     aliX += shVelX[j] * shInfluence[j];
                     aliY += shVelY[j] * shInfluence[j];
                     totalWeight += shInfluence[j];
@@ -319,7 +320,6 @@ __global__ void kernIdentifyCellStartEnd(
     }
 }
 
-
 __global__ void kernApplyVelocityChangeSorted(
     int N,
     const float* velChangeX_sorted, const float* velChangeY_sorted,
@@ -361,8 +361,6 @@ __global__ void kernApplyVelocityChangeSorted(
     posX[origIdx] += velX[origIdx] * dt;
     posY[origIdx] += velY[origIdx] * dt;
 }
-
-
 
 __global__ void kernComputeRotations(
     int N, const float* velX, const float* velY, float* rotations)
@@ -477,7 +475,7 @@ __global__ void computeLeaderFollowKernel(
             }
         }
     }
-    else {
+    else if (type_sorted[i] == 0) {
         // Follower: allineamento + coesione verso leader più vicino
         float closestDist = 1e20f;
         int closestIdx = -1;
@@ -511,4 +509,107 @@ __global__ void computeLeaderFollowKernel(
 
     velChangeX_sorted[i] += deltaX;
     velChangeY_sorted[i] += deltaY;
+}
+
+__global__ void computePredatorKernel(
+    int N,
+    const float* posX_sorted,
+    const float* posY_sorted,
+    const int* type_sorted,
+    float* velChangeX_sorted,
+    float* velChangeY_sorted)
+{
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= N) return;
+
+    float px = posX_sorted[i];
+    float py = posY_sorted[i];
+
+    // --- Predatori ---
+    if (type_sorted[i] == 1) { // PREDATOR
+        float repX = 0.f, repY = 0.f;
+
+        // Separazione tra predatori
+        for (int j = 0; j < N; ++j) {
+            if (i == j) continue;
+            if (type_sorted[j] != 1) continue;
+            float dx = px - posX_sorted[j];
+            float dy = py - posY_sorted[j];
+            float dist = sqrtf(dx * dx + dy * dy);
+            if (dist < d_predatorSeparationDistance && dist > 0.001f) {
+                repX += dx / dist;
+                repY += dy / dist;
+            }
+        }
+
+        // Inseguimento prede
+        float closestDist = 1e20f;
+        float targetX = 0.f, targetY = 0.f;
+        int nearbyCount = 0;
+
+        for (int j = 0; j < N; ++j) {
+            if (type_sorted[j] == 1) continue; // solo prede
+            float dx = posX_sorted[j] - px;
+            float dy = posY_sorted[j] - py;
+            float dist = sqrtf(dx * dx + dy * dy);
+
+            if (dist < closestDist && dist < d_predatorChaseDistance) {
+                closestDist = dist;
+                targetX = posX_sorted[j];
+                targetY = posY_sorted[j];
+            }
+            if (dist < d_predatorBoostRadius) nearbyCount++;
+        }
+
+        float chaseX = 0.f, chaseY = 0.f;
+        if (closestDist < 1e20f) {
+            float dirX = targetX - px;
+            float dirY = targetY - py;
+            float len = sqrtf(dirX * dirX + dirY * dirY);
+            if (len > 0.001f) {
+                float baseForce = ((d_predatorChaseDistance - closestDist) / d_predatorChaseDistance) * d_predatorChaseScale * 100.0f;
+                float boost = (nearbyCount <= 2) ? 1.5f : 1.0f;
+                chaseX = (dirX / len) * baseForce * boost;
+                chaseY = (dirY / len) * baseForce * boost;
+            }
+        }
+
+        velChangeX_sorted[i] += repX * d_predatorSeparationScale + chaseX;
+        velChangeY_sorted[i] += repY * d_predatorSeparationScale + chaseY;
+    }
+    // --- Prede/Leader ---
+    else {
+        float evadeX = 0.f, evadeY = 0.f;
+        int nearbyAllies = 0;
+
+        for (int j = 0; j < N; ++j) {
+            if (i == j) continue;
+
+            // Solo predatori
+            if (type_sorted[j] == 1) {
+                float dx = px - posX_sorted[j];
+                float dy = py - posY_sorted[j];
+                float dist = sqrtf(dx * dx + dy * dy);
+                if (dist < d_predatorFearDistance && dist > 0.001f) {
+                    evadeX += (dx / dist) * (d_predatorFearDistance - dist);
+                    evadeY += (dy / dist) * (d_predatorFearDistance - dist);
+                }
+            }
+            // Conteggio alleati vicini
+            else {
+                float dx = posX_sorted[j] - px;
+                float dy = posY_sorted[j] - py;
+                float dist = sqrtf(dx * dx + dy * dy);
+                if (dist < d_allyRadius) nearbyAllies++;
+            }
+        }
+
+        // Fattore di gruppo (sigmoide)
+        float k = 10.03f;
+        float n0 = 2.08f;
+        float groupFactor = 1.0f / (1.0f + expf(-k * (nearbyAllies - n0)));
+
+        velChangeX_sorted[i] += evadeX * d_predatorFearScale * groupFactor;
+        velChangeY_sorted[i] += evadeY * d_predatorFearScale * groupFactor;
+    }
 }

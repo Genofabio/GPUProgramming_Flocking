@@ -42,17 +42,17 @@ SimulationGPU::SimulationGPU(unsigned int width, unsigned int height)
     params.borderDistance = 80.0f;
     params.predatorFearDistance = 100.0f;
     params.predatorChaseDistance = 120.0f;
-    params.predatorSeparationDistance = 50.0f;
+    params.predatorSeparationDistance = 70.0f;
     params.predatorEatDistance = 5.0f;
 
     // Scale (forza delle regole)
-    params.cohesionScale = 0.07f;
+    params.cohesionScale = 0.1f;
     params.separationScale = 2.2f;
     params.alignmentScale = 0.19f;
     params.borderScale = 0.3f;
-    params.predatorFearScale = 0.8f;
+    params.predatorFearScale = 1.2f;
     params.predatorChaseScale = 0.12f;
-    params.predatorSeparationScale = 2.0f;
+    params.predatorSeparationScale = 4.0f;
     params.borderAlertDistance = 120.0f;
 
     // Muri
@@ -65,7 +65,7 @@ SimulationGPU::SimulationGPU(unsigned int width, unsigned int height)
     params.mateDistance = 10.0f;
     params.mateThreshold = 200;
     params.matingAge = 6;
-    params.predatorBoostRadius = 70.0f;
+    params.predatorBoostRadius = 50.0f;
     params.desiredLeaderDistance = 150.0f;
     params.allyRadius = 50.0f;
 
@@ -123,8 +123,8 @@ void SimulationGPU::init()
 
     // Initialize boids
     initLeaders(5);
-    initPrey(4000);
-    initPredators(0);
+    initPrey(2500);
+    initPredators(5);
 
     // Allocate and copy boid data to GPU if not done yet
     if (!boidDataInitialized) {
@@ -134,7 +134,7 @@ void SimulationGPU::init()
     }
 
     // Initialize walls
-    initWalls(40);
+    initWalls(30);
 
     // Preprocessing wall data for GPU
     prepareWallsGPU();
@@ -337,7 +337,7 @@ void SimulationGPU::initPredators(int count)
         b.velocity = glm::vec2(static_cast<float>(rand() % 201 - 100) * 0.5f, static_cast<float>(rand() % 201 - 100) * 0.5f);
         b.type = BoidType::PREDATOR;
         b.age = 10;
-        b.scale = 1.9f;
+        b.scale = 1.9f * 8.0f;
         b.color = glm::vec3(0.9f, 0.2f, 0.2f);
         b.drift = glm::vec2(0);
         boids.push_back(b);
@@ -496,6 +496,17 @@ void SimulationGPU::computeForces() {
         gpuBoids.velX_sorted,     // velocità X dei boid
         gpuBoids.velY_sorted,     // velocità Y dei boid
         gpuBoids.type_sorted,
+        gpuBoids.velChangeX_sorted,
+        gpuBoids.velChangeY_sorted
+        );
+    cudaDeviceSynchronize();
+
+    // --- 7. Calcola la separazione tra predatori ---
+    computePredatorKernel << <blocks, threads >> > (
+        N,
+        gpuBoids.posX_sorted,
+        gpuBoids.posY_sorted,
+        gpuBoids.type_sorted,        // solo predatori (type==1) saranno aggiornati
         gpuBoids.velChangeX_sorted,
         gpuBoids.velChangeY_sorted
         );
