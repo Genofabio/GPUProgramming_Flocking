@@ -8,32 +8,69 @@
 #include <iostream>
 #include <stack>
 
+#include <cuda_runtime.h>
+
 class Profiler {
 public:
-    // Avvia un timer (annidabile)
-    void start() {
-        start_stack.push(clock_type::now());
-    }
-
-    // Ferma l'ultimo timer e ritorna durata in ms
-    double stop() {
-        if (start_stack.empty()) {
-            std::cerr << "Profiler error: stop() called without matching start()\n";
-            return 0.0;
+    Profiler() {
+        int deviceCount = 0;
+        if (cudaGetDeviceCount(&deviceCount) == cudaSuccess && deviceCount > 0) {
+            useCUDA = true;
+            cudaDeviceProp prop;
+            cudaGetDeviceProperties(&prop, 0);
+            std::cout << "[Profiler] Mod GPU attiva (device: "
+                << prop.name << ", " << prop.multiProcessorCount << " SM)\n";
         }
-        auto end_time = clock_type::now();
-        auto start_time = start_stack.top();
-        start_stack.pop();
-        ms duration = end_time - start_time;
-        return duration.count();
+        else {
+            useCUDA = false;
+            std::cout << "[Profiler] Mod CPU attiva (nessuna GPU CUDA disponibile)\n";
+        }
     }
 
-    // Registra una misura associata ad un'etichetta
+    void start() {
+        if (useCUDA) {
+            cudaEvent_t startEvent, stopEvent;
+            cudaEventCreate(&startEvent);
+            cudaEventCreate(&stopEvent);
+            cudaEventRecord(startEvent, 0);
+            event_stack.push({ startEvent, stopEvent });
+        }
+        else {
+            start_stack.push(clock_type::now());
+        }
+    }
+
+    double stop() {
+        if (useCUDA) {
+            if (event_stack.empty()) return 0.0;
+            auto ev = event_stack.top();
+            event_stack.pop();
+
+            cudaEventRecord(ev.second, 0);
+            cudaEventSynchronize(ev.second);
+
+            float ms = 0.0f;
+            cudaEventElapsedTime(&ms, ev.first, ev.second);
+
+            cudaEventDestroy(ev.first);
+            cudaEventDestroy(ev.second);
+
+            return static_cast<double>(ms);
+        }
+        else {
+            if (start_stack.empty()) return 0.0;
+            auto end_time = clock_type::now();
+            auto start_time = start_stack.top();
+            start_stack.pop();
+            ms duration = end_time - start_time;
+            return duration.count();
+        }
+    }
+
     void log(const std::string& label, double value) {
         measurements[label].push_back(value);
     }
 
-    // Calcola e stampa la media di una specifica etichetta
     void printAverage(const std::string& label) const {
         auto it = measurements.find(label);
         if (it == measurements.end() || it->second.empty()) {
@@ -46,7 +83,6 @@ public:
         std::cout << label << " average: " << avg << " ms\n";
     }
 
-    // Salva tutti i dati su file CSV
     void saveCSV(const std::string& filename) const {
         std::ofstream file(filename);
         if (!file.is_open()) {
@@ -55,23 +91,18 @@ public:
         }
         file << "label,value_ms\n";
         for (const auto& pair : measurements) {
-            const std::string& label = pair.first;
-            const std::vector<double>& vec = pair.second;
-            for (double v : vec) {
-                file << label << "," << v << "\n";
+            for (double v : pair.second) {
+                file << pair.first << "," << v << "\n";
             }
         }
-        file.close();
     }
 
-    // Stampa la media di tutte le etichette
     void printAllAverages() const {
-        for (const auto& pair : measurements) {
+        for (const auto& pair : measurements)
             printAverage(pair.first);
-        }
     }
 
-    // --- Gestione FPS ---
+    // --- FPS ---
     void updateFrameStats(double dt) {
         frameCounter++;
         consoleTimer += dt;
@@ -91,7 +122,11 @@ private:
     using clock_type = std::chrono::high_resolution_clock;
     using ms = std::chrono::duration<double, std::milli>;
 
+    bool useCUDA = false;
+
     std::stack<clock_type::time_point> start_stack;
+    std::stack<std::pair<cudaEvent_t, cudaEvent_t>> event_stack;
+
     std::map<std::string, std::vector<double>> measurements;
 
     // FPS
