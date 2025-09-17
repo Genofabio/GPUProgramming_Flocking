@@ -375,7 +375,6 @@ __global__ void kernComputeRotations(
     rotations[i] = angle + 270.0f;            // offset per orientamento modello
 }
 
-
 __global__ void kernIntegratePositions(
     int N, float dt,
     float* posX, float* posY,
@@ -422,7 +421,6 @@ __global__ void kernReorderData(
     velChangeX_sorted[i] = velChangeX[srcIdx];
     velChangeY_sorted[i] = velChangeY[srcIdx];
 }
-
 
 __global__ void copyRenderDataKernel(
     int N,

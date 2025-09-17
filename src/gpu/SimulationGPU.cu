@@ -206,16 +206,43 @@ void SimulationGPU::update(float dt) {
     // --- 6. Sincronizza prima di copiare i dati su CPU ---
     cudaDeviceSynchronize();
 
-    // --- 7. Copia i dati da GPU a CPU ---
+    // --- 7. Copia asincrona su CPU usando streams ---
     renderPositions.resize(N);
     renderRotations.resize(N);
     renderColors.resize(N);
     renderScales.resize(N);
 
-    CUDA_CHECK(cudaMemcpy(renderPositions.data(), devRenderPositions, N * sizeof(glm::vec2), cudaMemcpyDeviceToHost));
-    CUDA_CHECK(cudaMemcpy(renderRotations.data(), devRenderRotations, N * sizeof(float), cudaMemcpyDeviceToHost));
-    CUDA_CHECK(cudaMemcpy(renderColors.data(), devRenderColors, N * sizeof(glm::vec3), cudaMemcpyDeviceToHost));
-    CUDA_CHECK(cudaMemcpy(renderScales.data(), devRenderScales, N * sizeof(float), cudaMemcpyDeviceToHost));
+    int numStreams = 4;
+    std::vector<cudaStream_t> streams(numStreams);
+
+    // Creazione stream
+    for (int i = 0; i < numStreams; ++i)
+        cudaStreamCreate(&streams[i]);
+
+    size_t chunkSize = (N + numStreams - 1) / numStreams;
+
+    for (int i = 0; i < numStreams; ++i) {
+        size_t offset = i * chunkSize;
+        size_t thisChunk = std::min(chunkSize, N - offset);
+        if (thisChunk == 0) continue;
+
+        cudaMemcpyAsync(renderPositions.data() + offset, devRenderPositions + offset,
+            thisChunk * sizeof(glm::vec2), cudaMemcpyDeviceToHost, streams[i]);
+        cudaMemcpyAsync(renderRotations.data() + offset, devRenderRotations + offset,
+            thisChunk * sizeof(float), cudaMemcpyDeviceToHost, streams[i]);
+        cudaMemcpyAsync(renderColors.data() + offset, devRenderColors + offset,
+            thisChunk * sizeof(glm::vec3), cudaMemcpyDeviceToHost, streams[i]);
+        cudaMemcpyAsync(renderScales.data() + offset, devRenderScales + offset,
+            thisChunk * sizeof(float), cudaMemcpyDeviceToHost, streams[i]);
+    }
+
+    // Sincronizza tutti gli stream prima di usare i dati
+    for (int i = 0; i < numStreams; ++i)
+        cudaStreamSynchronize(streams[i]);
+
+    // Distruggi stream
+    for (int i = 0; i < numStreams; ++i)
+        cudaStreamDestroy(streams[i]);
 
     // --- 8. Aggiorna il renderer ---
     boidRenderer->updateInstances(renderPositions, renderRotations, renderColors, renderScales);

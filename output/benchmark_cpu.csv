@@ -1,4141 +1,1108 @@
 label,value_ms
-compute forces,15.0312
-compute forces,16.5752
-compute forces,16.3917
-compute forces,14.8159
-compute forces,14.8523
-compute forces,14.8135
-compute forces,14.2303
-compute forces,15.2512
-compute forces,13.9
-compute forces,15.3792
-compute forces,13.9857
-compute forces,12.2241
-compute forces,12.315
-compute forces,12.3557
-compute forces,12.4277
-compute forces,14.1762
-compute forces,11.1309
-compute forces,11.1526
-compute forces,11.1238
-compute forces,11.1086
-compute forces,11.1646
-compute forces,10.0458
-compute forces,9.9573
-compute forces,11.2535
-compute forces,10.0369
-compute forces,11.5865
-compute forces,9.8536
-compute forces,9.6711
-compute forces,9.6759
-compute forces,9.6771
-compute forces,9.6393
-compute forces,9.7625
-compute forces,10.763
-compute forces,9.747
-compute forces,11.1631
-compute forces,9.8151
-compute forces,9.8221
-compute forces,9.916
-compute forces,9.9
-compute forces,10.0055
-compute forces,9.9715
-compute forces,10.0473
-compute forces,10.0635
-compute forces,10.0035
-compute forces,10.0598
-compute forces,10.1302
-compute forces,10.2047
-compute forces,10.1602
-compute forces,10.2876
-compute forces,10.2858
-compute forces,11.9899
-compute forces,10.4615
-compute forces,11.6184
-compute forces,10.3771
-compute forces,10.4905
-compute forces,10.66
-compute forces,10.6894
-compute forces,12.4845
-compute forces,12.4088
-compute forces,12.309
-compute forces,12.0778
-compute forces,12.8854
-compute forces,12.8984
-compute forces,12.8782
-compute forces,12.8792
-compute forces,12.87
-compute forces,12.6163
-compute forces,12.5976
-compute forces,13.3218
-compute forces,14.9932
-compute forces,13.4681
-compute forces,14.4457
-compute forces,13.7727
-compute forces,13.8333
-compute forces,13.6592
-compute forces,13.3695
-compute forces,13.6892
-compute forces,13.6938
-compute forces,13.8443
-compute forces,13.9849
-compute forces,13.5326
-compute forces,13.5518
-compute forces,13.6787
-compute forces,14.1144
-compute forces,14.3485
-compute forces,15.1489
-compute forces,15.4742
-compute forces,15.5477
-compute forces,16.7267
-compute forces,15.1806
-compute forces,16.7971
-compute forces,15.7026
-compute forces,17.2806
-compute forces,15.2177
-compute forces,17.1009
-compute forces,16.0046
-compute forces,16.0743
-compute forces,15.4605
-compute forces,15.9525
-compute forces,16.4371
-compute forces,15.7149
-compute forces,15.1018
-compute forces,15.3252
-compute forces,16.0826
-compute forces,14.9155
-compute forces,16.3599
-compute forces,16.5268
-compute forces,18.1443
-compute forces,16.3631
-compute forces,17.995
-compute forces,17.1287
-compute forces,16.4853
-compute forces,17.3484
-compute forces,17.5446
-compute forces,17.9546
-compute forces,17.8382
-compute forces,19.0752
-compute forces,16.6311
-compute forces,16.3214
-compute forces,15.7642
-compute forces,17.0756
-compute forces,16.9552
-compute forces,17.1049
-compute forces,18.0078
-compute forces,17.0425
-compute forces,17.2832
-compute forces,17.2403
-compute forces,19.1142
-compute forces,17.3227
-compute forces,18.6527
-compute forces,17.0959
-compute forces,17.0534
-compute forces,18.2135
-compute forces,18.2827
-compute forces,19.5517
-compute forces,17.9548
-compute forces,17.7608
-compute forces,20.0561
-compute forces,18.2355
-compute forces,18.2839
-compute forces,17.9605
-compute forces,18.8862
-compute forces,17.6187
-compute forces,18.0579
-compute forces,18.0079
-compute forces,17.5591
-compute forces,18.7763
-compute forces,17.3929
-compute forces,18.9488
-compute forces,17.4479
-compute forces,18.4629
-compute forces,17.1992
-compute forces,17.127
-compute forces,16.9595
-compute forces,17.3558
-compute forces,18.6746
-compute forces,17.2922
-compute forces,18.4635
-compute forces,17.194
-compute forces,17.1441
-compute forces,17.0461
-compute forces,17.8891
-compute forces,17.8165
-compute forces,18.0434
-compute forces,19.919
-compute forces,18.8014
-compute forces,20.4109
-compute forces,20.33
-compute forces,20.1244
-compute forces,20.9753
-compute forces,19.3764
-compute forces,20.2439
-compute forces,19.9503
-compute forces,21.4124
-compute forces,21.2034
-compute forces,20.4579
-compute forces,19.9912
-compute forces,21.3804
-compute forces,19.296
-compute forces,17.6816
-compute forces,17.8103
-compute forces,17.8707
-compute forces,16.6335
-compute forces,19.0858
-compute forces,18.0586
-compute forces,18.1913
-compute forces,19.2373
-compute forces,18.5563
-compute forces,18.1426
-compute forces,18.2302
-compute forces,18.5415
-compute forces,19.6489
-compute forces,18.4691
-compute forces,19.7568
-compute forces,17.9829
-compute forces,19.2956
-compute forces,18.1311
-compute forces,18.2938
-compute forces,17.8843
-compute forces,18.2826
-compute forces,16.7552
-compute forces,15.964
-compute forces,16.4548
-compute forces,16.0846
-compute forces,16.6972
-compute forces,15.5527
-compute forces,16.3608
-compute forces,15.5561
-compute forces,15.3605
-compute forces,15.5149
-compute forces,16.921
-compute forces,15.7359
-compute forces,16.7985
-compute forces,15.6298
-compute forces,15.3554
-compute forces,15.2949
-compute forces,15.4939
-compute forces,15.1387
-compute forces,14.9777
-compute forces,16.3373
-compute forces,15.6378
-compute forces,16.9333
-compute forces,15.1299
-compute forces,15.0481
-compute forces,14.954
-compute forces,16.1694
-compute forces,14.8002
-compute forces,16.2192
-compute forces,14.6897
-compute forces,14.7115
-compute forces,14.6173
-compute forces,15.6658
-compute forces,15.7094
-compute forces,15.6698
-compute forces,17.278
-compute forces,15.4155
-compute forces,15.3688
-compute forces,15.2259
-compute forces,15.2503
-compute forces,14.7966
-compute forces,15.986
-compute forces,14.5904
-compute forces,15.3959
-compute forces,13.7585
-compute forces,14.7716
-compute forces,13.9192
-compute forces,15.1348
-compute forces,14.2375
-compute forces,14.2543
-compute forces,14.2136
-compute forces,14.3355
-compute forces,14.2914
-compute forces,15.6669
-compute forces,14.3011
-compute forces,14.5001
-compute forces,15.6736
-compute forces,16.9073
-compute forces,15.659
-compute forces,15.6878
-compute forces,15.5702
-compute forces,14.7923
-compute forces,15.9134
-compute forces,14.2158
-compute forces,14.1388
-compute forces,14.0912
-compute forces,14.1081
-compute forces,14.7514
-compute forces,14.9891
-compute forces,15.2197
-compute forces,15.9516
-compute forces,14.6078
-compute forces,14.7319
-compute forces,15.3026
-compute forces,15.49
-compute forces,15.6005
-compute forces,17.6386
-compute forces,16.5182
-compute forces,16.7642
-compute forces,16.0216
-compute forces,16.4352
-compute forces,15.7374
-compute forces,16.8298
-compute forces,16.8805
-compute forces,16.1312
-compute forces,16.1925
-compute forces,17.6547
-compute forces,17.5036
-compute forces,17.3115
-compute forces,17.7888
-compute forces,17.2715
-compute forces,17.4291
-compute forces,19.0922
-compute forces,16.7747
-compute forces,16.4423
-compute forces,15.4101
-compute forces,15.4947
-compute forces,15.2185
-compute forces,16.7571
-compute forces,15.3332
-compute forces,15.2886
-compute forces,15.2969
-compute forces,15.3529
-compute forces,15.0654
-compute forces,15.0798
-compute forces,15.9473
-compute forces,15.0637
-compute forces,15.3757
-compute forces,15.1452
-compute forces,15.0835
-compute forces,15.3991
-compute forces,16.3411
-compute forces,15.4376
-compute forces,16.938
-compute forces,15.4645
-compute forces,16.8468
-compute forces,15.4217
-compute forces,15.7376
-compute forces,16.6896
-compute forces,15.7044
-compute forces,15.5217
-compute forces,15.4844
-compute forces,15.4223
-compute forces,15.4134
-compute forces,16.9273
-compute forces,15.5008
-compute forces,16.4805
-compute forces,15.572
-compute forces,15.3324
-compute forces,15.3949
-compute forces,15.8765
-compute forces,15.2068
-compute forces,17.7552
-compute forces,16.1744
-compute forces,16.2808
-compute forces,16.1087
-compute forces,17.5959
-compute forces,16.5428
-compute forces,16.62
-compute forces,17.6058
-compute forces,16.0685
-compute forces,17.8382
-compute forces,16.3936
-compute forces,17.6418
-compute forces,16.2686
-compute forces,16.5141
-compute forces,17.0947
-compute forces,17.0136
-compute forces,17.482
-compute forces,16.9572
-compute forces,16.8346
-compute forces,16.7472
-compute forces,17.1415
-compute forces,17.7276
-compute forces,16.775
-compute forces,17.5349
-compute forces,17.1699
-compute forces,17.5545
-compute forces,17.0564
-compute forces,18.7526
-compute forces,16.4909
-compute forces,16.9673
-compute forces,15.8753
-compute forces,15.8239
-compute forces,15.5653
-compute forces,15.6255
-compute forces,15.0871
-compute forces,15.4683
-compute forces,14.113
-compute forces,14.2969
-compute forces,14.1573
-compute forces,14.0601
-compute forces,14.9076
-compute forces,14.808
-compute forces,16.1238
-compute forces,14.759
-compute forces,16.0698
-compute forces,14.8516
-compute forces,15.8936
-compute forces,14.9207
-compute forces,16.4857
-compute forces,15.7084
-compute forces,16.397
-compute forces,15.9841
-compute forces,15.5283
-compute forces,15.6054
-compute forces,15.5827
-compute forces,17.1638
-compute forces,16.0763
-compute forces,17.5163
-compute forces,16.3417
-compute forces,17.6101
-compute forces,16.8554
-compute forces,17.9324
-compute forces,16.7022
-compute forces,16.3474
-compute forces,17.064
-compute forces,17.3872
-compute forces,18.5167
-compute forces,16.514
-compute forces,17.9256
-compute forces,16.6683
-compute forces,16.7973
-compute forces,16.7159
-compute forces,16.4798
-compute forces,16.5902
-compute forces,16.1779
-compute forces,17.2436
-compute forces,15.925
-compute forces,17.4135
-compute forces,16.4395
-compute forces,16.5305
-compute forces,16.4497
-compute forces,18.0063
-compute forces,16.6891
-compute forces,17.2487
-compute forces,16.7779
-compute forces,16.5614
-compute forces,18.0727
-compute forces,16.8999
-compute forces,17.3882
-compute forces,16.0014
-compute forces,15.8971
-compute forces,15.9069
-compute forces,16.4234
-compute forces,16.5173
-compute forces,16.328
-compute forces,17.115
-compute forces,16.8451
-compute forces,18.3965
-compute forces,16.8167
-compute forces,18.421
-compute forces,17.2221
-compute forces,16.0399
-compute forces,16.2685
-compute forces,16.3712
-compute forces,16.1778
-compute forces,16.1562
-compute forces,16.1294
-compute forces,16.171
-compute forces,17.4048
-compute forces,16.552
-compute forces,16.6425
-compute forces,17.1197
-compute forces,17.7246
-compute forces,17.6704
-compute forces,17.2865
-compute forces,17.7137
-compute forces,17.33
-compute forces,17.3816
-compute forces,17.6174
-compute forces,18.664
-compute forces,17.1687
-compute forces,18.7428
-compute forces,17.1902
-compute forces,17.3032
-compute forces,16.4417
-compute forces,16.2532
-compute forces,15.1785
-compute forces,15.9588
-compute forces,17.4645
-compute forces,16.1007
-compute forces,17.5368
-compute forces,15.72
-compute forces,14.986
-compute forces,15.1008
-compute forces,15.5501
-compute forces,15.4947
-compute forces,16.1998
-compute forces,16.6658
-compute forces,16.5969
-compute forces,16.6094
-compute forces,15.5091
-compute forces,16.5141
-compute forces,16.2951
-compute forces,17.0772
-compute forces,16.3106
-compute forces,16.1774
-compute forces,16.6478
-compute forces,16.1081
-compute forces,16.0915
-compute forces,16.1888
-compute forces,15.98
-compute forces,15.074
-compute forces,15.1053
-compute forces,15.1085
-compute forces,17.2884
-compute forces,15.4583
-compute forces,16.8513
-compute forces,15.3223
-compute forces,15.2953
-compute forces,14.463
-compute forces,14.8907
-compute forces,14.7786
-compute forces,16.0587
-compute forces,14.6217
-compute forces,14.6411
-compute forces,14.7101
-compute forces,14.2603
-compute forces,14.7601
-compute forces,14.5442
-compute forces,14.5695
-compute forces,14.6236
-compute forces,17.6959
-compute forces,16.3742
-compute forces,17.3551
-compute forces,15.9618
-compute forces,17.1368
-compute forces,15.8977
-compute forces,17.2266
-compute forces,16.6438
-compute forces,18.013
-compute forces,16.512
-compute forces,16.6472
-compute forces,17.7995
-compute forces,16.4251
-compute forces,18.4613
-compute forces,16.5819
-compute forces,17.5555
-compute forces,16.2048
-compute forces,18.0888
-compute forces,16.6143
-compute forces,16.8768
-compute forces,16.8145
-compute forces,16.528
-compute forces,17.286
-compute forces,16.5087
-compute forces,18.2513
-compute forces,17.6934
-compute forces,18.5125
-compute forces,17.7665
-compute forces,17.9315
-compute forces,17.8388
-compute forces,17.8124
-compute forces,19.4104
-compute forces,17.9911
-compute forces,19.1931
-compute forces,17.8872
-compute forces,17.6658
-compute forces,18.6359
-compute forces,17.9232
-compute forces,17.7399
-compute forces,17.987
-compute forces,19.6152
-compute forces,18.9041
-compute forces,17.7395
-compute forces,19.0217
-compute forces,18.1353
-compute forces,18.9255
-compute forces,17.0018
-compute forces,16.8862
-compute forces,17.5788
-compute forces,18.5196
-compute forces,17.5078
-compute forces,16.8399
-compute forces,16.8606
-compute forces,17.9481
-compute forces,18.9009
-compute forces,17.6175
-compute forces,17.0682
-compute forces,17.6578
-compute forces,17.8461
-compute forces,18.2901
-compute forces,17.8616
-compute forces,19.475
-compute forces,17.3066
-compute forces,18.5301
-compute forces,17.898
-compute forces,19.0195
-compute forces,20.1745
-compute forces,18.3489
-compute forces,18.4316
-compute forces,19.4625
-compute forces,17.0619
-compute forces,17.6578
-compute forces,16.8576
-compute forces,18.0446
-compute forces,17.4843
-compute forces,17.1506
-compute forces,17.6954
-compute forces,17.201
-compute forces,18.2506
-compute forces,16.4973
-compute forces,17.7102
-compute forces,16.1444
-compute forces,16.1179
-compute forces,15.9515
-compute forces,17.2133
-compute forces,15.1357
-compute forces,16.4999
-compute forces,14.8981
-compute forces,15.1979
-compute forces,15.1511
-compute forces,15.277
-compute forces,15.7456
-compute forces,15.4244
-compute forces,14.966
-compute forces,14.9736
-compute forces,15.2954
-compute forces,15.7691
-compute forces,17.2582
-compute forces,14.7555
-compute forces,16.9846
-compute forces,15.7375
-compute forces,15.5875
-compute forces,15.6124
-compute forces,14.4072
-compute forces,13.9781
-compute forces,13.9338
-compute forces,13.8556
-compute forces,14.9227
-compute forces,13.7222
-compute forces,15.0225
-compute forces,13.6633
-compute forces,13.7206
-compute forces,14.5823
-compute forces,15.9395
-compute forces,14.7831
-compute forces,14.5309
-compute forces,14.6354
-compute forces,14.7215
-compute forces,14.7225
-compute forces,15.1411
-compute forces,14.7018
-compute forces,15.0604
-compute forces,16.5441
-compute forces,15.3573
-compute forces,16.7786
-compute forces,15.4675
-compute forces,16.5735
-compute forces,16.1498
-compute forces,15.8668
-compute forces,15.2781
-compute forces,18.2381
-compute forces,16.6347
-compute forces,16.5466
-compute forces,16.2881
-compute forces,15.8329
-compute forces,17.6067
-compute forces,16.3783
-compute forces,17.4653
-compute forces,17.8411
-compute forces,17.817
-compute forces,17.8351
-compute forces,18.6469
-compute forces,16.4968
-compute forces,15.8404
-compute forces,15.818
-compute forces,16.2347
-compute forces,17.3436
-compute forces,16.0147
-compute forces,17.8019
-compute forces,16.6368
-compute forces,15.3481
-compute forces,17.2021
-compute forces,16.0144
-compute forces,15.6004
-compute forces,15.711
-compute forces,15.8263
-compute forces,14.6329
-compute forces,15.8427
-compute forces,14.7787
-compute forces,16.0856
-compute forces,14.5891
-compute forces,16.1129
-compute forces,14.8462
-compute forces,15.0294
-compute forces,15.356
-compute forces,15.6924
-compute forces,14.792
-compute forces,15.962
-compute forces,14.5986
-compute forces,14.6722
-compute forces,15.1045
-compute forces,16.3452
-compute forces,15.0916
-compute forces,15.0427
-compute forces,14.5301
-compute forces,14.7208
-compute forces,14.9589
-compute forces,15.2754
-compute forces,15.2843
-compute forces,16.2979
-compute forces,17.6408
-compute forces,16.2483
-compute forces,16.0074
-compute forces,15.6829
-compute forces,15.9286
-compute forces,16.0079
-compute forces,15.7923
-compute forces,17.3314
-compute forces,15.9307
-compute forces,15.6345
-compute forces,15.9536
-compute forces,17.1297
-compute forces,15.9922
-compute forces,17.5505
-compute forces,16.2461
-compute forces,15.7883
-compute forces,15.993
-compute forces,16.0757
-compute forces,14.8815
-compute forces,14.6636
-compute forces,14.4848
-compute forces,15.7529
-compute forces,14.4975
-compute forces,14.4418
-compute forces,14.5427
-compute forces,14.5
-compute forces,14.966
-compute forces,16.5846
-compute forces,17.0831
-compute forces,16.5211
-compute forces,16.4459
-compute forces,16.5103
-compute forces,17.1358
-compute forces,15.7946
-compute forces,16.8343
-compute forces,15.4783
-compute forces,14.5351
-compute forces,14.5852
-compute forces,15.7842
-compute forces,15.7531
-compute forces,15.5816
-compute forces,16.8594
-compute forces,15.5567
-compute forces,16.7153
-compute forces,15.5742
-compute forces,15.4452
-compute forces,15.5919
-compute forces,16.4171
-compute forces,15.678
-compute forces,16.8066
-compute forces,15.2947
-compute forces,16.2207
-compute forces,15.1596
-compute forces,14.6502
-compute forces,15.7991
-compute forces,15.8281
-compute forces,15.5684
-compute forces,15.2593
-compute forces,15.4314
-compute forces,15.7822
-compute forces,16.678
-compute forces,15.5409
-compute forces,16.6864
-compute forces,15.6594
-compute forces,15.2736
-compute forces,16.0612
-compute forces,14.6708
-compute forces,16.0056
-compute forces,16.987
-compute forces,16.3722
-compute forces,16.143
-compute forces,14.5349
-compute forces,15.7612
-compute forces,16.3891
-compute forces,15.5157
-compute forces,16.1898
-compute forces,14.5697
-compute forces,15.548
-compute forces,14.9505
-compute forces,15.0682
-compute forces,13.8812
-compute forces,14.4884
-compute forces,14.5903
-compute forces,15.0955
-compute forces,13.6994
-compute forces,15.398
-compute forces,13.7252
-compute forces,13.6924
-compute forces,13.7656
-compute forces,14.0022
-compute forces,13.8955
-compute forces,13.7216
-compute forces,13.5729
-compute forces,13.5326
-compute forces,13.4468
-compute forces,13.7184
-compute forces,13.7502
-compute forces,13.7527
-compute forces,13.6851
-compute forces,13.7089
-compute forces,13.7136
-compute forces,13.6441
-compute forces,13.6986
-compute forces,13.6825
-compute forces,13.7584
-compute forces,14.8595
-compute forces,13.5633
-compute forces,13.6652
-compute forces,13.7059
-compute forces,13.6714
-compute forces,13.6698
-compute forces,13.413
-compute forces,13.3729
-compute forces,14.567
-compute forces,13.4364
-compute forces,13.7244
-compute forces,14.4119
-compute forces,13.7559
-compute forces,14.0496
-compute forces,13.9923
-compute forces,13.9395
-compute forces,13.948
-compute forces,14.0142
-compute forces,13.7756
-compute forces,13.898
-compute forces,13.8673
-compute forces,13.8463
-compute forces,13.6026
-compute forces,14.808
-compute forces,13.749
-compute forces,13.6452
-compute forces,13.6712
-compute forces,13.5629
-compute forces,14.2002
-compute forces,14.0876
-compute forces,14.153
-compute forces,14.0877
-compute forces,13.9181
-compute forces,13.8761
-compute forces,13.8045
-compute forces,15.0843
-compute forces,13.7751
-compute forces,13.7692
-compute forces,15.1517
-compute forces,13.9428
-compute forces,13.3296
-compute forces,15.1217
-compute forces,14.2318
-compute forces,16.9948
-compute forces,15.3532
-compute forces,14.6979
-compute forces,14.4818
-compute forces,14.0285
-compute forces,14.421
-compute forces,13.8994
-compute forces,14.0364
-compute forces,14.1813
-compute forces,15.5495
-compute forces,14.1653
-compute forces,15.5546
-compute forces,14.1929
-compute forces,15.7802
-compute forces,15.2284
-compute forces,13.942
-compute forces,15.2107
-compute forces,16.4718
-compute forces,15.2931
-compute forces,14.5402
-compute forces,14.5385
-compute forces,14.4885
-compute forces,14.5924
-compute forces,14.6161
-compute forces,14.6437
-compute forces,14.0953
-compute forces,14.9148
-compute forces,13.5116
-compute forces,14.9119
-compute forces,14.6054
-compute forces,14.5943
-compute forces,14.9295
-compute forces,16.2115
-compute forces,14.7748
-compute forces,16.1709
-compute forces,14.9158
-compute forces,16.1184
-compute forces,14.3619
-compute forces,15.0028
-compute forces,14.8508
-compute forces,16.2777
-compute forces,14.2531
-compute forces,15.3564
-compute forces,14.5148
-compute forces,14.0461
-compute forces,14.1067
-compute forces,13.9872
-compute forces,14.2158
-compute forces,14.612
-compute forces,14.1138
-compute forces,14.25
-compute forces,14.4879
-compute forces,16.4377
-compute forces,15.3958
-compute forces,15.4742
-compute forces,16.2805
-compute forces,15.5565
-compute forces,16.756
-compute forces,15.8972
-compute forces,17.3281
-compute forces,15.8036
-compute forces,16.8957
-compute forces,16.9788
-compute forces,16.58
-compute forces,16.8838
-compute forces,16.7595
-compute forces,16.0864
-compute forces,15.9304
-compute forces,17.4177
-compute forces,16.4242
-compute forces,18.0799
-compute forces,16.5995
-compute forces,16.6448
-compute forces,16.3741
-compute forces,15.6079
-compute forces,15.7014
-compute forces,16.6637
-compute forces,15.7545
-compute forces,15.4216
-compute forces,16.3069
-compute forces,16.1872
-compute forces,16.3564
-compute forces,15.6996
-compute forces,17.1663
-compute forces,16.887
-compute forces,16.0153
-compute forces,15.8537
-compute forces,15.4095
-compute forces,15.8629
-compute forces,16.5393
-compute forces,16.3199
-compute forces,16.2245
-compute forces,17.0004
-compute forces,16.7663
-compute forces,17.6734
-compute forces,16.4766
-compute forces,17.5956
-compute forces,16.6804
-compute forces,16.5228
-compute forces,17.8163
-compute forces,18.0196
-compute forces,19.6003
-compute forces,18.4994
-compute forces,19.8332
-compute forces,17.4069
-compute forces,17.4896
-compute forces,17.7832
-compute forces,18.7205
-compute forces,18.12
-compute forces,18.5801
-compute forces,19.2253
-compute forces,18.5675
-compute forces,18.6992
-compute forces,20.0243
-compute forces,17.8596
-compute forces,18.7718
-compute forces,17.1825
-compute forces,18.2182
-compute forces,17.8302
-compute forces,17.726
-compute forces,18.8242
-compute forces,17.5598
-compute forces,17.6814
-compute forces,17.7869
-compute forces,19.0658
-compute forces,16.9941
-compute forces,18.8076
-compute forces,16.5238
-compute forces,17.5295
-compute forces,18.3841
-compute forces,17.3605
-compute forces,18.6004
-compute forces,17.1472
-compute forces,17.8757
-compute forces,16.1463
-compute forces,17.7241
-compute forces,16.3213
-compute forces,16.5716
-compute forces,16.3829
-compute forces,16.7192
-compute forces,17.8616
-compute forces,16.9028
-compute forces,18.0887
-compute forces,17.2368
-compute forces,18.5204
-compute forces,17.2325
-compute forces,17.7901
-compute forces,17.2067
-compute forces,16.9699
-compute forces,20.3188
-compute forces,19.15
-compute forces,17.953
-compute forces,17.9552
-compute forces,17.7855
-compute forces,20.5581
-compute forces,19.0355
-compute forces,19.2627
-compute forces,19.4772
-compute forces,19.3601
-compute forces,20.8204
-compute forces,18.0164
-compute forces,18.9831
-compute forces,19.3787
-compute forces,18.8594
-compute forces,19.0928
-compute forces,19.2601
-compute forces,20.6001
-compute forces,20.8874
-compute forces,19.6185
-compute forces,19.6348
-compute forces,19.4265
-compute forces,19.0025
-compute forces,20.6414
-compute forces,19.1277
-compute forces,18.9589
-compute forces,19.0312
-compute forces,19.2925
-compute forces,20.4125
-compute forces,19.0321
-compute forces,18.9644
-compute forces,20.4219
-compute forces,19.067
-compute forces,19.9507
-compute forces,18.2969
-compute forces,17.8571
-compute forces,18.4819
-compute forces,18.894
-compute forces,19.994
-compute forces,18.9399
-compute forces,19.0782
-compute forces,19.1167
-compute forces,19.1041
-compute forces,20.0593
-compute forces,19.0564
-compute forces,19.0693
-compute forces,18.3809
-compute forces,18.4232
-compute forces,18.3293
-compute forces,18.9561
-compute forces,20.1992
-compute forces,18.9955
-compute forces,20.4498
-compute forces,16.8428
-compute forces,16.6543
-compute forces,18.8628
-compute forces,17.8465
-compute forces,19.142
-compute forces,17.774
-compute forces,19.2063
-compute forces,17.9097
-compute forces,19.8556
-compute forces,18.2303
-compute forces,17.8486
-compute forces,19.723
-compute forces,18.2525
-compute forces,17.9958
-compute forces,17.0613
-compute forces,16.7993
-compute forces,18.7663
-compute forces,18.7184
-compute forces,18.7685
-compute forces,18.6369
-compute forces,16.8602
-compute forces,17.2539
-compute forces,16.9708
-compute forces,17.1099
-compute forces,17.1507
-compute forces,18.5339
-compute forces,17.0751
-compute forces,17.1238
-compute forces,17.2053
-compute forces,18.6875
-compute forces,17.4852
-compute forces,17.3733
-compute forces,17.5121
-compute forces,17.6999
-compute forces,18.8112
-compute forces,17.8362
-compute forces,18.8655
-compute forces,17.8458
-compute forces,18.0484
-compute forces,18.1493
-compute forces,17.102
-compute forces,18.8226
-compute forces,16.9891
-compute forces,17.7344
-compute forces,16.7267
-compute forces,18.2236
-compute forces,16.9313
-compute forces,16.7534
-compute forces,18.2727
-compute forces,16.8911
-compute forces,17.0834
-compute forces,17.1082
-compute forces,18.5962
-compute forces,17.1994
-compute forces,18.7298
-compute forces,17.2455
-compute forces,17.2506
-compute forces,17.3108
-compute forces,17.6068
-compute forces,18.2096
-compute forces,17.1163
-compute forces,17.826
-compute forces,18.0175
-compute forces,19.0507
-compute forces,17.9124
-compute forces,19.0903
-compute forces,17.6398
-compute forces,17.8035
-compute forces,17.6401
-compute forces,18.9996
-compute forces,17.851
-compute forces,16.8806
-compute forces,16.8701
-compute forces,18.2398
-compute forces,17.0804
-compute forces,16.8561
-compute forces,18.2266
-compute forces,16.7987
-compute forces,15.7744
-compute forces,16.0492
-compute forces,16.1428
-compute forces,16.8094
-compute forces,15.8811
-compute forces,16.0408
-compute forces,16.044
-compute forces,16.7914
-compute forces,15.9587
-compute forces,16.1755
-compute forces,16.3937
-compute forces,15.8597
-compute forces,17.1457
-compute forces,16.3092
-compute forces,17.1746
-compute forces,16.0593
-compute forces,16.1634
-compute forces,15.7628
-compute forces,16.2409
-compute forces,15.4507
-compute forces,15.7749
-compute forces,15.1199
-compute forces,16.2886
-compute forces,16.3891
-compute forces,15.9319
-compute forces,17.0706
-compute forces,16.1671
-compute forces,16.1576
-compute forces,16.428
-compute forces,17.9323
-compute forces,16.4757
-compute forces,16.5076
-compute forces,16.6426
-compute forces,16.6696
-compute forces,17.9415
-compute forces,16.8688
-compute forces,18.2738
-compute forces,16.8901
-compute forces,16.9404
-compute forces,16.7922
-compute forces,17.5235
-compute forces,16.1564
-compute forces,16.2417
-compute forces,17.2792
-compute forces,16.3073
-compute forces,17.6767
-compute forces,16.2266
-compute forces,16.302
-compute forces,16.2645
-compute forces,16.0701
-compute forces,16.1308
-compute forces,16.3087
-compute forces,15.7466
-compute forces,16.981
-compute forces,15.6856
-compute forces,15.7778
-compute forces,17.3666
-compute forces,15.8535
-compute forces,15.8398
-compute forces,17.4582
-compute forces,17.3877
-compute forces,16.1791
-compute forces,16.0923
-compute forces,16.125
-compute forces,17.2994
-compute forces,16.1784
-compute forces,17.3989
-compute forces,16.0649
-compute forces,16.1801
-compute forces,15.3774
-compute forces,16.1297
-compute forces,17.3121
-compute forces,16.4461
-compute forces,17.5911
-compute forces,16.5486
-compute forces,16.1923
-compute forces,15.7536
-compute forces,16.5235
-compute forces,16.3661
-compute forces,16.3781
-compute forces,16.3588
-compute forces,16.2202
-compute forces,17.5705
-compute forces,16.417
+compute forces,15.2993
+compute forces,15.1535
+compute forces,15.1537
+compute forces,15.1295
+compute forces,15.1373
+compute forces,14.3793
+compute forces,14.2952
+compute forces,14.2159
+compute forces,14.1651
+compute forces,13.3527
+compute forces,12.8545
+compute forces,12.9332
+compute forces,12.8936
+compute forces,12.9107
+compute forces,12.6582
+compute forces,11.7972
+compute forces,11.9384
+compute forces,11.8889
+compute forces,11.9012
+compute forces,11.8252
+compute forces,10.6546
+compute forces,10.6621
+compute forces,10.7097
+compute forces,10.715
+compute forces,10.7569
+compute forces,10.8135
+compute forces,9.7612
+compute forces,9.8518
+compute forces,9.8136
+compute forces,9.8058
+compute forces,9.8732
+compute forces,9.8025
+compute forces,9.8075
+compute forces,9.8458
+compute forces,9.8837
+compute forces,9.9249
+compute forces,9.9898
+compute forces,10.053
+compute forces,10.1319
+compute forces,10.1767
+compute forces,10.1731
+compute forces,10.1978
+compute forces,10.3234
+compute forces,10.3239
+compute forces,10.4202
+compute forces,10.4056
+compute forces,10.4119
+compute forces,10.494
+compute forces,10.4955
+compute forces,10.9306
+compute forces,10.6372
+compute forces,10.6676
+compute forces,10.8988
+compute forces,10.7866
+compute forces,10.8128
+compute forces,11.0148
+compute forces,10.9756
+compute forces,11.4357
+compute forces,13.1968
+compute forces,12.15
+compute forces,12.0767
+compute forces,12.0406
+compute forces,12.0237
+compute forces,11.9067
+compute forces,12.0716
+compute forces,12.0937
+compute forces,12.146
+compute forces,12.0708
+compute forces,12.1466
+compute forces,12.2151
+compute forces,12.1185
+compute forces,13.0339
+compute forces,13.3905
+compute forces,13.4374
+compute forces,13.6885
+compute forces,13.7803
+compute forces,13.8637
+compute forces,13.8607
+compute forces,13.0355
+compute forces,13.1346
+compute forces,13.7461
+compute forces,13.7717
+compute forces,13.6824
+compute forces,13.7481
+compute forces,13.9531
+compute forces,14.3363
+compute forces,14.2663
+compute forces,14.1934
+compute forces,14.2098
+compute forces,14.3004
+compute forces,14.7697
+compute forces,13.5715
+compute forces,13.5551
+compute forces,13.5033
+compute forces,13.7458
+compute forces,14.2197
+compute forces,15.4163
+compute forces,15.583
+compute forces,15.5858
+compute forces,15.4549
+compute forces,15.6854
+compute forces,15.4047
+compute forces,15.9943
+compute forces,13.6966
+compute forces,13.7684
+compute forces,13.6089
+compute forces,13.6649
+compute forces,13.4753
+compute forces,13.8248
+compute forces,14.1128
+compute forces,14.1426
+compute forces,15.0927
+compute forces,14.6805
+compute forces,15.9429
+compute forces,14.3845
+compute forces,14.3312
+compute forces,14.3749
+compute forces,14.4361
+compute forces,14.5312
+compute forces,14.571
+compute forces,14.5651
+compute forces,14.7341
+compute forces,14.7996
+compute forces,15.0407
+compute forces,15.338
+compute forces,15.2532
+compute forces,15.2076
+compute forces,15.0417
+compute forces,16.4562
+compute forces,15.9832
+compute forces,15.832
+compute forces,16.0991
+compute forces,16.4137
+compute forces,15.1813
+compute forces,15.4338
+compute forces,15.9875
+compute forces,15.9782
+compute forces,16.3198
+compute forces,15.9948
+compute forces,16.0353
+compute forces,15.7231
+compute forces,16.2421
+compute forces,16.0982
+compute forces,16.6238
+compute forces,15.2822
+compute forces,15.0479
+compute forces,15.1921
+compute forces,15.0892
+compute forces,15.5336
+compute forces,15.5793
+compute forces,15.0848
+compute forces,15.0449
+compute forces,14.8282
+compute forces,15.6728
+compute forces,15.1772
+compute forces,15.2666
+compute forces,15.5424
+compute forces,15.6294
+compute forces,15.5492
+compute forces,15.6156
+compute forces,17.5251
 compute forces,17.4302
-compute forces,16.2674
-compute forces,17.4238
-compute forces,16.1901
-compute forces,17.6256
-compute forces,16.1221
-compute forces,15.8613
-compute forces,15.9752
-compute forces,16.0718
-compute forces,17.5462
-compute forces,16.3998
-compute forces,17.889
-compute forces,16.5811
-compute forces,17.6318
-compute forces,16.0994
-compute forces,16.1688
-compute forces,16.2292
-compute forces,16.1955
-compute forces,16.5616
-compute forces,16.2283
-compute forces,18.4769
-compute forces,17.0443
-compute forces,18.4856
-compute forces,17.4039
-compute forces,18.5335
-compute forces,17.577
-compute forces,17.6188
-compute forces,17.0126
-compute forces,17.5334
-compute forces,19.032
-compute forces,16.814
-compute forces,17.8881
-compute forces,16.812
-compute forces,17.4283
-compute forces,17.3507
-compute forces,18.1564
-compute forces,17.386
-compute forces,17.253
-compute forces,17.0151
-compute forces,16.6822
-compute forces,18.8689
-compute forces,17.1889
-compute forces,16.8477
-compute forces,16.7298
-compute forces,16.6738
-compute forces,18.0254
-compute forces,16.9251
-compute forces,17.0313
-compute forces,16.4202
-compute forces,17.9519
-compute forces,16.6244
-compute forces,17.9937
-compute forces,16.2291
-compute forces,17.2883
-compute forces,16.0667
-compute forces,16.1382
-compute forces,16.2102
-compute forces,16.2984
-compute forces,16.1902
-compute forces,16.4302
-compute forces,16.5535
-compute forces,16.195
-compute forces,17.8934
-compute forces,17.3645
-compute forces,17.4995
-compute forces,17.4802
-compute forces,17.6505
-compute forces,19.4391
-compute forces,19.5721
-compute forces,20.9112
-compute forces,20.1225
-compute forces,19.8469
-compute forces,21.1905
-compute forces,19.3672
-compute forces,21.0547
-compute forces,19.7369
-compute forces,19.6936
-compute forces,20.7906
-compute forces,19.1117
-compute forces,20.3519
-compute forces,18.4901
-compute forces,20.1097
-compute forces,18.6801
-compute forces,18.3754
-compute forces,19.9005
-compute forces,18.0897
-compute forces,18.6017
-compute forces,18.1503
-compute forces,17.9982
-compute forces,18.6009
-compute forces,16.9988
-compute forces,17.5383
-compute forces,17.5383
-compute forces,17.6356
-compute forces,17.3301
-compute forces,18.3312
-compute forces,17.7947
-compute forces,16.8955
-compute forces,18.022
-compute forces,17.3592
-compute forces,18.3239
-compute forces,17.1397
-compute forces,18.175
-compute forces,17.2649
-compute forces,17.222
-compute forces,17.0848
-compute forces,17.3229
-compute forces,18.1639
-compute forces,17.5942
-compute forces,18.6851
-compute forces,17.5986
-compute forces,17.6498
-compute forces,17.5711
-compute forces,17.7097
-compute forces,16.8597
-compute forces,16.7294
-compute forces,17.5197
-compute forces,17.558
-compute forces,18.6531
-compute forces,17.5967
-compute forces,18.9051
-compute forces,17.508
-compute forces,16.718
-compute forces,18.5681
-compute forces,17.9826
-compute forces,19.1985
-compute forces,17.8752
-compute forces,17.7536
-compute forces,17.5793
-compute forces,17.1069
-compute forces,17.4448
-compute forces,17.3679
-compute forces,19.0317
-compute forces,17.2075
-compute forces,18.7829
-compute forces,17.6099
+compute forces,17.8782
+compute forces,17.923
+compute forces,17.1885
+compute forces,17.8441
+compute forces,17.8121
+compute forces,18.1552
+compute forces,19.0634
+compute forces,18.8652
+compute forces,19.4065
+compute forces,19.2603
+compute forces,19.427
+compute forces,19.3609
+compute forces,17.4071
+compute forces,17.7395
+compute forces,17.6741
+compute forces,17.6313
+compute forces,17.3201
 compute forces,17.3325
-compute forces,17.5597
-compute forces,17.3589
-compute forces,17.448
-compute forces,17.8284
-compute forces,17.2709
-compute forces,17.1198
-compute forces,18.3254
-compute forces,17.0097
-compute forces,18.2747
-compute forces,18.2594
-compute forces,18.22
-compute forces,18.3148
-compute forces,17.7649
-compute forces,18.1156
-compute forces,17.829
-compute forces,17.9235
-compute forces,17.9282
-compute forces,17.4597
-compute forces,18.2768
+compute forces,17.5533
+compute forces,17.4567
+compute forces,17.48
+compute forces,16.5946
+compute forces,16.4124
+compute forces,18.2094
+compute forces,18.3037
+compute forces,16.8926
+compute forces,18.72
+compute forces,17.3759
+compute forces,18.2598
+compute forces,18.0892
+compute forces,17.8114
+compute forces,15.071
+compute forces,16.7903
+compute forces,16.6516
 compute forces,17.6932
-compute forces,18.0098
-compute forces,17.3313
-compute forces,19.1945
-compute forces,18.165
-compute forces,19.431
-compute forces,19.0056
-compute forces,17.8357
-compute forces,18.8552
-compute forces,20.3389
-compute forces,18.7011
-compute forces,20.3222
-compute forces,19.9527
-compute forces,19.9148
-compute forces,19.1934
-compute forces,20.6472
-compute forces,21.9114
-compute forces,20.7589
-compute forces,20.7667
-compute forces,22.0795
-compute forces,21.1853
-compute forces,21.3539
-compute forces,22.5716
-compute forces,21.4188
-compute forces,22.7137
-compute forces,22.3645
-compute forces,22.6377
-compute forces,23.659
-compute forces,22.6581
-compute forces,23.8016
-render,2.2863
-render,102.203
-render,0.7302
-render,1.5697
-render,0.7056
-render,0.7445
-render,1.0069
-render,0.8356
-render,4.2469
-render,0.615
-render,1.2868
-render,0.8472
-render,0.7684
-render,0.7508
-render,1.6415
-render,0.7432
-render,1.9893
-render,0.6435
-render,0.8876
-render,0.6358
-render,0.8604
-render,1.0415
-render,0.9038
-render,0.9219
-render,1.0344
-render,0.8745
-render,0.8161
-render,1.371
-render,0.7214
-render,0.6128
-render,0.9511
-render,0.6206
-render,0.7364
-render,0.6721
-render,0.8204
-render,0.582
-render,0.755
-render,0.6364
-render,0.8258
-render,0.6705
-render,0.8561
-render,0.7353
-render,0.8051
-render,0.6431
-render,0.9343
-render,0.6815
-render,0.9341
-render,0.6189
-render,0.7647
-render,0.5937
+compute forces,16.1522
+compute forces,16.9106
+compute forces,17.6064
+compute forces,17.6666
+compute forces,17.2574
+compute forces,17.8004
+compute forces,17.9671
+compute forces,18.1925
+compute forces,17.9739
+compute forces,18.3383
+compute forces,17.3053
+compute forces,17.5726
+compute forces,17.4001
+compute forces,17.6271
+compute forces,17.8341
+compute forces,18.0152
+compute forces,17.9511
+compute forces,17.6801
+compute forces,17.8299
+compute forces,17.7495
+compute forces,18.11
+compute forces,17.8236
+compute forces,17.7436
+compute forces,17.8143
+compute forces,17.8676
+compute forces,17.9264
+compute forces,17.7444
+compute forces,17.3064
+compute forces,17.3496
+compute forces,17.5974
+compute forces,18.5804
+compute forces,17.5146
+compute forces,16.7582
+compute forces,16.8793
+compute forces,16.8233
+compute forces,16.4247
+compute forces,17.507
+compute forces,17.4884
+compute forces,17.001
+compute forces,15.8623
+compute forces,17.0047
+compute forces,16.881
+compute forces,16.786
+compute forces,16.6847
+compute forces,15.7689
+compute forces,16.9367
+compute forces,16.991
+compute forces,17.0606
+compute forces,17.0706
+compute forces,17.1019
+compute forces,17.2278
+compute forces,17.2272
+compute forces,16.8717
+compute forces,17.0724
+compute forces,16.9423
+compute forces,16.8985
+compute forces,16.4977
+compute forces,16.4444
+compute forces,17.268
+compute forces,17.1936
+compute forces,16.4327
+compute forces,16.4387
+compute forces,16.3114
+compute forces,16.2834
+compute forces,16.2379
+compute forces,16.3876
+compute forces,16.3409
+compute forces,16.3176
+compute forces,16.3377
+compute forces,16.5672
+compute forces,16.48
+compute forces,16.6774
+compute forces,16.6332
+compute forces,16.6975
+compute forces,16.771
+compute forces,16.6144
+compute forces,16.4036
+compute forces,14.9422
+compute forces,14.5033
+compute forces,15.3761
+compute forces,16.4394
+compute forces,16.7517
+compute forces,15.7084
+compute forces,16.3827
+compute forces,16.4058
+compute forces,16.008
+compute forces,15.4312
+compute forces,16.447
+compute forces,16.4351
+compute forces,16.4483
+compute forces,16.1764
+compute forces,15.1226
+compute forces,15.2581
+compute forces,15.6462
+compute forces,15.8031
+compute forces,15.8736
+compute forces,15.4958
+compute forces,15.4341
+compute forces,15.4721
+compute forces,15.3233
+compute forces,15.03
+compute forces,14.5596
+compute forces,13.8978
+compute forces,13.9346
+compute forces,14.7498
+compute forces,14.5053
+compute forces,14.396
+compute forces,14.1719
+compute forces,14.3687
+compute forces,14.5831
+compute forces,14.6941
+compute forces,14.9231
+compute forces,15.0952
+compute forces,15.2526
+compute forces,15.2238
+compute forces,15.662
+compute forces,14.6565
+compute forces,15.3894
+compute forces,17.5369
+compute forces,17.5236
+compute forces,17.5928
+compute forces,17.4674
+compute forces,16.4602
+compute forces,17.6403
+compute forces,18.0468
+compute forces,18.112
+compute forces,16.3487
+compute forces,16.6161
+compute forces,16.2655
+compute forces,17.2648
+compute forces,16.5681
+compute forces,16.5853
+compute forces,15.7711
+compute forces,15.0133
+compute forces,16.0347
+compute forces,16.1535
+compute forces,15.8209
+compute forces,16.0432
+compute forces,15.1991
+compute forces,15.2354
+compute forces,15.6743
+compute forces,15.7992
+compute forces,15.6044
+compute forces,15.3945
+compute forces,15.4001
+compute forces,15.3416
+compute forces,15.3107
+compute forces,15.2855
+compute forces,15.259
+compute forces,15.3445
+compute forces,14.9388
+compute forces,14.923
+compute forces,14.5665
+compute forces,15.9585
+compute forces,15.8194
+compute forces,16.0713
+compute forces,14.8354
+compute forces,14.2249
+compute forces,14.853
+compute forces,15.3986
+compute forces,14.8024
+compute forces,14.7436
+compute forces,14.4145
+compute forces,14.7618
+compute forces,14.8214
+compute forces,14.9508
+compute forces,14.8149
+compute forces,14.8537
+compute forces,14.9932
+compute forces,15.0173
+compute forces,15.0244
+compute forces,14.4848
+render,2.0871
+render,81.3317
+render,0.7486
 render,1.1041
-render,0.7478
-render,1.0519
-render,0.7096
-render,1.0773
-render,0.5866
-render,0.7771
-render,0.7074
-render,0.7431
-render,0.6176
-render,0.7907
-render,0.5861
-render,1.2264
-render,0.72
-render,1.4373
-render,0.5913
-render,0.7768
-render,0.7407
-render,0.9909
-render,0.5719
-render,0.8858
-render,0.6639
-render,0.8302
-render,0.5804
-render,0.7873
-render,1.1239
-render,0.7817
-render,0.5796
-render,0.8633
-render,0.6986
-render,0.9284
-render,1.0049
-render,1.0901
-render,0.6929
-render,1.1116
-render,0.5707
-render,0.7567
-render,0.5798
-render,0.7632
-render,0.5279
-render,1.1393
-render,0.718
-render,0.7178
-render,0.5668
-render,0.7343
-render,0.5806
-render,0.9709
-render,0.5493
-render,0.8255
-render,0.5427
-render,0.7426
-render,0.9477
-render,0.7005
-render,0.5671
-render,0.6934
-render,0.5475
-render,0.935
-render,0.5984
-render,0.7254
-render,0.5285
-render,0.7684
-render,0.5714
-render,0.8674
-render,0.5465
-render,0.7697
-render,0.6027
-render,0.7588
-render,0.5415
-render,0.6859
-render,0.5092
-render,0.7677
-render,0.5322
-render,0.7233
-render,0.7015
-render,0.8719
-render,0.5438
-render,0.7806
-render,0.5329
-render,0.7758
-render,0.6156
-render,0.6858
-render,0.6137
-render,0.7329
-render,0.5543
-render,0.6818
-render,0.5995
-render,0.7166
-render,0.5461
-render,0.8041
-render,0.5537
-render,0.7258
-render,0.5543
-render,0.7607
-render,0.598
-render,0.7693
-render,0.539
-render,0.7041
-render,0.6187
-render,0.7109
-render,0.5307
-render,0.7721
-render,1.1881
-render,0.6904
-render,0.5379
-render,0.6964
-render,0.551
-render,0.9707
-render,0.5397
-render,0.7933
-render,0.5718
-render,1.0648
-render,0.7568
-render,0.8311
-render,0.5799
-render,0.6979
-render,0.6063
-render,0.8373
-render,0.5535
-render,0.6732
-render,0.5419
-render,0.7411
-render,0.6518
-render,0.7919
-render,0.662
-render,1.1347
-render,0.5165
-render,0.7395
-render,0.5352
-render,0.7253
-render,0.556
-render,0.7662
-render,0.5421
-render,0.7254
-render,0.6446
-render,0.7343
-render,0.5508
-render,0.7086
-render,0.9745
-render,0.7168
-render,0.5453
-render,0.8613
-render,0.5566
-render,0.964
-render,0.5394
-render,0.6751
-render,0.5949
-render,15.7491
-render,0.8465
-render,0.718
-render,0.5405
-render,0.8592
-render,0.5306
-render,1.2453
-render,0.5373
-render,0.6826
-render,0.6123
-render,0.6943
-render,0.5475
-render,0.6777
-render,0.6439
-render,0.7517
-render,0.6334
-render,0.7086
-render,1.0066
-render,0.6732
-render,0.5028
-render,0.7829
-render,0.5907
-render,0.7934
-render,0.5204
-render,0.6802
-render,0.5607
-render,0.6741
-render,0.6202
-render,0.7151
-render,0.5414
-render,0.7991
-render,0.5434
-render,1.1024
-render,0.54
-render,0.7563
-render,0.6896
-render,0.8875
-render,0.5359
-render,0.7095
-render,0.6015
-render,0.9075
-render,0.5612
-render,0.7828
-render,0.543
-render,0.7254
-render,0.5319
-render,0.706
-render,0.5038
-render,0.6925
-render,0.5604
-render,0.7132
-render,0.5495
-render,0.75
-render,0.5557
-render,1.0332
-render,0.5355
-render,0.8025
-render,0.5451
-render,0.7403
-render,0.6305
-render,0.821
-render,0.5785
-render,0.8087
-render,0.7247
-render,0.8035
-render,0.5826
-render,0.7867
-render,0.5371
-render,0.7399
-render,0.5409
-render,0.7791
-render,0.5352
-render,0.8895
-render,0.6343
-render,0.7015
-render,0.6208
-render,0.7084
-render,0.5408
-render,0.7241
-render,0.7047
-render,0.9345
-render,0.5724
-render,0.6581
-render,0.5658
-render,0.6511
-render,0.5302
-render,0.7368
-render,0.5941
-render,0.731
-render,0.6897
-render,0.7919
-render,0.7256
-render,0.791
-render,0.6225
-render,0.7703
-render,0.6897
-render,0.8342
-render,0.5114
-render,0.7269
-render,0.586
-render,0.8043
-render,0.5573
-render,1.3512
-render,0.5955
-render,0.7262
-render,0.6279
-render,0.8312
-render,0.6751
-render,0.7609
-render,0.5582
-render,0.8938
-render,0.53
-render,0.8438
-render,0.5392
-render,0.9247
-render,0.6314
-render,0.7581
-render,0.5876
-render,0.6686
-render,0.536
-render,0.807
-render,0.5204
-render,0.6856
-render,0.5826
-render,0.7622
-render,0.5398
-render,0.6849
-render,1.1646
-render,0.926
-render,0.602
-render,0.7032
-render,0.5355
-render,1.1194
-render,0.5485
-render,0.6653
-render,0.5476
-render,1.1063
-render,0.5472
-render,0.7921
-render,0.6747
-render,0.8584
-render,0.538
-render,0.6796
-render,1.0713
-render,0.6984
-render,0.5488
-render,0.733
-render,0.5392
-render,0.6607
-render,0.6442
-render,0.7198
-render,0.5494
-render,0.7801
-render,0.5458
-render,0.7779
-render,0.5465
-render,0.7235
-render,0.5961
-render,0.9513
-render,0.5356
-render,0.8441
-render,0.5715
-render,0.6716
-render,0.5407
-render,0.987
-render,0.5391
-render,1.0965
-render,1.2251
-render,1.2625
-render,1.0802
-render,0.6527
-render,0.5071
-render,1.2483
-render,0.5332
-render,0.6891
-render,0.6073
-render,0.7296
-render,0.5331
-render,0.7542
-render,0.5437
-render,0.7258
-render,1.4845
-render,0.8855
-render,0.6945
-render,0.7563
-render,0.5589
-render,0.7755
-render,0.546
-render,0.7276
-render,0.5438
-render,0.6793
-render,0.5591
-render,0.685
-render,0.7472
-render,0.6944
-render,0.5277
-render,0.7431
-render,0.7799
-render,0.761
-render,0.5704
-render,0.7569
-render,0.5884
-render,0.7307
-render,1.0207
-render,0.8045
-render,0.6032
-render,0.6784
-render,0.5038
-render,0.826
-render,0.6439
-render,0.676
-render,0.5574
-render,0.717
-render,0.5694
-render,0.7683
-render,0.5497
-render,0.7369
-render,0.8298
-render,0.6951
-render,0.5536
-render,0.7133
-render,0.5522
-render,0.7035
-render,0.8994
-render,1.3983
-render,0.5325
-render,1.2214
-render,0.8121
 render,0.7347
-render,0.555
-render,0.7251
-render,0.563
-render,0.7171
-render,0.6865
-render,0.6827
-render,1.0319
-render,0.8955
-render,0.5321
-render,0.6819
-render,1.5671
-render,0.6714
-render,0.6792
-render,0.8314
-render,0.5556
-render,0.7264
-render,0.5118
-render,0.7328
-render,0.5875
-render,0.6808
-render,0.5156
-render,0.6909
-render,1.0324
-render,0.8195
-render,0.7678
-render,0.7101
-render,0.5629
-render,0.6784
-render,0.8862
-render,0.6635
-render,0.6338
-render,0.8658
-render,0.7374
-render,0.734
-render,0.5506
-render,0.7046
-render,0.9957
-render,0.6845
-render,0.5247
-render,0.7149
-render,0.934
-render,0.693
-render,0.6273
-render,0.7611
-render,0.5453
-render,0.9318
-render,0.5609
-render,1.3349
-render,0.5367
-render,0.6952
-render,1.0085
-render,0.7069
-render,0.604
-render,0.9505
-render,0.527
-render,0.7116
-render,0.7127
-render,0.6912
-render,0.514
-render,0.6939
-render,0.5341
-render,0.6768
-render,0.5662
-render,0.8831
-render,0.5606
-render,0.7667
-render,0.5336
-render,0.959
+render,0.5665
+render,0.94
+render,0.6543
+render,4.1352
+render,0.4857
+render,0.8687
+render,0.4915
+render,0.6998
 render,0.5534
-render,0.866
-render,0.5387
-render,0.6746
-render,0.7106
-render,0.7235
-render,0.5908
-render,0.9772
-render,0.5434
-render,0.7502
-render,0.5512
-render,0.721
-render,0.5051
-render,1.0039
-render,0.5463
-render,0.7197
-render,0.765
-render,0.7208
-render,0.5599
-render,0.7725
-render,0.5259
-render,0.768
-render,0.5577
-render,0.7018
-render,0.605
-render,0.9266
-render,0.5431
-render,1.0118
-render,0.5983
-render,0.8569
-render,0.8821
-render,0.7609
-render,0.6624
-render,0.7623
-render,0.5373
-render,0.7931
-render,0.5208
-render,0.7051
-render,0.997
-render,0.6864
-render,0.5742
-render,0.7213
-render,0.5938
-render,0.6566
-render,0.5218
-render,0.7362
-render,0.5318
-render,0.861
-render,0.623
-render,0.6349
-render,0.5263
-render,0.7456
-render,0.8609
-render,0.6752
-render,0.5506
-render,0.9344
-render,0.5973
-render,1.2664
-render,0.6224
-render,1.0751
-render,0.5465
-render,1.0268
-render,0.5544
-render,0.7309
-render,0.9294
-render,0.7492
-render,0.5332
-render,0.7004
-render,0.5562
-render,0.7116
-render,0.5463
-render,0.6711
-render,0.5526
-render,0.6805
-render,0.5472
-render,1.2358
-render,0.9004
-render,0.7118
-render,0.6236
-render,0.8151
-render,0.5373
-render,0.8148
-render,0.5603
-render,1.3227
-render,0.5414
-render,0.7866
-render,0.543
-render,0.684
-render,0.5468
-render,0.7808
-render,0.5913
-render,0.7342
-render,0.8741
-render,0.6842
-render,0.5176
-render,0.7683
-render,0.5792
-render,0.8002
-render,0.5928
-render,0.9167
-render,0.6943
-render,0.9356
-render,0.5984
-render,0.731
-render,0.5375
-render,0.643
-render,0.5294
-render,0.7264
-render,0.5863
-render,0.706
-render,0.5885
-render,0.8045
-render,0.5956
-render,0.8555
-render,0.5517
-render,0.8207
-render,0.5656
-render,0.7009
-render,0.5539
-render,0.7243
-render,0.5292
-render,0.8405
-render,0.7786
-render,0.7081
-render,0.5591
-render,0.9032
-render,0.5541
-render,0.8248
-render,0.5322
-render,0.9425
-render,0.588
-render,0.6846
-render,0.5567
-render,0.7332
-render,0.6087
-render,0.6832
-render,1.0446
-render,0.9781
-render,0.5473
-render,0.7448
-render,0.6269
-render,1.2502
-render,0.6158
-render,0.8813
-render,0.556
-render,0.7098
-render,0.7216
-render,0.7212
-render,0.5369
-render,1.2192
-render,0.5374
-render,1.2531
-render,0.5983
-render,0.7955
-render,0.857
-render,0.7225
-render,0.5332
-render,0.8265
-render,0.7436
-render,0.829
-render,0.5773
-render,0.825
-render,0.5034
-render,0.8118
-render,0.5604
-render,0.6832
-render,0.5459
+render,0.6433
+render,0.4896
+render,1.0188
+render,0.7352
+render,0.837
+render,0.5291
 render,0.7073
-render,0.5423
-render,0.9512
-render,0.5473
-render,0.6964
-render,0.5421
-render,0.9064
-render,0.6214
-render,1.1453
-render,0.6185
-render,0.9133
-render,0.5373
-render,0.6788
-render,0.5857
-render,1.0726
-render,0.6099
-render,0.8466
-render,0.7409
-render,0.7341
-render,0.5509
-render,0.7582
-render,0.5726
-render,0.7094
-render,0.6417
-render,0.8219
-render,0.5502
-render,0.963
-render,0.5361
-render,0.7239
-render,0.5359
-render,0.712
-render,0.6218
-render,0.8556
-render,0.5468
-render,0.6709
-render,0.5666
-render,0.8224
-render,0.5909
-render,0.9591
-render,0.7427
-render,0.6991
-render,0.5526
-render,0.7633
-render,0.5566
-render,0.7824
-render,0.5526
-render,0.9937
-render,0.554
-render,0.7508
-render,0.5867
-render,0.7973
-render,0.5443
-render,0.7299
-render,0.5346
-render,0.7557
-render,0.5512
-render,1.0791
-render,0.492
-render,0.6764
-render,0.5744
-render,0.6809
-render,0.549
-render,0.8656
-render,0.5394
-render,0.6696
-render,0.5126
-render,0.6362
-render,0.5764
-render,0.7644
-render,0.5234
-render,0.6508
-render,1.218
-render,0.7968
-render,0.543
-render,1.4059
-render,0.5918
-render,0.7876
-render,0.6928
-render,1.2211
-render,0.5544
-render,0.9877
-render,0.5714
-render,0.6984
-render,1.1397
-render,0.8688
+render,0.6023
+render,0.7213
 render,0.5486
-render,0.8631
-render,0.6057
-render,0.9092
-render,0.695
-render,0.7361
-render,0.5762
-render,0.6776
-render,0.6112
-render,0.7925
-render,0.5156
-render,0.7325
-render,0.5516
-render,0.7255
-render,0.6522
-render,0.7336
-render,0.5354
-render,0.9002
-render,0.5293
-render,0.7268
-render,0.5864
-render,0.6979
-render,0.6917
-render,0.7756
-render,0.5316
-render,0.7328
-render,0.5825
-render,0.7283
-render,0.7354
-render,0.7373
-render,0.5444
-render,0.8054
-render,0.5441
-render,1.3523
-render,0.5945
-render,0.7791
-render,0.5953
-render,0.7659
-render,0.5879
-render,0.7311
-render,0.54
-render,1.6094
-render,0.5468
-render,0.8331
-render,0.5408
-render,0.9239
-render,0.5417
-render,1.0994
-render,0.549
-render,0.7906
-render,0.5958
-render,0.6685
-render,0.5205
-render,0.6753
-render,0.548
-render,1.3337
-render,0.5453
-render,0.9496
-render,0.648
-render,0.66
-render,0.5384
-render,0.6886
-render,0.5355
-render,1.4329
-render,0.592
-render,0.6941
-render,0.5408
-render,0.7964
-render,0.5379
-render,0.8511
-render,0.688
-render,1.44
-render,0.5855
-render,0.6502
-render,0.5553
-render,0.8589
-render,0.5473
-render,0.6826
-render,0.5582
-render,0.7548
-render,0.5801
-render,0.8949
-render,0.5908
-render,0.6824
-render,0.545
-render,0.7245
-render,0.6327
-render,0.669
-render,0.5081
-render,0.6521
-render,0.7033
-render,0.7418
-render,0.8259
-render,1.199
-render,0.5648
-render,0.7004
-render,0.5859
-render,0.7196
-render,0.5472
-render,0.7734
-render,0.5216
-render,0.7738
-render,0.5436
-render,0.8515
-render,0.5322
-render,0.8014
-render,0.5373
-render,0.958
-render,0.5957
-render,1.1438
-render,1.0054
-render,0.7836
-render,0.5759
-render,1.066
-render,0.5839
-render,0.6778
-render,0.5407
-render,0.8065
-render,0.5499
-render,0.6951
-render,0.6154
-render,0.699
-render,0.5368
-render,0.6947
-render,1.0092
-render,0.728
-render,0.6306
-render,0.827
-render,0.591
-render,0.6732
-render,0.8351
-render,1.0496
-render,0.5781
-render,0.668
-render,0.6129
-render,1.1849
-render,0.7417
-render,0.6816
-render,0.7318
-render,0.8326
-render,0.5931
-render,0.6931
-render,0.5653
-render,1.0629
-render,0.5516
-render,1.3054
-render,0.5295
-render,0.7642
-render,0.5588
-render,0.7425
-render,0.5835
-render,0.7333
-render,0.5952
-render,1.0088
-render,0.5872
-render,0.7856
-render,0.596
-render,0.6842
-render,0.5542
-render,0.7462
-render,0.5796
-render,0.778
-render,0.9206
-render,0.7277
-render,0.5246
-render,0.7405
-render,0.5337
-render,0.6435
-render,0.551
-render,0.9798
-render,0.5378
-render,0.6645
-render,0.6287
-render,0.8735
-render,0.5893
-render,0.7826
-render,0.5558
-render,0.7339
-render,0.5867
-render,0.973
-render,0.9854
-render,0.7437
-render,0.7239
-render,1.0389
-render,0.7659
-render,0.874
-render,0.645
-render,0.6976
-render,0.5365
-render,1.0227
-render,0.5529
-render,0.6681
-render,0.6658
-render,1.014
-render,0.544
-render,0.7899
-render,0.6039
-render,0.6869
-render,0.541
-render,0.6828
-render,0.5287
-render,0.7209
-render,0.5479
-render,0.97
-render,0.558
-render,0.6916
-render,0.6038
-render,0.6878
-render,0.6646
-render,0.7856
-render,0.601
-render,1.3814
-render,0.5739
-render,0.7372
-render,0.5871
-render,0.6857
-render,0.5484
-render,0.7273
-render,0.7623
-render,0.7828
-render,0.5139
-render,0.8294
-render,0.698
-render,0.6457
-render,0.5405
-render,0.7664
-render,0.6336
-render,0.8055
-render,0.5096
-render,0.7775
-render,1.6568
-render,0.7094
-render,0.5856
-render,0.6676
-render,0.5245
-render,1.2177
-render,0.6072
-render,4.2424
-render,1.0192
-render,1.2953
-render,0.5475
-render,0.9081
-render,0.6019
-render,0.6721
-render,0.5257
-render,0.6681
-render,0.5295
-render,0.6335
-render,0.9007
-render,0.9421
-render,0.753
-render,0.7535
-render,0.683
-render,0.8332
-render,0.5692
-render,0.6794
-render,0.5437
-render,0.7901
-render,0.4921
-render,0.736
-render,1.2805
-render,0.7847
-render,0.6655
-render,1.8962
-render,0.6355
-render,0.7114
-render,1.0017
-render,0.7763
-render,0.5444
-render,1.2628
-render,0.9436
-render,0.7823
-render,0.6159
-render,0.8509
-render,0.5529
-render,0.7278
-render,0.5531
-render,0.8328
-render,1.431
-render,0.7685
-render,0.554
-render,0.7722
-render,0.6027
-render,0.6385
-render,0.983
-render,0.6915
-render,0.5513
-render,0.7292
-render,0.9004
-render,0.7305
-render,0.5367
-render,0.9588
-render,0.5545
-render,0.7866
-render,0.7217
-render,0.7379
-render,0.546
-render,0.7085
-render,0.6608
-render,0.8236
-render,0.5752
-render,0.8279
-render,0.501
-render,2.1097
-render,0.5573
-render,0.9233
-render,0.5469
-render,0.7222
-render,0.7768
-render,0.6837
-render,0.5422
-render,1.2976
-render,0.5476
-render,0.6993
-render,0.5346
-render,0.8073
-render,0.7608
-render,0.8467
-render,0.5459
-render,0.7024
-render,0.6332
-render,0.6898
-render,0.5639
-render,0.685
-render,0.91
-render,0.6638
-render,0.564
-render,0.7831
-render,0.5972
-render,0.7623
-render,0.5661
-render,1.2003
-render,0.5443
-render,0.6922
-render,0.57
-render,0.8346
-render,0.5334
-render,0.7809
-render,0.7032
-render,0.936
-render,0.5996
-render,0.6973
-render,0.9065
-render,0.7172
-render,0.5553
-render,0.7178
-render,0.5568
-render,0.8384
-render,0.5332
-render,0.9986
-render,0.5803
-render,0.7247
-render,0.7943
-render,0.9102
-render,0.7298
-render,0.9812
-render,0.6318
-render,1.3809
-render,0.5658
-render,1.1728
-render,0.795
-render,0.9335
-render,0.551
-render,0.6735
-render,0.589
-render,0.6704
-render,0.5086
-render,0.6973
-render,0.521
-render,1.1928
-render,0.5031
-render,0.7008
-render,0.9466
-render,0.8893
-render,0.5431
-render,0.7028
-render,0.4993
-render,0.669
-render,0.5545
-render,0.6755
-render,0.5395
-render,0.6612
-render,1.2007
-render,0.7576
-render,0.7412
-render,0.6727
-render,0.9849
-render,0.7137
-render,0.516
-render,0.9569
-render,0.5611
-render,1.2378
-render,0.5435
-render,0.8745
-render,0.5461
-render,1.8778
-render,0.5305
-render,0.8382
-render,0.5252
-render,0.6642
-render,0.5443
-render,0.6764
-render,0.819
-render,0.7431
-render,0.53
-render,0.6925
-render,1.116
-render,0.9203
-render,0.6103
-render,0.7774
-render,0.5196
-render,0.7069
-render,0.5613
-render,0.6974
-render,0.5899
-render,0.6772
-render,0.5666
-render,0.9324
-render,0.595
-render,0.8452
-render,0.5876
-render,0.6771
-render,1.3254
-render,21.5114
-render,1.3962
-render,0.6809
-render,0.5439
-render,0.6841
-render,0.5373
-render,0.6748
-render,0.5797
-render,0.6778
-render,0.6062
-render,0.799
-render,0.5578
-render,0.8398
-render,1.0459
-render,1.0159
-render,0.5489
-render,0.6898
-render,0.954
-render,1.2338
-render,0.538
-render,0.7216
-render,0.6361
-render,0.7004
-render,0.5539
-render,0.681
-render,0.611
-render,0.6924
-render,0.5591
-render,0.8315
-render,0.7243
-render,0.684
-render,0.7724
-render,0.7413
-render,0.5305
-render,0.7175
-render,0.5499
-render,0.7326
-render,0.5737
-render,1.2464
-render,0.5085
-render,0.6975
-render,0.56
-render,0.9647
-render,0.5585
-render,0.7053
-render,0.5396
-render,0.7256
-render,0.6755
-render,0.674
-render,0.6767
-render,0.7932
-render,0.5657
-render,0.9102
-render,0.5994
-render,0.6907
-render,0.5551
-render,0.7422
-render,0.5313
-render,0.8511
-render,0.5513
-render,0.7193
-render,0.5448
-render,0.7292
-render,0.4964
-render,0.689
-render,0.5604
-render,0.6765
-render,0.5684
-render,0.676
-render,0.5368
-render,0.6804
-render,0.5996
-render,0.7167
-render,0.5332
-render,0.7547
-render,0.5445
-render,0.7444
-render,0.6344
-render,0.754
-render,0.485
-render,0.9805
-render,0.697
-render,0.7632
-render,0.5513
-render,0.9805
-render,0.5212
-render,1.2836
-render,0.6126
-render,0.8283
-render,0.4981
-render,0.7507
-render,0.553
-render,0.6899
-render,0.6047
-render,0.6769
-render,0.6063
-render,0.7358
-render,0.5503
-render,0.6809
-render,0.9278
-render,0.6763
-render,0.6039
-render,0.8772
-render,0.5591
-render,0.8139
-render,0.6207
-render,1.0526
-render,0.7559
-render,0.897
-render,0.5114
-render,0.723
-render,1.0667
-render,1.0224
-render,0.5427
-render,0.6768
-render,0.6224
-render,0.6912
-render,0.5482
-render,0.7287
-render,0.5588
-render,0.8208
-render,0.5366
-render,0.7908
-render,0.5818
-render,0.7647
-render,0.5669
-render,0.7378
-render,0.8553
-render,0.7747
-render,0.7091
-render,0.792
-render,0.5576
-render,0.7424
-render,0.5252
-render,0.6893
-render,0.5539
-render,0.715
-render,0.6457
-render,0.6819
-render,0.5407
-render,0.9572
-render,0.5111
-render,0.7078
-render,0.539
-render,0.673
-render,0.5417
-render,0.926
-render,0.5909
-render,0.7178
-render,0.6124
-render,0.7075
-render,0.5929
-render,0.847
-render,0.5615
-render,1.1065
-render,0.5429
-render,0.7188
-render,0.6428
-render,0.697
-render,0.7333
-render,0.7727
+render,0.8149
+render,0.5104
+render,0.6747
+render,0.5356
+render,0.9546
+render,0.6396
+render,0.8497
+render,0.4657
+render,0.9624
+render,0.6784
+render,0.8552
+render,0.4869
+render,0.7203
+render,0.471
+render,0.64
+render,0.5135
+render,0.7122
+render,0.5726
+render,0.7913
+render,0.5208
+render,0.652
+render,0.4728
+render,0.8773
+render,0.5971
+render,0.6328
+render,0.7142
+render,1.1572
+render,0.9529
+render,0.9171
+render,0.612
+render,0.6846
 render,0.5483
-render,0.6941
-render,0.5407
-render,0.7995
-render,0.5738
-render,0.6646
-render,0.6057
-render,0.7146
-render,0.558
-render,0.775
-render,0.7097
-render,0.7423
-render,0.6368
-render,0.7766
-render,0.5281
-render,0.6587
-render,0.5901
-render,0.7351
-render,0.5774
-render,0.6795
-render,0.633
-render,0.6755
-render,0.5408
-render,0.7725
-render,0.5075
-render,0.6326
-render,0.5963
-render,0.8119
-render,0.6202
-render,2.5764
-render,0.9562
-render,0.9023
-render,0.7456
-render,0.6885
+render,0.6839
+render,0.5879
+render,0.9307
+render,0.5352
+render,0.7467
+render,0.4853
+render,0.8024
+render,0.6803
+render,1.1393
+render,0.5425
+render,0.6899
+render,0.4665
+render,0.6711
+render,0.7405
+render,0.7166
+render,0.5029
+render,0.8225
+render,0.4695
+render,1.3055
+render,0.5313
+render,0.8446
+render,0.5274
+render,0.6909
+render,0.5679
+render,0.7262
+render,0.4662
+render,0.7127
+render,0.5585
+render,0.6693
+render,0.503
+render,1.2065
+render,0.5005
+render,0.7554
+render,0.4971
+render,0.6826
+render,0.6266
+render,0.6379
+render,0.5341
+render,0.7124
+render,0.5746
+render,0.6377
+render,0.5338
+render,0.7175
+render,0.5742
+render,0.7352
+render,0.4584
+render,0.5588
+render,0.8946
+render,1.0166
+render,0.724
+render,0.9408
+render,0.4717
+render,0.6396
+render,0.4847
+render,0.5345
+render,0.8619
+render,1.2225
+render,0.7528
+render,0.8044
+render,0.5185
+render,0.7526
+render,0.4686
+render,0.8093
+render,0.5971
+render,0.574
+render,0.4381
+render,0.6976
+render,0.4338
+render,0.818
+render,0.4249
+render,0.8189
+render,0.4305
+render,0.7029
+render,0.445
+render,0.7035
+render,0.5094
+render,0.6544
+render,0.5366
+render,0.694
+render,0.5087
+render,0.6823
+render,0.4582
+render,0.7867
+render,0.4258
+render,0.6007
+render,0.4425
+render,0.7427
+render,0.8415
+render,0.5644
+render,0.435
+render,0.6353
+render,0.4287
+render,0.7237
+render,0.7057
+render,0.7668
+render,0.4992
+render,0.6042
+render,0.4321
+render,0.7559
+render,0.3936
+render,0.6986
+render,0.5484
+render,0.6237
+render,1.0513
+render,0.6307
+render,0.532
+render,0.651
+render,0.4794
+render,0.7035
+render,0.4715
+render,0.651
+render,0.4317
+render,1.1369
+render,0.5263
+render,0.665
+render,0.4881
+render,0.7059
+render,0.5064
+render,0.6713
+render,0.429
+render,0.7335
+render,0.4643
+render,0.6214
+render,0.5043
+render,0.7316
+render,0.4477
+render,0.7091
+render,0.4348
+render,0.676
+render,0.388
+render,0.8101
+render,0.4298
+render,0.5803
+render,0.4299
+render,0.7494
+render,0.4671
+render,0.6977
+render,0.4535
+render,0.7152
+render,0.5527
+render,0.7413
+render,0.5087
+render,0.6871
+render,0.5935
+render,1.0215
+render,0.4661
+render,0.6135
+render,0.452
+render,0.8066
+render,0.4079
+render,0.5868
+render,0.4857
+render,0.7186
+render,0.4071
+render,0.59
+render,0.3954
+render,0.7882
+render,0.4469
+render,0.6165
+render,0.4435
+render,0.6161
+render,0.4225
+render,0.6825
+render,0.4877
+render,0.8996
+render,0.4438
+render,0.7746
+render,0.4778
+render,0.8182
+render,0.414
+render,0.822
+render,0.4248
+render,0.6661
+render,0.4554
+render,0.76
+render,0.4386
+render,0.647
+render,0.3991
+render,0.6736
+render,0.4403
+render,0.6726
+render,0.4596
+render,0.7309
 render,0.5619
-render,1.3029
-render,0.7045
-render,0.859
-render,0.9617
-render,0.7488
+render,0.6392
+render,0.6292
+render,0.7312
+render,0.4939
+render,0.8207
+render,0.4776
+render,0.6157
+render,0.5278
+render,0.6075
+render,0.4369
+render,0.6916
+render,0.4878
+render,0.7066
+render,0.4833
+render,0.724
+render,0.5278
+render,0.6415
+render,0.5779
+render,1.1173
+render,0.7148
+render,0.9004
+render,0.4858
+render,0.625
+render,0.4909
+render,0.625
+render,0.6929
+render,0.6249
+render,0.4302
+render,0.7596
+render,0.4344
+render,0.7313
+render,0.4302
+render,0.7483
+render,0.5065
+render,0.6482
+render,0.4965
+render,1.0283
+render,0.3984
+render,0.7542
+render,0.4248
+render,1.0154
+render,0.6501
+render,0.6842
+render,0.4444
+render,0.6931
+render,0.46
+render,0.7592
+render,0.4282
+render,0.8073
+render,0.6515
+render,1.0625
 render,0.5159
-render,0.8985
-render,0.5362
-render,0.7034
-render,0.5288
-render,0.7123
-render,0.6227
-render,0.6745
-render,0.6472
-render,0.8365
-render,0.5472
-update,57.2407
-update,39.8464
-update,37.4518
-update,35.265
-update,37.367
-update,35.807
-update,36.664
-update,35.7639
-update,34.3968
-update,35.8143
-update,35.5436
-update,33.3221
-update,34.1744
-update,32.0195
-update,32.9443
-update,35.5424
-update,30.862
-update,30.9344
-update,29.8185
-update,30.7074
-update,30.0407
-update,29.4864
-update,28.0683
-update,29.3983
-update,28.0972
-update,31.9849
-update,28.4129
-update,28.2124
-update,27.5794
-update,27.2997
-update,28.9556
-update,27.2929
-update,28.7246
-update,27.2005
-update,29.1877
-update,27.5701
-update,28.3429
-update,27.63
-update,28.8446
-update,29.1564
-update,27.992
-update,28.0141
-update,28.002
-update,28.5831
-update,28.1162
-update,28.5452
-update,28.0007
-update,28.4489
-update,29.2579
-update,28.0779
-update,30.3747
-update,28.2246
-update,29.8571
-update,28.6806
-update,28.8003
-update,28.5386
-update,28.524
-update,32.1036
-update,30.489
-update,31.6359
-update,30.2918
-update,32.3081
-update,31.1352
-update,32.0606
-update,33.6992
-update,30.7266
-update,32.5081
-update,31.6326
-update,31.5269
-update,36.9806
-update,31.4031
-update,32.7453
-update,32.7581
-update,32.0498
-update,31.9991
-update,31.4124
-update,32.2273
-update,31.4809
-update,32.8877
-update,32.0345
-update,31.3112
-update,32.7231
-update,32.0572
-update,33.1657
-update,34.5556
-update,32.7835
-update,33.9273
-update,33.2511
-update,34.8819
-update,32.8133
-update,39.2891
-update,33.6897
-update,35.3778
-update,33.3128
-update,34.9726
-update,33.611
-update,35.5542
-update,33.5865
-update,34.0428
-update,35.0646
-update,33.7261
-update,33.7493
-update,33.2249
-update,33.6301
-update,33.239
-update,35.0257
-update,34.8782
-update,35.6281
-update,34.4098
-update,35.7315
-update,37.8184
-update,36.3955
-update,39.123
-update,35.5588
-update,35.8747
-update,36.2587
-update,39.2142
-update,34.2409
-update,34.5669
-update,34.3584
-update,35.0159
-update,35.2721
-update,35.0272
-update,35.9586
-update,36.5032
-update,35.34
-update,35.1193
-update,37.2077
-update,35.4099
-update,36.2465
-update,35.4037
-update,34.5913
-update,36.0837
-update,36.0086
-update,37.5736
-update,35.6557
-update,35.4194
-update,38.1852
-update,36.204
-update,36.5997
-update,35.9401
-update,36.7301
-update,35.6582
-update,37.5804
-update,38.8332
-update,35.2811
-update,36.727
-update,35.216
-update,36.8708
-update,35.3636
-update,36.2743
-update,36.6487
-update,34.9575
-update,35.5241
-update,35.4193
-update,36.3767
-update,35.4252
-update,36.1285
-update,35.636
-update,34.7861
-update,34.9037
-update,36.921
-update,36.6132
-update,35.9282
-update,37.8628
-update,36.4372
-update,38.3042
-update,38.3345
-update,37.8174
-update,38.6866
-update,37.369
-update,39.4546
-update,37.7302
-update,44.7915
-update,41.1416
-update,40.1736
-update,41.7481
-update,39.3696
-update,36.8398
-update,36.7463
-update,35.8698
-update,35.3171
-update,35.0867
-update,36.7014
-update,38.2641
-update,35.9569
-update,37.0162
-update,36.7312
-update,36.8509
-update,36.175
-update,36.3569
-update,38.3093
-update,36.2355
-update,37.5912
-update,35.7412
-update,36.9136
-update,125.084
-update,37.4218
-update,36.0056
-update,39.1101
-update,35.0108
-update,33.9797
-update,35.6617
-update,34.5957
-update,35.9251
-update,33.3763
-update,34.34
-update,33.2633
-update,33.3616
-update,33.0045
-update,34.6111
-update,33.7406
-update,34.8723
-update,113.063
-update,36.7532
-update,33.9599
-update,33.7311
-update,33.0732
-update,32.8709
-update,33.673
-update,33.393
-update,34.6739
-update,32.8722
-update,33.9711
-update,32.7233
-update,33.8543
-update,32.6895
-update,33.8493
-update,32.9083
-update,32.967
-update,32.7324
-update,33.4883
-update,34.4947
-update,33.3895
-update,35.1997
-update,33.5398
-update,33.703
-update,34.1143
-update,33.7832
-update,32.2248
-update,33.8671
-update,32.1937
-update,33.5132
-update,31.3801
-update,32.6831
-update,31.5999
-update,33.0964
-update,31.9676
-update,32.7922
-update,32.0228
-update,34.9536
-update,31.9469
-update,33.5375
-update,32.0862
-update,32.3034
-update,33.484
-update,35.0617
-update,33.4388
-update,33.7294
-update,33.3168
-update,33.9588
-update,34.2349
-update,32.6101
-update,33.6785
-update,32.7659
-update,32.7233
-update,32.6897
-update,33.7227
-update,32.9768
-update,33.4375
-update,32.5458
-update,33.5133
-update,33.4055
-update,33.3892
-update,33.5494
-update,35.3993
-update,34.336
-update,34.194
-update,33.9315
-update,35.5627
-update,34.8355
-update,35.7883
-update,34.8903
-update,34.1089
-update,34.5517
-update,35.538
-update,36.4591
-update,35.704
-update,36.2381
-update,36.4192
-update,41.4809
-update,38.1022
-update,37.0021
-update,35.484
-update,33.4793
-update,34.2233
-update,33.2487
-update,35.2202
-update,34.1866
-update,33.0347
-update,33.7052
-update,33.0435
-update,34.3581
-update,33.2912
-update,33.7385
-update,32.8724
-update,34.3214
-update,34.5892
-update,33.8597
-update,33.7933
-update,34.2502
-update,32.9635
-update,34.9202
-update,33.274
-update,34.7374
-update,33.898
-update,33.7475
-update,34.7447
-update,34.2122
-update,33.677
-update,33.1763
-update,34.495
-update,33.5946
-update,35.0317
-update,33.2369
-update,34.4915
-update,33.4418
-update,33.9479
-update,33.485
-update,33.852
-update,33.0728
-update,34.7034
-update,33.9241
-update,35.4254
-update,34.4069
-update,34.7011
-update,34.72
-update,34.8734
-update,35.3602
-update,33.6708
-update,35.8602
-update,34.1803
-update,35.5108
-update,33.8919
-update,34.4445
-update,35.1891
-update,35.3247
-update,35.0114
-update,35.3821
-update,34.6018
-update,34.5017
-update,36.1384
-update,35.8069
-update,34.7931
-update,35.8191
-update,34.7688
-update,35.7053
-update,34.7222
-update,38.0369
-update,34.4656
-update,34.8389
-update,33.6227
-update,35.0821
-update,34.6259
-update,34.1353
-update,36.8994
-update,34.6268
-update,31.8522
-update,32.5478
-update,33.1643
-update,31.7828
-update,33.9214
-update,32.6834
-update,33.8081
-update,32.9189
-update,34.3213
-update,32.7461
-update,34.5099
-update,33.2704
-update,34.7986
-update,33.9302
-update,34.6695
-update,35.2666
-update,38.942
+render,0.9378
+render,0.4812
+render,0.6264
+render,0.466
+render,0.5941
+render,0.6343
+render,0.7684
+render,0.4913
+render,0.6035
+render,0.4404
+render,0.7881
+render,0.5136
+render,0.6347
+render,0.4263
+render,0.6314
+render,0.4622
+render,0.6058
+render,0.5239
+render,0.663
+render,0.4253
+render,0.604
+render,0.4404
+render,0.6104
+render,0.4321
+render,0.6963
+render,0.4975
+render,0.7361
+render,0.4945
+render,0.8235
+render,0.4859
+render,0.773
+render,0.4253
+render,0.5931
+render,0.44
+render,0.7082
+render,0.4919
+render,0.6908
+render,0.5049
+render,0.6983
+render,0.5349
+render,0.647
+render,0.417
+render,0.7072
+render,0.7423
+render,0.9177
+render,0.3993
+render,1.1198
+render,0.5697
+render,1.3713
+render,0.4467
+render,0.671
+render,0.4297
+render,0.7849
+render,0.6602
+render,0.5515
+render,0.4533
+render,0.8
+render,0.9473
+render,1.1198
+render,0.5337
+render,0.6955
+render,0.4914
+render,0.8881
+render,0.4891
+render,1.0559
+render,0.5674
+render,1.3843
+render,0.4233
+render,0.5741
+render,0.4291
+render,0.7792
+render,0.5489
+render,0.6832
+render,0.498
+render,0.8337
+render,0.4887
+render,0.6095
+update,52.511
+update,36.6291
+update,35.2839
+update,34.1545
+update,34.423
+update,33.9683
+update,33.2096
 update,34.0362
-update,33.4933
-update,35.1243
-update,33.7319
-update,35.3382
-update,34.2879
-update,35.639
-update,34.4364
-update,35.6692
-update,34.6371
-update,37.7092
-update,35.4889
-update,35.7279
-update,37.8291
-update,34.6032
-update,35.8226
-update,35.0954
-update,36.1868
-update,35.7474
-update,34.4523
-update,35.371
-update,33.8948
-update,35.1678
-update,33.5258
-update,35.4308
-update,34.0844
-update,35.9204
-update,34.0684
-update,36.0508
-update,34.3259
-update,37.0578
-update,34.7781
-update,34.3831
-update,36.0898
-update,34.9846
-update,35.1355
-update,34.2137
-update,34.7703
-update,33.8972
-update,34.2328
-update,34.7809
-update,35.57
-update,35.4587
-update,34.8682
-update,36.4545
-update,34.3234
-update,36.428
-update,35.4938
-update,34.1526
-update,34.6805
-update,34.4996
-update,34.902
-update,33.9301
-update,34.1507
-update,34.1
-update,35.213
-update,34.4766
-update,34.6779
-update,35.0454
-update,35.7556
-update,36.3062
-update,35.0543
-update,35.4602
-update,36.9805
-update,36.8035
-update,35.4911
-update,36.6141
-update,34.7792
-update,36.768
-update,35.376
-update,35.1983
-update,35.6679
-update,34.2883
-update,33.4625
-update,33.9396
-update,35.4543
-update,33.9027
-update,35.6539
-update,33.5462
-update,33.7872
-update,33.0561
-update,33.7192
-update,33.7172
-update,34.8442
-update,35.5106
-update,35.0703
-update,35.1797
-update,34.6109
-update,36.0898
-update,34.4239
-update,34.8698
-update,36.0166
-update,35.0193
-update,35.4002
-update,34.1673
-update,34.5367
-update,34.0931
-update,33.9824
-update,32.8476
-update,33.5506
-update,32.9293
-update,35.5399
-update,33.6218
-update,34.4681
-update,33.2839
-update,34.8443
-update,33.1358
-update,34.6976
-update,32.6717
-update,36.2857
-update,32.7557
-update,32.3833
-update,32.993
-update,32.0203
-update,34.6199
-update,32.1941
-update,33.539
-update,32.2824
-update,35.6109
-update,34.0215
-update,35.2708
-update,33.5304
-update,35.4127
-update,33.5907
-update,35.3525
-update,34.0918
-update,36.0419
-update,34.9621
-update,34.7177
-update,35.7502
-update,34.6319
-update,36.1718
-update,34.382
-update,35.5557
-update,34.4806
-update,37.7673
-update,35.9907
-update,35.1599
-update,35.9113
-update,34.2341
-update,35.1133
-update,33.9651
-update,36.3766
-update,35.3136
-update,37.0498
-update,35.8767
-update,37.0649
-update,38.1598
-update,35.9188
-update,37.1856
-update,36.0416
-update,36.6768
-update,36.9949
-update,35.5524
-update,36.8796
-update,35.9853
-update,37.1134
-update,35.8705
-update,37.7206
-update,37.3873
-update,35.7919
-update,36.8182
-update,36.29
-update,36.6537
-update,35.2937
-update,35.338
-update,37.9502
-update,36.1224
-update,35.7101
-update,34.6165
-update,35.6772
-update,35.5547
-update,39.0589
-update,36.7547
-update,38.086
-update,36.1242
-update,36.4167
-update,38.375
-update,36.5457
-update,37.5117
-update,35.0462
-update,36.0586
-update,36.1786
-update,36.7428
-update,38.7339
-update,41.2244
-update,38.5036
-update,40.5389
-update,37.288
-update,37.8702
-update,35.1818
-update,35.7153
-update,35.5424
-update,34.9928
-update,35.8029
-update,34.8761
-update,35.9393
-update,34.3222
-update,35.8418
-update,34.1809
-update,34.386
-update,34.107
-update,34.9556
-update,32.7932
-update,34.5592
-update,32.5225
-update,34.7132
-update,33.2093
-update,33.2135
-update,34.0804
-update,33.4596
-update,34.5254
-update,32.8991
-update,33.9449
-update,33.8146
-update,35.1405
-update,32.5258
-update,34.876
-update,33.7673
-update,34.6143
-update,34.3661
-update,32.289
-update,32.1918
-update,32.024
-update,31.9405
-update,32.8245
-update,32.4391
-update,33.2235
-update,31.4956
-update,32.6265
-update,35.3328
-update,34.2028
-update,33.0129
-update,32.6531
-update,33.2219
-update,32.0711
-update,32.679
-update,34.0026
-update,32.8194
-update,32.5667
-update,34.7517
-update,32.7997
-update,34.7357
-update,33.286
-update,34.8357
-update,34.2162
-update,34.9043
-update,32.8599
-update,36.0214
-update,36.0195
-update,35.4896
-update,35.2121
-update,34.0583
-update,35.362
-update,34.6115
-update,35.2502
-update,35.64
-update,36.8455
-update,36.9978
-update,38.0891
-update,34.9823
-update,33.6255
-update,35.4347
-update,34.6656
-update,35.4171
-update,33.8483
-update,36.4047
-update,35.9056
-update,34.3458
-update,34.9326
-update,34.3027
-update,33.5228
-update,33.3854
-update,34.0973
-update,32.8432
-update,33.8226
-update,33.2094
-update,34.5021
-update,32.7712
-update,34.3974
-update,33.3349
-update,34.051
-update,33.7183
-update,33.765
-update,32.9319
-update,33.5905
-update,33.037
-update,33.5295
-update,33.1761
-update,34.4587
-update,34.2621
-update,32.7447
-update,33.2591
-update,33.2045
-update,35.6339
-update,38.3605
-update,34.468
-update,33.9769
-update,35.5844
-update,34.1279
-update,33.9579
-update,34.6941
-update,34.0791
-update,34.594
-update,34.1709
-update,35.0555
-update,33.8373
-update,33.9025
-update,34.0996
-update,34.7534
-update,33.8092
-update,35.587
-update,34.3022
-update,34.7184
-update,34.3625
-update,34.6746
-update,33.3984
-update,32.5505
-update,32.4927
-update,33.7822
-update,32.7524
-update,32.0378
-update,33.7659
-update,32.0552
-update,34.2955
-update,34.4722
-update,34.8184
-update,34.3889
-update,35.5089
-update,34.4138
-update,35.0942
-update,33.9615
-update,35.0082
-update,33.7064
-update,32.2021
-update,32.8215
-update,33.3773
-update,35.5136
-update,33.4708
-update,34.9723
-update,33.3766
-update,34.3316
-update,33.5762
-update,34.5525
-update,34.4368
-update,34.0017
-update,33.9041
-update,35.0658
-update,33.007
-update,33.7812
-update,33.1557
-update,32.4673
-update,34.9812
-update,33.8094
-update,33.395
-update,33.8559
-update,36.6456
-update,33.8335
-update,34.9105
-update,35.4172
-update,37.0349
-update,36.5311
-update,33.0086
-update,34.1777
-update,32.5292
-update,33.7498
-update,35.1592
-update,34.7098
-update,33.8242
-update,32.8841
-update,33.7915
-update,34.0585
-update,33.1828
-update,33.9782
-update,32.6146
-update,33.6173
-update,32.9433
-update,34.1523
-update,31.7318
-update,33.3207
-update,32.385
-update,33.1528
-update,31.7877
-update,33.3784
-update,32.81
-update,31.6109
-update,31.9316
-update,32.6491
-update,34.0543
-update,31.2202
-update,32.6307
-update,32.3053
-update,31.306
-update,32.6835
-update,32.0037
-update,31.7525
-update,32.6873
+update,33.6059
+update,32.379
+update,30.7025
+update,30.7639
+update,31.6807
+update,31.0796
+update,30.7519
+update,29.5313
+update,30.9248
+update,29.1542
+update,30.4987
+update,29.5464
+update,27.8231
+update,27.2668
+update,28.1892
+update,28.2973
+update,27.3383
+update,28.036
+update,28.0229
+update,26.9198
+update,26.517
+update,26.2923
+update,27.4334
+update,27.1037
+update,26.6237
+update,26.3827
+update,26.8391
+update,26.4155
+update,26.4869
+update,25.9572
+update,26.4269
+update,26.4254
+update,27.0993
+update,26.3088
+update,26.7225
+update,26.4858
+update,26.7553
+update,26.7257
+update,27.1845
+update,27.016
+update,28.1158
+update,32.4793
+update,27.9697
+update,28.2439
+update,33.4376
+update,28.1204
+update,29.6304
+update,28.241
+update,28.1953
+update,28.5921
+update,30.4937
+update,29.5591
+update,28.1765
+update,28.0975
+update,28.1215
+update,27.724
+update,28.4447
+update,28.4495
+update,28.5714
+update,29.3291
+update,29.6987
+update,28.361
+update,28.7583
+update,29.3909
+update,32.485
+update,31.1179
+update,31.8589
+update,31.2709
+update,31.658
+update,31.2573
+update,30.3795
+update,29.6082
+update,30.3493
+update,30.5295
+update,31.0177
+update,31.4025
+update,31.3675
+update,30.4472
+update,32.6416
+update,30.5024
+update,31.4576
 update,31.6177
-update,32.3438
-update,31.5547
-update,32.7131
-update,31.4516
-update,32.8775
-update,32.8057
-update,31.7289
-update,32.8693
-update,31.6605
-update,32.7082
-update,31.9301
-update,31.0227
-update,31.5322
-update,32.7188
-update,31.6562
-update,31.2896
-update,32.2496
-update,31.3671
-update,32.1049
-update,31.8436
-update,31.8613
-update,31.6555
-update,32.2981
-update,31.5887
-update,35.6863
-update,31.6679
-update,33.3009
-update,31.6319
-update,32.9773
-update,31.9118
-update,33.0491
-update,31.5185
-update,31.7089
-update,31.9718
-update,33.7736
-update,32.3014
-update,33.3771
-update,31.4019
-update,33.0319
-update,31.5906
-update,33.1059
-update,31.5822
-update,31.8062
-update,32.9365
-update,32.9705
-update,31.381
-update,33.0602
-update,31.876
-update,118.712
-update,39.222
-update,34.0265
-update,33.0352
-update,32.2075
-update,32.8237
-update,32.1257
-update,32.6425
-update,33.3471
-update,33.9613
-update,32.3793
-update,35.8481
-update,34.7658
-update,37.3029
-update,33.8067
-update,32.3315
-update,33.7223
-update,34.3964
-update,33.4514
-update,33.4124
-update,33.7391
-update,32.1342
-update,32.5392
-update,32.9535
-update,33.08
-update,31.7891
-update,32.7925
-update,31.2662
-update,35.5441
-update,33.1172
-update,33.5846
-update,32.5159
-update,34.2765
-update,32.5068
-update,34.3055
-update,32.4741
-update,34.243
-update,32.2534
-update,34.9551
-update,32.6347
-update,33.9933
-update,32.5913
-update,34.7783
-update,32.131
-update,33.1869
-update,31.7884
-update,32.8727
-update,33.5328
-update,32.9553
-update,31.7235
-update,33.5798
-update,32.6231
-update,34.8573
-update,34.036
-update,33.5455
-update,34.1449
-update,33.5811
-update,34.6582
-update,33.7373
-update,35.6158
-update,33.6609
-update,34.8756
-update,36.0772
-update,34.7096
-update,35.2764
-update,34.5406
-update,34.5301
-update,33.7546
-update,36.1162
-update,34.4514
-update,35.9064
-update,34.1032
-update,35.8365
-update,34.4164
-update,33.6358
-update,33.1844
-update,34.6179
-update,33.9474
-update,34.8974
-update,34.4293
-update,34.6039
-update,35.0687
-update,33.5527
-update,34.8136
-update,34.945
-update,34.1262
-update,34.0577
-update,33.5096
-update,34.097
-update,35.9589
-update,34.701
-update,34.4586
-update,35.4791
-update,34.1615
-update,36.792
-update,34.5986
-update,35.9029
-update,37.6791
-update,35.0364
-update,37.793
-update,38.8878
-update,37.6944
-update,36.1056
-update,38.3929
-update,35.3952
-update,35.1696
-update,36.4313
-update,36.7861
-update,36.1097
-update,36.0389
-update,37.0706
-update,39.9148
-update,36.3287
-update,37.9203
-update,36.357
-update,36.3438
-update,34.9332
-update,37.5129
-update,35.7947
-update,35.6544
-update,36.5959
-update,35.7748
-update,35.5216
-update,35.9622
-update,37.052
-update,34.797
-update,37.4298
-update,35.4198
-update,35.4652
-update,36.0119
-update,35.4917
-update,36.0281
-update,35.1516
-update,35.5358
-update,34.2306
-update,35.5496
-update,34.8249
-update,34.4909
-update,34.6809
-update,34.2864
-update,35.7015
-update,34.8267
-update,36.2847
-update,34.8859
-update,36.0445
-update,34.5389
-update,35.0274
-update,34.9824
-update,33.8078
-update,37.2479
-update,37.5938
-update,34.9432
-update,36.2246
-update,36.7513
-update,38.9546
-update,36.6379
-update,37.3986
-update,37.1189
-update,36.359
-update,38.0745
-update,35.2778
-update,35.9671
-update,37.1275
-update,37.3302
-update,37.3743
-update,37.3029
-update,38.6585
-update,38.1018
-update,37.4428
-update,38.2712
-update,38.6552
-update,35.9086
-update,37.6363
-update,36.8942
-update,35.9079
-update,40.3675
-update,36.2153
-update,38.0983
-update,39.1629
-update,37.5303
-update,38.7856
-update,37.067
-update,38.2448
-update,36.9351
-update,36.0635
-update,36.9137
-update,36.6955
-update,38.0881
-update,37.9396
-update,37.4441
-update,38.2252
-update,36.5898
-update,38.0689
-update,37.2875
-update,36.8798
-update,36.5504
-update,36.5081
-update,36.4426
-update,36.6741
-update,37.8988
-update,37.0121
-update,38.2043
-update,34.976
-update,36.2446
-update,36.8995
-update,35.5091
-update,37.3222
-update,35.3901
-update,37.1669
-update,35.7328
-update,37.4996
-update,36.0967
-update,36.2291
-update,37.4537
-update,36.1691
-update,36.8895
-update,35.2639
-update,34.6383
-update,40.185
-update,37.9669
-update,36.6452
-update,36.4015
-update,35.5163
-update,35.372
-update,34.7733
-update,35.1239
-update,36.2
-update,36.5506
-update,35.3892
-update,36.0734
-update,34.9327
-update,36.2673
-update,35.792
-update,35.5907
-update,35.6345
-update,36.0294
-update,36.6354
-update,35.6211
-update,36.9814
-update,35.9027
-update,36.0543
-update,36.0631
-update,35.3734
-update,36.6636
-update,34.8668
-update,35.6734
-update,34.6308
-update,36.0735
-update,35.3468
-update,34.8895
-update,36.2821
-update,34.3416
-update,35.7058
-update,34.9203
-update,36.7158
-update,35.019
-update,36.5649
-update,35.1708
-update,35.7586
-update,35.438
-update,35.7352
-update,35.836
-update,35.077
-update,35.3969
-update,36.4575
-update,37.2178
-update,37.023
-update,42.6699
-update,39.406
-update,38.3824
-update,35.4981
-update,36.413
-update,36.5827
-update,34.4529
-update,34.111
-update,36.6664
-update,37.5176
+update,31.8376
+update,30.4578
+update,30.6801
+update,30.5831
+update,32.9575
+update,30.438
+update,33.0428
+update,33.228
+update,32.9229
+update,32.3743
+update,32.4827
+update,33.5754
+update,33.4696
+update,31.0125
+update,32.3901
+update,30.0378
+update,29.9433
+update,30.1654
+update,29.8818
+update,32.625
+update,99.0205
+update,31.5186
+update,31.3687
+update,33.0468
+update,30.2541
+update,31.2753
+update,30.9063
+update,31.1938
+update,31.0096
+update,31.6692
+update,31.2298
+update,31.4152
+update,32.2755
+update,32.4006
+update,32.366
+update,32.2748
+update,31.6877
+update,30.8699
+update,33.588
+update,32.8111
+update,32.7056
+update,33.3192
+update,33.182
+update,31.6709
+update,32.7809
+update,32.8969
+update,32.8381
+update,33.2838
+update,32.6468
+update,32.9132
+update,34.9655
+update,33.4123
+update,33.5574
+update,34.0447
+update,31.9809
+update,31.7768
+update,32.329
+update,32.887
+update,32.7382
+update,32.2622
+update,31.6828
+update,31.4533
+update,33.7956
+update,32.3225
+update,33.0723
+update,32.099
+update,31.9098
+update,32.9068
+update,32.331
+update,32.1993
+update,34.6829
+update,35.4452
+update,34.6738
+update,35.1514
+update,33.9217
+update,35.2782
+update,34.8523
+update,35.0702
+update,36.3893
+update,35.6964
+update,36.448
+update,35.7569
+update,38.4009
+update,35.4563
+update,34.4326
+update,34.9962
+update,33.993
+update,34.2096
+update,34.1432
+update,33.7268
+update,34.9765
+update,34.0548
+update,34.6822
+update,33.386
+update,33.6414
+update,34.4156
+update,34.8186
+update,33.7536
+update,35.847
+update,33.6819
+update,34.5043
+update,34.4915
+update,34.5619
+update,31.3476
+update,33.6889
+update,34.3855
+update,35.2713
+update,32.3374
+update,34.0524
+update,35.0422
+update,35.6531
+update,33.1552
+update,34.6223
+update,35.6155
+update,34.8239
+update,32.727
+update,33.8515
+update,33.3261
+update,33.587
+update,32.5449
+update,33.4712
+update,34.7748
+update,34.6534
+update,34.3147
+update,34.6092
+update,34.4404
+update,34.2212
+update,33.8605
+update,33.7229
+update,34.1948
+update,34.6786
+update,34.6767
+update,34.528
+update,34.1705
+update,34.2884
+update,33.4458
+update,33.8453
+update,34.8833
+update,33.7907
 update,34.234
-update,35.3749
-update,34.0778
-update,33.847
-update,34.0069
-update,33.1471
-update,36.0905
-update,33.9215
-update,34.5329
-update,33.0062
-update,34.0026
-update,33.0462
-update,34.8574
-update,35.2239
-update,33.0446
-update,34.4515
-update,33.4226
-update,35.1104
-update,34.4359
-update,33.0352
-update,33.0735
-update,33.8052
-update,34.0416
-update,32.7816
-update,33.4307
-update,33.2913
-update,33.4204
-update,32.9672
-update,35.6231
-update,33.5836
-update,33.475
-update,33.7782
-update,35.9027
-update,35.0616
-update,34.2663
-update,35.4535
-update,34.687
-update,36.1153
-update,34.577
-update,36.2285
-update,34.5406
-update,35.6313
-update,34.7395
-update,35.4425
-update,33.3856
-update,33.483
-update,35.1869
-update,34.2459
-update,35.4954
-update,34.3373
-update,35.7439
-update,34.3567
-update,34.3579
-update,35.4249
-update,34.3716
-update,34.1959
-update,34.6978
-update,34.0177
-update,33.5894
-update,35.2537
-update,39.255
-update,59.1096
-update,38.1711
-update,35.7441
-update,34.2576
-update,34.8549
-update,33.8451
-update,35.3926
-update,33.8373
-update,35.7173
-update,34.9063
-update,34.3856
-update,34.0915
-update,34.3873
-update,35.3891
-update,35.3089
-update,35.5038
-update,34.7553
-update,34.1712
-update,36.9651
-update,35.9084
-update,34.6777
-update,33.9312
-update,34.2853
-update,33.7098
-update,35.7009
-update,33.9455
-update,35.748
-update,33.8984
-update,37.6756
-update,34.1501
-update,37.7149
-update,34.2135
-update,34.5489
-update,33.6632
-update,34.0329
-update,35.0447
-update,34.3821
-update,35.8928
-update,34.7887
-update,35.5187
-update,35.4343
-update,35.4432
-update,34.2628
-update,34.0774
-update,35.0712
-update,33.9381
-update,36.1221
-update,34.7128
-update,36.5811
-update,35.0059
-update,36.6728
-update,35.5058
-update,36.8266
-update,34.8659
-update,35.2743
-update,36.6039
-update,34.6356
-update,36.4608
-update,35.0639
-update,36.4064
-update,35.4582
-update,36.0661
-update,35.7231
-update,34.8016
-update,35.4356
-update,34.4595
-update,36.7923
-update,34.7675
-update,36.6435
-update,35.1045
-update,34.8529
-update,35.791
-update,35.0177
-update,35.3066
-update,34.1368
-update,36.1259
-update,34.3376
-update,35.5899
-update,34.8377
-update,34.637
-update,34.3233
-update,34.0923
-update,34.6116
-update,34.1334
-update,34.7449
-update,34.4045
-update,33.9331
-update,33.5477
-update,34.9251
-update,34.4244
-update,35.5522
-update,35.3657
-update,34.7239
-update,36.3316
-update,37.4229
-update,38.3826
-update,38.7403
-update,37.7087
-update,39.047
-update,36.9652
-update,38.9705
-update,37.8274
-update,37.1328
-update,38.5243
-update,37.3668
-update,37.8045
-update,37.5702
-update,38.1362
-update,36.8002
-update,36.0569
-update,37.0556
-update,35.4881
-update,36.6145
-update,35.8925
-update,35.8237
-update,36.4988
-update,34.918
-update,35.9482
-update,35.4344
-update,35.1943
-update,35.214
-update,36.0085
-update,36.0831
-update,34.7611
-update,36.0641
-update,35.1405
-update,36.6319
-update,34.7274
-update,36.7191
-update,40.9772
-update,37.4992
-update,34.8189
-update,35.3003
-update,35.8248
-update,35.5256
-update,36.5073
-update,36.1579
-update,35.3209
-update,35.706
-update,35.4851
-update,35.038
-update,35.0554
-update,35.7489
-update,35.3392
-update,36.6159
-update,35.4108
-update,36.7458
-update,35.8254
-update,34.5843
-update,36.5582
-update,38.4304
-update,36.6658
-update,35.8858
-update,35.5194
-update,35.7351
-update,35.4337
-update,36.5833
-update,35.4003
-update,37.1649
-update,35.3324
-update,37.0027
-update,35.6233
-update,35.5771
-update,35.5118
-update,36.252
-update,35.4603
-update,35.544
-update,36.0339
-update,34.8634
-update,36.2361
-update,35.4191
-update,38.2722
-update,38.6501
-update,35.8106
-update,37.6503
-update,35.7455
-update,36.238
-update,35.9738
-update,37.3227
-update,36.6875
-update,35.1567
-update,35.9905
-update,35.7795
-update,35.718
-update,35.2532
-update,36.7329
-update,36.0916
-update,37.6556
-update,40.0932
-update,36.2663
-update,38.0285
-update,39.155
-update,36.3204
-update,37.8615
-update,37.634
-update,36.8328
-update,36.3318
-update,37.4954
-update,38.9364
-update,37.6391
-update,39.4433
-update,39.1925
-update,38.9148
-update,38.6376
-update,39.6429
-update,39.0697
-update,40.3634
-update,40.0542
-update,39.8989
-update,40.5474
-update,40.0063
-update,41.5268
+update,33.9676
+update,33.6395
+update,33.3217
+update,33.794
+update,34.5813
+update,34.328
+update,33.4706
+update,33.6929
+update,34.2811
+update,33.6205
+update,33.7136
+update,32.8143
+update,33.9506
+update,33.7036
+update,34.0442
+update,33.7367
+update,34.035
+update,33.8522
+update,34.506
+update,32.7664
+update,33.5162
+update,33.7059
+update,34.0115
+update,33.8493
+update,33.2167
+update,34.4578
+update,33.8778
+update,33.8274
+update,35.0036
+update,33.0595
+update,33.2596
+update,32.6836
+update,33.6978
+update,33.715
+update,33.5842
+update,32.8271
+update,33.8083
+update,32.8723
+update,34.0291
+update,32.6419
+update,32.9528
+update,33.7546
+update,33.6153
+update,33.0612
+update,31.8567
+update,31.3392
+update,31.6129
+update,33.5073
+update,33.2714
+update,32.2101
+update,33.308
+update,32.0852
+update,32.9514
+update,31.9259
+update,32.984
+update,33.8201
+update,34.0551
+update,33.1772
+update,33.0117
+update,32.914
+update,32.5514
+update,32.0658
+update,33.1729
+update,32.2244
+update,32.8406
+update,32.1473
+update,32.194
+update,32.5672
+update,30.9563
+update,30.4357
+update,30.7927
+update,30.5446
+update,31.3464
+update,30.7386
+update,30.134
+update,31.5213
+update,32.0089
+update,31.7112
+update,31.582
+update,31.1694
+update,31.8094
+update,32.1075
+update,32.4004
+update,31.0124
+update,31.6952
+update,33.7908
+update,33.9944
+update,34.3023
+update,40.6398
+update,33.0761
+update,34.6316
+update,34.8706
+update,35.3402
+update,33.5099
+update,33.9376
+update,32.7151
+update,34.1197
+update,33.1655
+update,34.1169
+update,32.8112
+update,32.622
+update,33.0212
+update,32.5224
+update,32.8305
+update,33.474
+update,32.1146
+update,31.1724
+update,33.1793
+update,32.3813
+update,31.1043
+update,31.4222
+update,31.1788
+update,32.5373
+update,31.5325
+update,31.6406
+update,30.6774
+update,34.2928
+update,33.7086
+update,34.3438
+update,33.0321
+update,32.5099
+update,31.2734
+update,35.2296
+update,31.9755
+update,31.6537
+update,31.6606
+update,33.2434
+update,34.1977
+update,31.9308
+update,31.3388
+update,31.315
+update,31.5668
+update,31.9366
+update,30.4671
+update,29.8806
+update,31.5711
+update,32.3234
+update,31.3346
+update,30.7116
