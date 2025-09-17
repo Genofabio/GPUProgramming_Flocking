@@ -17,7 +17,7 @@
 #include <core/UniformBoidGrid.h>
 #include <core/BoidParams.h>
 
-class SimulationGPU
+class Simulation
 {
 public:
     // Stato della simulazione
@@ -26,8 +26,8 @@ public:
     float currentTime = 0.0f;
 
     // Costruttori / distruttore
-    SimulationGPU(unsigned int width, unsigned int height);
-    ~SimulationGPU();
+    Simulation(unsigned int width, unsigned int height);
+    ~Simulation();
 
     void init();
     void processInput(float dt);

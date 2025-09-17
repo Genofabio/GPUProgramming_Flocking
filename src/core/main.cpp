@@ -15,7 +15,7 @@ const unsigned int SCREEN_WIDTH = 1500;
 const unsigned int SCREEN_HEIGHT = 1000;
 
 // Oggetto globale della simulazione
-SimulationGPU simulation(SCREEN_WIDTH, SCREEN_HEIGHT);
+Simulation simulation(SCREEN_WIDTH, SCREEN_HEIGHT);
 
 int main(int argc, char* argv[])
 {
