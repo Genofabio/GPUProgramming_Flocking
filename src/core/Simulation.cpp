@@ -98,7 +98,7 @@ void Simulation::init()
 
     // Initialize boids
     initLeaders(2);
-    initPrey(2000);
+    initPrey(200);
     initPredators(0);
 
     // Initialize walls
@@ -124,12 +124,6 @@ void Simulation::update(float dt)
 
     // 2. Applica le velocità ai boid
     applyVelocity(dt, velocityChanges);
-
-    // 3. Controlla quali prede sono state mangiate e le rimuove
-    checkEatenPrey();
-
-    // 4. Gestisce l'accoppiamento e lo spawn di nuovi boid
-    spawnNewBoids();
 
     profiler.log("update", profiler.stop());
 }
@@ -302,8 +296,6 @@ void Simulation::computeForces(std::vector<glm::vec2>& velocityChanges)
     for (size_t i = 0; i < N; ++i) {
         Boid& b = boids[i];
         glm::vec2 totalChange(0.0f);
-
-        BoidRules::computeBoidUpgrade(b, currentTime);
 
         int col = static_cast<int>(b.position.x / wallGrid.cellWidth);
         int row = static_cast<int>(b.position.y / wallGrid.cellHeight);
