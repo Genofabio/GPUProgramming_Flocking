@@ -170,7 +170,7 @@ void SimulationGPU::update(float dt) {
     computeForces();
 
     // --- 3. Applica le variazioni di velocità dai buffer sorted ---
-    kernApplyVelocityChangeSorted << <blocks, threads >> > (
+    kernApplyVelocityChange << <blocks, threads >> > (
         static_cast<int>(N),
         gpuBoids.velChangeX_sorted,
         gpuBoids.velChangeY_sorted,
@@ -191,7 +191,7 @@ void SimulationGPU::update(float dt) {
         );
 
     // --- 5. Copia i dati per il rendering sui buffer device ---
-    copyRenderDataKernel << <blocks, threads >> > (
+    kernCopyRenderData << <blocks, threads >> > (
         static_cast<int>(N),
         gpuBoids.posX, gpuBoids.posY,
         gpuBoids.rotations,
@@ -426,7 +426,7 @@ void SimulationGPU::computeForces() {
     int blocks = (N + threads - 1) / threads;
 
     // --- 1. Calcola gli indici della griglia ---
-    kernComputeIndices << <blocks, threads >> > (
+    kernComputeGridIndices << <blocks, threads >> > (
         N,
         gpuBoids.posX, gpuBoids.posY,
         gridData.particleGridIndices,
@@ -442,7 +442,7 @@ void SimulationGPU::computeForces() {
     thrust::sort_by_key(devGridKeys, devGridKeys + N, devArrayIndices);
 
     // --- 3. Reorder dei buffer ---
-    kernReorderData << <blocks, threads >> > (
+    kernReorderBoidData << <blocks, threads >> > (
         N,
         gpuBoids.posX, gpuBoids.posY,
         gpuBoids.velX, gpuBoids.velY,
@@ -467,12 +467,13 @@ void SimulationGPU::computeForces() {
         gridData.cellEndIndices
         );
 
-    // --- 5. Calcola le forze sui buffer ordinati usando il kernel ottimizzato con tiling ---
-    // Ogni boid necessita di 5 float in shared memory (posX, posY, velX, velY, influence)
+    // --- 5. Calcola le forze sui buffer ordinati ---
+// Ogni boid necessita di 5 float in shared memory (posX, posY, velX, velY, influence)
     profiler.start();
     size_t shMemSize = threads * 5 * sizeof(float);
 
-    computeForcesKernelAggressive << <blocks, threads, shMemSize >> > (
+    // 5a. Forze da coesione, separazione e allineamento (con tiling)
+    kernComputeBoidNeighborForces << <blocks, threads, shMemSize >> > (
         N,
         gpuBoids.posX_sorted, gpuBoids.posY_sorted,
         gpuBoids.velX_sorted, gpuBoids.velY_sorted,
@@ -481,15 +482,24 @@ void SimulationGPU::computeForces() {
         gridData.cellEndIndices,
         boidGrid.nCols, boidGrid.nRows,
         boidGrid.cellWidth,
+        gpuBoids.type_sorted,
         gpuBoids.velChangeX_sorted,
-        gpuBoids.velChangeY_sorted,
+        gpuBoids.velChangeY_sorted
+        );
+
+    // 5b. Forze da border e muri
+    kernComputeBorderWallForces << <blocks, threads >> > (
+        N,
+        gpuBoids.posX_sorted, gpuBoids.posY_sorted,
+        gpuBoids.velX_sorted, gpuBoids.velY_sorted,
         numWallSegments,
         reinterpret_cast<float2*>(wallsDevicePositions),
-		gpuBoids.type_sorted
+        gpuBoids.velChangeX_sorted,
+        gpuBoids.velChangeY_sorted
         );
 
     // --- 6. Calcola la repulsione tra leader ---
-    computeLeaderFollowKernel << <blocks, threads >> > (
+    kernLeaderFollowForces << <blocks, threads >> > (
         N,
         gpuBoids.posX_sorted,
         gpuBoids.posY_sorted,
@@ -502,7 +512,7 @@ void SimulationGPU::computeForces() {
     cudaDeviceSynchronize();
 
     // --- 7. Calcola la separazione tra predatori ---
-    computePredatorKernel << <blocks, threads >> > (
+    kernPredatorPreyForces << <blocks, threads >> > (
         N,
         gpuBoids.posX_sorted,
         gpuBoids.posY_sorted,

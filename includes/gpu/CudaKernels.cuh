@@ -3,30 +3,26 @@
 #include <glm/glm.hpp>
 #include <core/BoidParams.h>
 
+// Copia i parametri di simulazione sulla GPU
 void setSimulationParamsOnGPU(int width, int height, const BoidParams& params);
 
-// ============================================================
-// 1. Utility kernels per la griglia (hashing e ordinamento)
-// ============================================================
-
-__global__ void kernComputeIndices(
+// 1. Utility kernels per la griglia (hashing, ordinamento, reorder)
+__global__ void kernComputeGridIndices(
     int N,
     float* posX, float* posY,
     int* particleGridIndices,
     int* particleArrayIndices,
     int gridResolutionX, int gridResolutionY,
     float gridMinX, float gridMinY,
-    float cellWidth
-);
+    float cellWidth);
 
 __global__ void kernIdentifyCellStartEnd(
     int N,
     int* particleGridIndices,
     int* gridCellStartIndices,
-    int* gridCellEndIndices
-);
+    int* gridCellEndIndices);
 
-__global__ void kernReorderData(
+__global__ void kernReorderBoidData(
     int N,
     const float* posX, const float* posY,
     const float* velX, const float* velY,
@@ -40,15 +36,10 @@ __global__ void kernReorderData(
     float* scale_sorted, float* influence_sorted,
     int* type_sorted,
     float* colorR_sorted, float* colorG_sorted, float* colorB_sorted,
-    float* velChangeX_sorted, float* velChangeY_sorted
-);
+    float* velChangeX_sorted, float* velChangeY_sorted);
 
-// ============================================================
-// 2. Kernel principale: calcolo forze tra boids
-// ============================================================
-
-// Versione aggressiva ottimizzata con Shared Memory + Grid
-__global__ void computeForcesKernelAggressive(
+// 2. Forze tra boids (cohesion, separation, alignment, muri)
+__global__ void kernComputeBoidNeighborForces(
     int N,
     const float* posX_sorted, const float* posY_sorted,
     const float* velX_sorted, const float* velY_sorted,
@@ -57,53 +48,19 @@ __global__ void computeForcesKernelAggressive(
     const int* gridCellEndIndices,
     int gridResolutionX, int gridResolutionY,
     float cellWidth,
-    float* outVelChangeX, float* outVelChangeY,
+    const int* type_sorted,
+    float* outVelChangeX, float* outVelChangeY);
+
+__global__ void kernComputeBorderWallForces(
+    int N,
+    const float* posX_sorted, const float* posY_sorted,
+    const float* velX_sorted, const float* velY_sorted,
     int numWalls,
     const float2* wallPositions,
-    const int* type_sorted);
+    float* outVelChangeX, float* outVelChangeY);
 
-// ============================================================
-// 3. Integrazione e aggiornamento stato boids
-// ============================================================
-
-__global__ void kernApplyVelocityChangeSorted(
-    int N,
-    const float* velChangeX_sorted, const float* velChangeY_sorted,
-    float* posX, float* posY,
-    float* velX, float* velY,
-    const int* particleArrayIndices,
-    const int* type_sorted,  // aggiungi questo array
-    float dt);
-
-__global__ void kernIntegratePositions(
-    int N, float dt,
-    float* posX, float* posY,
-    const float* velX, const float* velY
-);
-
-__global__ void kernComputeRotations(
-    int N,
-    const float* velX, const float* velY,
-    float* rotations
-);
-
-// ============================================================
-// 4. Copia dati per il rendering
-// ============================================================
-
-__global__ void copyRenderDataKernel(
-    int N,
-    const float* posX, const float* posY,
-    const float* rotations,
-    const float* colorR, const float* colorG, const float* colorB,
-    const float* scale,
-    glm::vec2* outPositions,
-    float* outRotations,
-    glm::vec3* outColors,
-    float* outScales
-);
-
-__global__ void computeLeaderFollowKernel(
+// 3. Forze speciali (leader, predatori)
+__global__ void kernLeaderFollowForces(
     int N,
     const float* posX_sorted,
     const float* posY_sorted,
@@ -113,10 +70,42 @@ __global__ void computeLeaderFollowKernel(
     float* velChangeX_sorted,
     float* velChangeY_sorted);
 
-__global__ void computePredatorKernel(
+__global__ void kernPredatorPreyForces(
     int N,
     const float* posX_sorted,
     const float* posY_sorted,
     const int* type_sorted,
     float* velChangeX_sorted,
     float* velChangeY_sorted);
+
+// 4. Integrazione e aggiornamento stato
+__global__ void kernApplyVelocityChange(
+    int N,
+    const float* velChangeX_sorted, const float* velChangeY_sorted,
+    float* posX, float* posY,
+    float* velX, float* velY,
+    const int* particleArrayIndices,
+    const int* type_sorted,
+    float dt);
+
+__global__ void kernIntegratePositions(
+    int N, float dt,
+    float* posX, float* posY,
+    const float* velX, const float* velY);
+
+__global__ void kernComputeRotations(
+    int N,
+    const float* velX, const float* velY,
+    float* rotations);
+
+// 5. Copia dati per il rendering
+__global__ void kernCopyRenderData(
+    int N,
+    const float* posX, const float* posY,
+    const float* rotations,
+    const float* colorR, const float* colorG, const float* colorB,
+    const float* scale,
+    glm::vec2* outPositions,
+    float* outRotations,
+    glm::vec3* outColors,
+    float* outScales);
