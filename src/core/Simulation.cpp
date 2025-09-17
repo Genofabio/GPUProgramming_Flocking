@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <random>
 
-#include <core/SimulationGPU.h>
+#include <core/Simulation.h>
 #include <utility/ResourceManager.h>
 
 Simulation::Simulation(unsigned int width, unsigned int height)
@@ -125,12 +125,6 @@ void Simulation::update(float dt)
     // 2. Applica le velocità ai boid
     applyVelocity(dt, velocityChanges);
 
-    // 3. Controlla quali prede sono state mangiate e le rimuove
-    checkEatenPrey();
-
-    // 4. Gestisce l'accoppiamento e lo spawn di nuovi boid
-    spawnNewBoids();
-
     profiler.log("update", profiler.stop());
 }
 
@@ -143,11 +137,24 @@ void Simulation::render()
     gridRenderer->draw(wallGrid, glm::vec3(0.2f, 0.2f, 0.2f));
     //gridRenderer->draw(boidGrid, glm::vec3(0.6f, 0.6f, 0.6f));
 
-    // 2. Draw boids
-    for (const Boid& b : boids) {
-        float angle = glm::degrees(atan2(b.velocity.y, b.velocity.x)) + 270.0f;
-        boidRenderer->draw(b.position, angle, b.color, 10.0f * b.scale);
+    // 2. Prepara i vettori per il rendering dei boid (locali)
+    size_t N = boids.size();
+    std::vector<glm::vec2> positions(N);
+    std::vector<float> rotations(N);
+    std::vector<glm::vec3> colors(N);
+    std::vector<float> scales(N);
+
+    for (size_t i = 0; i < N; ++i) {
+        const Boid& b = boids[i];
+        positions[i] = b.position;
+        rotations[i] = glm::degrees(atan2(b.velocity.y, b.velocity.x)) + 270.0f;
+        colors[i] = b.color;
+        scales[i] = b.scale;
     }
+
+    // 3. Aggiorna il VBO e disegna
+    boidRenderer->updateInstances(positions, rotations, colors, scales);
+    boidRenderer->draw();
 
     // 3. Draw walls
     glLineWidth(3.0f);
@@ -201,7 +208,7 @@ void Simulation::initLeaders(int count)
         b.velocity = glm::vec2(static_cast<float>(rand() % 201 - 100) * 0.5f, static_cast<float>(rand() % 201 - 100) * 0.5f);
         b.type = BoidType::LEADER;
         b.age = 10;
-        b.scale = 1.7f;
+        b.scale = 1.7f * 8.0f;
         b.color = glm::vec3(0.9f, 0.9f, 0.2f);
         b.drift = glm::vec2(0);
         boids.push_back(b);
@@ -221,7 +228,7 @@ void Simulation::initPrey(int count)
         b.birthTime = currentTime + offsetDist(rng);
         b.age = ageDist(rng);
         float t = b.age / 10.0f;
-        b.scale = 1.0f + 0.04f * b.age;
+        b.scale = (1.0f + 0.04f * b.age ) * 8.0f;
         b.color = glm::mix(glm::vec3(0.2f, 0.2f, 0.9f), glm::vec3(0.05f, 0.8f, 0.7f), t);
         b.influence = 0.8f + 0.04f * b.age;
         boids.push_back(b);
@@ -236,7 +243,7 @@ void Simulation::initPredators(int count)
         b.velocity = glm::vec2(static_cast<float>(rand() % 201 - 100) * 0.5f, static_cast<float>(rand() % 201 - 100) * 0.5f);
         b.type = BoidType::PREDATOR;
         b.age = 10;
-        b.scale = 1.9f;
+        b.scale = 1.9f * 8.0f;
         b.color = glm::vec3(0.9f, 0.2f, 0.2f);
         b.drift = glm::vec2(0);
         boids.push_back(b);
@@ -289,8 +296,6 @@ void Simulation::computeForces(std::vector<glm::vec2>& velocityChanges)
     for (size_t i = 0; i < N; ++i) {
         Boid& b = boids[i];
         glm::vec2 totalChange(0.0f);
-
-        BoidRules::computeBoidUpgrade(b, currentTime);
 
         int col = static_cast<int>(b.position.x / wallGrid.cellWidth);
         int row = static_cast<int>(b.position.y / wallGrid.cellHeight);
